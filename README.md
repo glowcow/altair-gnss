@@ -14,10 +14,8 @@ interface speaks English and Russian.
   <img src="docs/screenshots/compass-dark.png" width="180" alt="The compass full screen in the dark theme">
 </p>
 
-The screenshots were taken indoors, before the receiver had a fix, so the
-position fields are empty. This is an early release: the barometer modes of
-the altimeter are covered by unit tests but have not yet been tried on a
-phone with a barometer.
+The screenshots were taken indoors on a phone without a barometer, before
+the receiver had a fix, so the position fields and the altimeter are empty.
 
 ## Contents
 
@@ -52,8 +50,7 @@ Working now:
   the fix. Counts in view and in the fix, average C/N0.
 - **Altimeter** — an aircraft-style dial: the hand goes round once per
   100 m (a figure is tens of metres, a small mark 2 m), a drum counts whole
-  metres, and two windows show the sea-level
-  pressure the reading rests on, in mbar and mmHg. Below it the same in
+  metres, and two windows show the current pressure in mbar and mmHg. Below it the same in
   figures — altitude, pressure and sea-level pressure in hPa and mmHg — and
   the vertical speed in m/s. The altitude comes from one of three sources:
   GNSS, the barometer alone, or the barometer corrected by GNSS. In the

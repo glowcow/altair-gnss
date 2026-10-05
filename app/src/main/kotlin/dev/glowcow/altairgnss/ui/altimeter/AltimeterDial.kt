@@ -41,11 +41,11 @@ import kotlin.math.sin
 
 /**
  * An aircraft-style altimeter: the hand goes round once per 100 m, so a figure is tens of metres
- * and a small mark is 2 m; the drum counts whole metres, the two windows show the sea-level
- * pressure the reading rests on. The face is dark in any theme.
+ * and a small mark is 2 m; the drum counts whole metres, the two windows show the pressure the
+ * barometer reads now. The face is dark in any theme.
  */
 @Composable
-fun AltimeterDial(altitude: Double?, referenceHpa: Double?, modifier: Modifier = Modifier) {
+fun AltimeterDial(altitude: Double?, pressureHpa: Double?, modifier: Modifier = Modifier) {
     val accent = AltairTheme.colors.accent
     val measurer = rememberTextMeasurer()
     // The hand glides between readings; after a jump, such as a calibration, it runs round to the new one.
@@ -110,8 +110,8 @@ fun AltimeterDial(altitude: Double?, referenceHpa: Double?, modifier: Modifier =
             drawText(text, topLeft = Offset(center.x + x - text.size.width / 2, at.y - text.size.height / 2))
             centred(measurer, value, style(0.085f, FontWeight.Medium, FontFamily.Monospace), Offset(center.x + x, at.y + box.height * 0.56f))
         }
-        window(-r * 0.3f, labels[2], referenceHpa?.let { String.format(Locale.ROOT, "%.1f", it) } ?: NO_VALUE)
-        window(r * 0.3f, labels[3], referenceHpa?.let { String.format(Locale.ROOT, "%.1f", it * Barometry.MMHG_PER_HPA) } ?: NO_VALUE)
+        window(-r * 0.3f, labels[2], pressureHpa?.let { String.format(Locale.ROOT, "%.1f", it) } ?: NO_VALUE)
+        window(r * 0.3f, labels[3], pressureHpa?.let { String.format(Locale.ROOT, "%.1f", it * Barometry.MMHG_PER_HPA) } ?: NO_VALUE)
         // What a figure of the scale is worth.
         centred(measurer, labels[4], style(0.068f, FontWeight.Medium), Offset(center.x, center.y + r * 0.455f))
 

@@ -67,7 +67,7 @@ private fun AltimeterContent(top: Dp, bottom: Dp) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Group {
-            AltimeterDial(state.altitude, state.referenceHpa, Modifier.padding(start = 14.dp, end = 14.dp, top = 14.dp))
+            AltimeterDial(state.altitude, state.pressureHpa, Modifier.padding(start = 14.dp, end = 14.dp, top = 14.dp))
             Text(
                 when {
                     state.altitude == null && state.source == AltitudeSource.BAROMETER && state.calibration == null ->
