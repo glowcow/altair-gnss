@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_status">Статус</string>
+    <string name="tab_sky">Небо</string>
+    <string name="tab_altimeter">Альтиметр</string>
+    <string name="tab_instruments">Приборы</string>
+    <string name="tab_settings">Настройки</string>
+
+    <string name="location_title">Нужно точное местоположение</string>
+    <string name="location_text">Спутники, уровни сигнала и координаты приходят от GNSS-приёмника телефона, а Android открывает его только с разрешением на точное местоположение. Данные не покидают телефон.</string>
+    <string name="location_allow">Разрешить местоположение</string>
+    <string name="location_open_settings">Открыть настройки приложения</string>
+
+    <string name="status_fix">Позиция определена</string>
+    <string name="status_searching">Поиск спутников</string>
+    <string name="status_off">Геолокация выключена</string>
+    <string name="status_open_location">Открыть настройки геолокации</string>
+    <string name="status_signals">Сигналов в решении: %1$d из %2$d</string>
+    <string name="status_no_signals">Сигналов пока нет</string>
+    <string name="status_flags_hint">A — альманах, E — эфемериды, U — используется в решении</string>
+
+    <string name="label_latitude">Широта</string>
+    <string name="label_longitude">Долгота</string>
+    <string name="label_altitude_msl">Высота над уровнем моря</string>
+    <string name="label_altitude_ellipsoid">Высота, WGS 84</string>
+    <string name="label_accuracy_h">Точность в плане</string>
+    <string name="label_accuracy_v">Точность по высоте</string>
+    <string name="label_speed">Скорость</string>
+    <string name="label_bearing">Курс</string>
+    <string name="label_ttff">Время до первой фиксации</string>
+    <string name="label_fix_time">Время фиксации, UTC</string>
+
+    <string name="column_band">Диап.</string>
+    <string name="column_elevation">Возв.</string>
+    <string name="column_azimuth">Азим.</string>
+    <string name="column_flags">Флаги</string>
+    <string name="sort_id">Сортировка по ID</string>
+    <string name="sort_cn0">Сортировка по сигналу</string>
+
+    <string name="unit_metres">%1$s м</string>
+    <string name="unit_accuracy_metres">±%1$s м</string>
+    <string name="unit_kmh">%1$s км/ч</string>
+    <string name="unit_seconds">%1$s с</string>
+    <string name="unit_dbhz">%1$s дБ·Гц</string>
+
+    <string name="sky_in_view">В поле зрения</string>
+    <string name="sky_in_fix">В решении</string>
+    <string name="sky_average">Средний C/N0</string>
+    <string name="sky_north">С</string>
+    <string name="sky_east">В</string>
+    <string name="sky_south">Ю</string>
+    <string name="sky_west">З</string>
+
+    <string name="altitude_no_data">Высоты пока нет</string>
+    <string name="altitude_calibrate_first">Сначала откалибруйте барометр</string>
+    <string name="altitude_above_sea">над уровнем моря · %1$s</string>
+    <string name="altitude_above_sea_accuracy">над уровнем моря · %1$s · %2$s</string>
+
+    <string name="altimeter_description">Циферблат альтиметра: %1$s</string>
+    <string name="label_altitude">Высота</string>
+    <string name="label_vertical_speed">Вертикальная скорость</string>
+    <string name="label_pressure_mmhg">Давление, мм рт. ст.</string>
+    <string name="label_reference_mmhg">На уровне моря, мм рт. ст.</string>
+    <string name="unit_mps">%1$s м/с</string>
+    <string name="unit_mmhg">%1$s мм рт. ст.</string>
+
+    <string name="altitude_source">Источник высоты</string>
+    <string name="source_barometer">Только барометр</string>
+    <string name="source_auto">Барометр с поправкой по GNSS</string>
+    <string name="altitude_no_barometer">В этом телефоне нет барометра, поэтому высота берётся только из GNSS</string>
+
+    <string name="label_pressure">Давление</string>
+    <string name="label_reference_pressure">Давление на уровне моря</string>
+    <string name="label_gnss_altitude">Высота по GNSS</string>
+    <string name="label_barometer_altitude">Высота по барометру</string>
+    <string name="label_calibrated">Калибровка</string>
+    <string name="label_drift">Ожидаемая ошибка</string>
+    <string name="unit_hpa">%1$s гПа</string>
+
+    <string name="calibrate_gnss">Калибровать по GNSS</string>
+    <string name="calibrate_gnss_hint">20 секунд под открытым небом; дальше высота идёт только от барометра</string>
+    <string name="calibrate_progress">Усредняю высоту… %1$d%%</string>
+    <string name="calibrate_failed">Высота по GNSS здесь недостаточно точна</string>
+    <string name="calibrate_altitude">Ввести известную высоту</string>
+    <string name="calibrate_altitude_hint">Барометр будет считать от высоты, которую вы зададите</string>
+    <string name="calibrate_airport">Калибровать по аэропорту</string>
+    <string name="calibrate_airport_hint">Давление на уровне моря из последней сводки аэропорта рядом; нужен интернет</string>
+    <string name="airport_title">Аэропорты рядом</string>
+    <string name="airport_loading">Ищу сводки…</string>
+    <string name="airport_no_position">Координат пока нет: чтобы найти аэропорты, нужны хотя бы примерные</string>
+    <string name="airport_failed">Не удалось связаться с сервисом погоды</string>
+    <string name="airport_none">Свежих сводок в радиусе 200 км нет</string>
+    <string name="airport_row">%1$s км · %2$s гПа · %3$s</string>
+    <string name="airport_hint">Сводки берутся у Aviation Weather Center. В запросе указывается область шириной в несколько сотен километров, а не ваши координаты. Чем дальше аэропорт, тем меньше его давление говорит о вашем.</string>
+    <string name="input_altitude">Высота над уровнем моря, м</string>
+    <string name="save">Сохранить</string>
+
+    <string name="compass_true">Истинный север</string>
+    <string name="compass_magnetic">Магнитный север</string>
+    <string name="compass_unreliable">Низкая точность: поводите восьмёркой</string>
+    <string name="compass_missing">В этом телефоне нет датчика компаса</string>
+
+    <string name="speed_course">Курс %1$s</string>
+    <string name="unit_kmh_label">км/ч</string>
+    <string name="back">Назад</string>
+    <string name="title_compass">Компас</string>
+    <string name="title_speed">Скорость</string>
+    <string name="label_heading_true">Истинный курс</string>
+    <string name="label_heading_magnetic">Магнитный курс</string>
+    <string name="label_declination">Магнитное склонение</string>
+    <string name="label_course">Путевой угол</string>
+    <string name="label_pitch">Наклон вперёд</string>
+    <string name="label_roll">Наклон вбок</string>
+    <string name="label_field">Магнитное поле</string>
+    <string name="label_field_expected">Ожидаемое здесь</string>
+    <string name="label_inclination">Магнитное наклонение</string>
+    <string name="unit_microtesla">%1$s мкТл</string>
+    <string name="compass_field_hint">Если поле сильно отличается от ожидаемого, рядом металл или магнит: компас врёт, пока вы не отойдёте.</string>
+    <string name="label_speed_mps">Скорость, м/с</string>
+    <string name="label_acceleration">Ускорение</string>
+    <string name="unit_mps2">%1$s м/с²</string>
+    <string name="label_speed_max">Максимальная</string>
+    <string name="label_speed_average">Средняя в движении</string>
+    <string name="label_distance">Путь</string>
+    <string name="unit_km">%1$s км</string>
+    <string name="label_moving_time">Время в движении</string>
+    <string name="label_speed_accuracy">Точность скорости</string>
+    <string name="trip_reset">Сбросить поездку</string>
+    <string name="trip_hint">Максимум, средняя, путь и время начнутся заново</string>
+    <string name="speed_scale_hint">Шкала растёт вместе со скоростью: 10, 20, 40, 80 км/ч и далее. Поездка считается, пока открыта вкладка, которой нужен GNSS.</string>
+    <string name="map_sun">Солнце в зените</string>
+    <string name="map_you">Вы</string>
+    <string name="map_no_position">Координат пока нет</string>
+    <string name="label_gnss_time">Время GNSS, UTC</string>
+    <string name="label_gnss_local_time">Время GNSS, местное</string>
+    <string name="label_phone_time">Часы телефона</string>
+    <string name="label_clock_offset">Ошибка часов телефона</string>
+    <string name="clock_ahead">спешат на %1$s с</string>
+    <string name="clock_behind">отстают на %1$s с</string>
+    <string name="label_sunrise">Восход</string>
+    <string name="label_sunset">Закат</string>
+    <string name="label_solar_noon">Истинный полдень</string>
+    <string name="label_day_length">Долгота дня</string>
+    <string name="day_length">%1$d ч %2$d мин</string>
+    <string name="sun_always_up">Полярный день</string>
+    <string name="sun_always_down">Полярная ночь</string>
+    <string name="day_length_hours">%1$d ч</string>
+    <plurals name="in_days">
+        <item quantity="one">через %d день</item>
+        <item quantity="few">через %d дня</item>
+        <item quantity="many">через %d дней</item>
+        <item quantity="other">через %d дня</item>
+    </plurals>
+    <string name="map_description">Карта мира: день и ночь сейчас и ваше положение</string>
+    <string name="label_moon">Луна</string>
+    <string name="label_moon_lit">Освещено диска</string>
+    <string-array name="moon_phases">
+        <item>Новолуние</item>
+        <item>Растущий серп</item>
+        <item>Первая четверть</item>
+        <item>Растущая луна</item>
+        <item>Полнолуние</item>
+        <item>Убывающая луна</item>
+        <item>Последняя четверть</item>
+        <item>Убывающий серп</item>
+    </string-array>
+
+    <string name="settings_theme">Тема</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="settings_palette">Цветовая схема</string>
+    <string name="palette_warm">Тёплая</string>
+    <string name="palette_classic">Классическая</string>
+    <string name="settings_language">Язык</string>
+    <string name="language_system">Как в системе</string>
+    <string name="settings_coordinates">Формат координат</string>
+    <string name="coordinates_dd">Десятичные градусы</string>
+    <string name="coordinates_ddm">Градусы и десятичные минуты</string>
+    <string name="coordinates_dms">Градусы, минуты, секунды</string>
+    <string name="settings_keep_screen_on">Не гасить экран</string>
+    <string name="settings_keep_screen_on_hint">Пока приложение открыто</string>
+    <string name="settings_start_tab">Открывать на вкладке</string>
+    <string name="settings_true_north">Истинный север</string>
+    <string name="settings_true_north_hint">Компас и «Небо» считают от истинного севера; выключено — от магнитного</string>
+    <string name="settings_source">Координаты только со спутников</string>
+    <string name="settings_source_hint">Wi-Fi и сотовые вышки не используются. Вспомогательные данные приложение отключить не может: они лишь подсказывают приёмнику, где искать спутники, ускоряют первую фиксацию и на координаты не влияют.</string>
+    <string name="settings_assist_refresh">Обновить вспомогательные данные</string>
+    <string name="settings_assist_refresh_hint">Время и прогноз орбит, чтобы первая фиксация была быстрее</string>
+    <string name="settings_assist_clear">Сбросить вспомогательные данные</string>
+    <string name="settings_assist_clear_hint">Следующая фиксация будет холодной, как только по спутникам</string>
+    <string name="assist_sent">Запрос отправлен приёмнику</string>
+    <string name="assist_refused">Телефон отклонил запрос</string>
+    <string name="assist_clear_title">Сбросить вспомогательные данные?</string>
+    <string name="assist_clear_text">Приёмник забудет орбиты, время и последнее положение. Пока он не получит их снова, со спутников или из сети, первая фиксация во всех приложениях будет занимать минуты.</string>
+    <string name="assist_clear_confirm">Сбросить</string>
+    <string name="settings_app_update">Проверять обновления приложения</string>
+    <string name="settings_app_update_hint">Раз в неделю, в релизах на GitHub</string>
+    <string name="app_update_channel">Обновления приложения</string>
+    <string name="app_update_available">Доступна версия %1$s</string>
+    <string name="app_update_tap">Нажмите, чтобы посмотреть изменения и установить</string>
+    <string name="app_update_check">Нажмите, чтобы проверить новую версию</string>
+    <string name="app_update_checking">Проверяю…</string>
+    <string name="app_update_latest">Это последняя версия</string>
+    <string name="app_update_failed">Не удалось проверить обновления</string>
+    <string name="app_update_downloading">Загрузка… %1$d%%</string>
+    <string name="app_update_install">Скачать и установить</string>
+    <string name="app_update_dev">Сборка для разработки, не обновляется</string>
+    <string name="settings_licence">Лицензия</string>
+    <string name="settings_map_images">Снимки для карты</string>
+    <string name="settings_version">Версия</string>
+    <string name="settings_font">Шрифт</string>
+</resources>

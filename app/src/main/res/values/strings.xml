@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">Altair GNSS</string>
+
+    <string name="tab_status">Status</string>
+    <string name="tab_sky">Sky</string>
+    <string name="tab_altimeter">Altimeter</string>
+    <string name="tab_instruments">Instruments</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="location_title">Precise location is needed</string>
+    <string name="location_text">Satellites, signal levels and the position come from the phone’s GNSS receiver, which Android opens only with the precise location permission. Nothing leaves the phone.</string>
+    <string name="location_allow">Allow location</string>
+    <string name="location_open_settings">Open app settings</string>
+
+    <string name="status_fix">Position fixed</string>
+    <string name="status_searching">Searching for satellites</string>
+    <string name="status_off">Location is turned off</string>
+    <string name="status_open_location">Open location settings</string>
+    <string name="status_signals" tools:ignore="PluralsCandidate">%1$d of %2$d signals in the fix</string>
+    <string name="status_no_signals">No signals yet</string>
+    <string name="status_flags_hint">A — almanac, E — ephemeris, U — used in the fix</string>
+
+    <string name="label_latitude">Latitude</string>
+    <string name="label_longitude">Longitude</string>
+    <string name="label_altitude_msl">Altitude above sea level</string>
+    <string name="label_altitude_ellipsoid">Altitude, WGS 84</string>
+    <string name="label_accuracy_h">Horizontal accuracy</string>
+    <string name="label_accuracy_v">Vertical accuracy</string>
+    <string name="label_speed">Speed</string>
+    <string name="label_bearing">Bearing</string>
+    <string name="label_ttff">Time to first fix</string>
+    <string name="label_fix_time">Fix time, UTC</string>
+    <string name="label_pdop" translatable="false">PDOP</string>
+    <string name="label_hvdop" translatable="false">HDOP / VDOP</string>
+
+    <string name="column_id" translatable="false">ID</string>
+    <string name="column_band">Band</string>
+    <string name="column_cn0" translatable="false">C/N0</string>
+    <string name="column_elevation">Elev.</string>
+    <string name="column_azimuth">Azim.</string>
+    <string name="column_flags">Flags</string>
+    <string name="sort_id">Sorted by ID</string>
+    <string name="sort_cn0">Sorted by signal</string>
+
+    <string name="unit_metres">%1$s m</string>
+    <string name="unit_accuracy_metres">±%1$s m</string>
+    <string name="unit_kmh">%1$s km/h</string>
+    <string name="unit_seconds">%1$s s</string>
+    <string name="unit_degrees" translatable="false">%1$s°</string>
+    <string name="unit_dbhz">%1$s dB-Hz</string>
+
+    <string name="sky_in_view">In view</string>
+    <string name="sky_in_fix">In the fix</string>
+    <string name="sky_average">Average C/N0</string>
+    <string name="sky_north">N</string>
+    <string name="sky_east">E</string>
+    <string name="sky_south">S</string>
+    <string name="sky_west">W</string>
+
+    <string name="altitude_no_data">No altitude yet</string>
+    <string name="altitude_calibrate_first">Calibrate the barometer first</string>
+    <string name="altitude_above_sea">above sea level · %1$s</string>
+    <string name="altitude_above_sea_accuracy">above sea level · %1$s · %2$s</string>
+
+    <string name="dial_altitude" translatable="false">ALT</string>
+    <string name="dial_metres" translatable="false">METER</string>
+    <string name="dial_mbar" translatable="false">mbar</string>
+    <string name="dial_mmhg" translatable="false">mmHg</string>
+    <string name="dial_scale" translatable="false">x10 m</string>
+    <string name="altimeter_description">Altimeter dial: %1$s</string>
+    <string name="label_altitude">Altitude</string>
+    <string name="label_vertical_speed">Vertical speed</string>
+    <string name="label_pressure_mmhg">Pressure, mmHg</string>
+    <string name="label_reference_mmhg">Sea-level pressure, mmHg</string>
+    <string name="unit_mps">%1$s m/s</string>
+    <string name="unit_mmhg">%1$s mmHg</string>
+
+    <string name="altitude_source">Altitude source</string>
+    <string name="source_gnss" translatable="false">GNSS</string>
+    <string name="source_barometer">Barometer only</string>
+    <string name="source_auto">Barometer, corrected by GNSS</string>
+    <string name="altitude_no_barometer">This phone has no barometer, so the altitude comes from GNSS only</string>
+
+    <string name="label_pressure">Pressure</string>
+    <string name="label_reference_pressure">Sea-level pressure</string>
+    <string name="label_gnss_altitude">GNSS altitude</string>
+    <string name="label_barometer_altitude">Barometric altitude</string>
+    <string name="label_calibrated">Calibrated</string>
+    <string name="label_drift">Expected error</string>
+    <string name="unit_hpa">%1$s hPa</string>
+    <string name="value_with_accuracy" translatable="false">%1$s %2$s</string>
+
+    <string name="calibrate_gnss">Calibrate from GNSS</string>
+    <string name="calibrate_gnss_hint">20 seconds under the open sky; after that the altitude comes from the barometer alone</string>
+    <string name="calibrate_progress">Averaging the altitude… %1$d%%</string>
+    <string name="calibrate_failed">The GNSS altitude is not accurate enough here</string>
+    <string name="calibrate_altitude">Enter a known altitude</string>
+    <string name="calibrate_altitude_hint">The barometer counts from the altitude you type</string>
+    <string name="calibrate_airport">Calibrate from an airport</string>
+    <string name="calibrate_airport_hint">Sea-level pressure from the latest report of an airport nearby; needs the internet</string>
+    <string name="airport_title">Airports nearby</string>
+    <string name="airport_loading">Looking for reports…</string>
+    <string name="airport_no_position">No position yet: even a rough one is needed to find airports</string>
+    <string name="airport_failed">Couldn’t reach the weather service</string>
+    <string name="airport_none">No fresh reports within 200 km</string>
+    <string name="airport_row">%1$s km · %2$s hPa · %3$s</string>
+    <string name="airport_hint">Reports come from the Aviation Weather Center. The request names an area a few hundred kilometres wide, not your position. The farther the airport, the less its pressure says about yours.</string>
+    <string name="input_altitude">Altitude above sea level, m</string>
+    <string name="save">Save</string>
+
+    <string name="compass_true">True north</string>
+    <string name="compass_magnetic">Magnetic north</string>
+    <string name="compass_unreliable">Low accuracy: wave a figure of eight</string>
+    <string name="compass_missing">This phone has no compass sensor</string>
+
+    <string name="speed_course">Course %1$s</string>
+    <string name="unit_kmh_label">km/h</string>
+    <string name="back">Back</string>
+    <string name="title_compass">Compass</string>
+    <string name="title_speed">Speed</string>
+    <string name="label_heading_true">True heading</string>
+    <string name="label_heading_magnetic">Magnetic heading</string>
+    <string name="label_declination">Magnetic declination</string>
+    <string name="label_course">Course over ground</string>
+    <string name="label_pitch">Tilt forward</string>
+    <string name="label_roll">Tilt sideways</string>
+    <string name="label_field">Magnetic field</string>
+    <string name="label_field_expected">Expected here</string>
+    <string name="label_inclination">Magnetic dip</string>
+    <string name="unit_microtesla">%1$s µT</string>
+    <string name="compass_field_hint">A field far from the expected one means metal or a magnet nearby: the compass is off until you move away.</string>
+    <string name="label_speed_mps">Speed, m/s</string>
+    <string name="label_acceleration">Acceleration</string>
+    <string name="unit_mps2">%1$s m/s²</string>
+    <string name="label_speed_max">Maximum</string>
+    <string name="label_speed_average">Average while moving</string>
+    <string name="label_distance">Distance</string>
+    <string name="unit_km">%1$s km</string>
+    <string name="label_moving_time">Moving time</string>
+    <string name="label_speed_accuracy">Speed accuracy</string>
+    <string name="trip_reset">Reset the trip</string>
+    <string name="trip_hint">Maximum, average, distance and time start over</string>
+    <string name="speed_scale_hint">The scale grows with the speed: 10, 20, 40, 80 km/h and on. The trip is counted while a tab that uses GNSS is open.</string>
+    <string name="map_sun">The sun is overhead</string>
+    <string name="map_you">You</string>
+    <string name="map_no_position">No position yet</string>
+    <string name="label_gnss_time">GNSS time, UTC</string>
+    <string name="label_gnss_local_time">GNSS time, local</string>
+    <string name="label_phone_time">Phone clock</string>
+    <string name="label_clock_offset">Phone clock error</string>
+    <string name="clock_ahead">%1$s s ahead</string>
+    <string name="clock_behind">%1$s s behind</string>
+    <string name="label_sunrise">Sunrise</string>
+    <string name="label_sunset">Sunset</string>
+    <string name="label_solar_noon">Solar noon</string>
+    <string name="label_day_length">Day length</string>
+    <string name="day_length">%1$d h %2$d min</string>
+    <string name="sun_always_up">Polar day</string>
+    <string name="sun_always_down">Polar night</string>
+    <string name="day_length_hours">%1$d h</string>
+    <plurals name="in_days">
+        <item quantity="one">in %d day</item>
+        <item quantity="other">in %d days</item>
+    </plurals>
+    <string name="map_description">World map with day and night now and your position</string>
+    <string name="label_moon">Moon</string>
+    <string name="label_moon_lit">Lit part of the disc</string>
+    <string name="unit_percent" translatable="false">%1$d%%</string>
+    <string-array name="moon_phases">
+        <item>New moon</item>
+        <item>Waxing crescent</item>
+        <item>First quarter</item>
+        <item>Waxing gibbous</item>
+        <item>Full moon</item>
+        <item>Waning gibbous</item>
+        <item>Last quarter</item>
+        <item>Waning crescent</item>
+    </string-array>
+
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_palette">Colour scheme</string>
+    <string name="palette_warm">Warm</string>
+    <string name="palette_classic">Classic</string>
+    <string name="settings_language">Language</string>
+    <string name="language_system">System default</string>
+    <string name="settings_coordinates">Coordinate format</string>
+    <string name="coordinates_dd">Decimal degrees</string>
+    <string name="coordinates_ddm">Degrees and decimal minutes</string>
+    <string name="coordinates_dms">Degrees, minutes, seconds</string>
+    <string name="settings_keep_screen_on">Keep the screen on</string>
+    <string name="settings_keep_screen_on_hint">While the app is open</string>
+    <string name="settings_start_tab">Open on</string>
+    <string name="settings_true_north">True north</string>
+    <string name="settings_true_north_hint">The compass and the sky plot count from true north; off — from magnetic</string>
+    <string name="settings_source">Position comes from satellites only</string>
+    <string name="settings_source_hint">No Wi-Fi or cell positioning is used. Assistance data cannot be switched off by an app: it only tells the receiver where to look, which speeds up the first fix and does not change the position.</string>
+    <string name="settings_assist_refresh">Refresh assistance data</string>
+    <string name="settings_assist_refresh_hint">Time and predicted orbits, for a faster first fix</string>
+    <string name="settings_assist_clear">Clear assistance data</string>
+    <string name="settings_assist_clear_hint">The next fix starts cold, as if from satellites alone</string>
+    <string name="assist_sent">The request was sent to the receiver</string>
+    <string name="assist_refused">This phone refused the request</string>
+    <string name="assist_clear_title">Clear assistance data?</string>
+    <string name="assist_clear_text">The receiver forgets the orbits, the time and its last position. Until it has them again, from the satellites or the network, the first fix takes minutes in every app.</string>
+    <string name="assist_clear_confirm">Clear</string>
+    <string name="settings_app_update">Check for app updates</string>
+    <string name="settings_app_update_hint">Once a week, in the releases on GitHub</string>
+    <string name="app_update_channel">App updates</string>
+    <string name="app_update_available">Version %1$s is available</string>
+    <string name="app_update_tap">Tap to see what is new and install it</string>
+    <string name="app_update_check">Tap to check for a new version</string>
+    <string name="app_update_checking">Checking…</string>
+    <string name="app_update_latest">This is the latest version</string>
+    <string name="app_update_failed">Couldn’t check for updates</string>
+    <string name="app_update_downloading">Downloading… %1$d%%</string>
+    <string name="app_update_install">Download and install</string>
+    <string name="app_update_dev">Development build, not updated</string>
+    <string name="settings_licence">Licence</string>
+    <string name="settings_map_images">Map images</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_font">Font</string>
+</resources>
