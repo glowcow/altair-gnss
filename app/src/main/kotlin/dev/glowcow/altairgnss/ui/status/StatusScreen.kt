@@ -159,7 +159,7 @@ private fun fixStats(state: GnssState, format: CoordinateFormat): List<Pair<Stri
 
 private val UTC_TIME = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneOffset.UTC)
 
-/** A bar per signal: height and colour are C/N0; the labels of signals outside the fix are muted. */
+/** A bar per signal: height and colour are C/N0, none where nothing is heard; the labels of signals outside the fix are muted. */
 @Composable
 private fun SignalBars(signals: List<Signal>) {
     val c = AltairTheme.colors
@@ -170,15 +170,17 @@ private fun SignalBars(signals: List<Signal>) {
     ) {
         for (signal in signals) {
             Column(Modifier.width(30.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                Text(signal.cn0DbHz.decimals(0), color = c.muted, fontSize = 10.sp, style = tabular(), maxLines = 1)
+                Text(if (signal.isHeard) signal.cn0DbHz.decimals(0) else NO_VALUE, color = c.muted, fontSize = 10.sp, style = tabular(), maxLines = 1)
                 Box(Modifier.height(96.dp), contentAlignment = Alignment.BottomCenter) {
-                    Box(
-                        Modifier
-                            .width(14.dp)
-                            .fillMaxHeight((signal.cn0DbHz / CN0_FULL).coerceIn(0.02f, 1f))
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(signalColor(signal.cn0DbHz)),
-                    )
+                    if (signal.isHeard) {
+                        Box(
+                            Modifier
+                                .width(14.dp)
+                                .fillMaxHeight((signal.cn0DbHz / CN0_FULL).coerceIn(0.02f, 1f))
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(signalColor(signal.cn0DbHz)),
+                        )
+                    }
                 }
                 Text(signal.label, color = if (signal.usedInFix) c.text else c.muted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
                 Text(signal.band.orEmpty(), color = c.muted, fontSize = 9.sp, maxLines = 1)
@@ -222,9 +224,9 @@ private fun SignalTable(signals: List<Signal>) {
             listOf(
                 signal.label,
                 signal.band ?: NO_VALUE,
-                signal.cn0DbHz.decimals(1),
-                stringResource(R.string.unit_degrees, signal.elevation.decimals(0)),
-                stringResource(R.string.unit_degrees, signal.azimuth.decimals(0)),
+                if (signal.isHeard) signal.cn0DbHz.decimals(1) else NO_VALUE,
+                if (signal.hasPosition) stringResource(R.string.unit_degrees, signal.elevation.decimals(0)) else NO_VALUE,
+                if (signal.hasPosition) stringResource(R.string.unit_degrees, signal.azimuth.decimals(0)) else NO_VALUE,
                 buildString {
                     append(if (signal.hasAlmanac) 'A' else '·')
                     append(if (signal.hasEphemeris) 'E' else '·')

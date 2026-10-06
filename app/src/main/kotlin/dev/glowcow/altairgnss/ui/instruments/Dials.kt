@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,10 +20,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
@@ -37,13 +40,20 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-/** The reading in the middle of a dial. */
+/** The reading in the middle of a dial; [drop] sets it lower, [captionDrop] the caption lower under the value. */
 @Composable
-private fun DialReading(value: String, caption: String, large: Boolean) {
+private fun DialReading(value: String, caption: String, large: Boolean, drop: Dp = 0.dp, captionDrop: Dp = 0.dp) {
     val c = AltairTheme.colors
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(Modifier.offset(y = drop), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, color = c.text, fontSize = if (large) 64.sp else 34.sp, fontWeight = FontWeight.Bold, style = tabular(), maxLines = 1)
-        Text(caption, color = c.muted, fontSize = if (large) 22.sp else 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+        Text(
+            caption,
+            color = c.muted,
+            fontSize = if (large) 22.sp else 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            modifier = Modifier.offset(y = captionDrop),
+        )
     }
 }
 
@@ -66,6 +76,13 @@ fun Compass(heading: Float?, modifier: Modifier = Modifier, large: Boolean = fal
         Canvas(Modifier.fillMaxSize()) {
             val radius = size.minDimension / 2 - 8.dp.toPx()
             val grow = if (large) 1.7f else 1f
+            val ring = radius * if (large) RING_LARGE else RING_SMALL
+            // Letters and degrees share one circle: on the large card a fixed way in from the marks,
+            // on the small one halfway between the marks and the ring.
+            val labels = if (large) radius - 30.dp.toPx() else (radius - 9.dp.toPx() + ring) / 2
+            // Top of a line whose capitals are centred on that circle.
+            fun top(layout: TextLayoutResult, style: TextStyle) =
+                center.y - labels - (layout.firstBaseline - style.fontSize.toPx() * CAP_HEIGHT / 2)
             rotate(-card) {
                 for (degrees in 0 until 360 step if (large) 5 else 10) {
                     val major = degrees % 30 == 0
@@ -82,20 +99,19 @@ fun Compass(heading: Float?, modifier: Modifier = Modifier, large: Boolean = fal
                     if (large && major && degrees % 90 != 0) {
                         val layout = measurer.measure(degrees.toString(), degree)
                         rotate(degrees.toFloat()) {
-                            drawText(layout, topLeft = Offset(center.x - layout.size.width / 2, center.y - radius + 22.dp.toPx()))
+                            drawText(layout, topLeft = Offset(center.x - layout.size.width / 2, top(layout, degree)))
                         }
                     }
                 }
                 cardinals.forEachIndexed { i, name ->
                     val layout = measurer.measure(name, if (i == 0) letter.copy(color = c.accent) else letter)
                     rotate(i * 90f) {
-                        drawText(layout, topLeft = Offset(center.x - layout.size.width / 2, center.y - radius + 12.dp.toPx() * grow))
+                        drawText(layout, topLeft = Offset(center.x - layout.size.width / 2, top(layout, letter)))
                     }
                 }
             }
             drawLine(c.accent, Offset(center.x, center.y - radius - 8.dp.toPx()), Offset(center.x, center.y - radius + 10.dp.toPx() * grow), 3.dp.toPx(), StrokeCap.Round)
             // The ring keeps the reading apart from the turning card.
-            val ring = radius * if (large) RING_LARGE else RING_SMALL
             drawCircle(c.groupBg, ring)
             drawCircle(c.line, ring, style = Stroke(1.dp.toPx()))
         }
@@ -103,6 +119,8 @@ fun Compass(heading: Float?, modifier: Modifier = Modifier, large: Boolean = fal
             heading?.let { stringResource(R.string.unit_degrees, (it.roundToInt() % 360).toString()) } ?: NO_VALUE,
             heading?.let { points[Heading.point(it)] }.orEmpty(),
             large,
+            drop = if (large) 8.dp else 4.dp,
+            captionDrop = if (large) 6.dp else 3.dp,
         )
     }
 }
@@ -143,8 +161,11 @@ fun Speedometer(kmh: Float?, modifier: Modifier = Modifier, large: Boolean = fal
 }
 
 // Radius of the ring round the compass reading, as a part of the dial's.
-private const val RING_SMALL = 0.62f
+private const val RING_SMALL = 0.6f
 private const val RING_LARGE = 0.56f
+
+// Height of a capital letter of the font, as a part of its size.
+private const val CAP_HEIGHT = 0.716f
 
 /** Full scales of the speedometer, km/h. */
 private val SPEED_SCALES = listOf(10, 20, 40, 80, 160, 320, 1000)

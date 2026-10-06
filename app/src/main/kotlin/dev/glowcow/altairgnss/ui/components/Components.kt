@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -119,6 +120,8 @@ fun TabScreen(tab: TopTab, onTab: (TopTab) -> Unit, content: @Composable (top: D
                 .fillMaxWidth()
                 .onSizeChanged { headerHeight = it.height }
                 .frosted(page, c.groupBg) { Offset.Zero }
+                // What shows through the glass is not tappable through it.
+                .pointerInput(Unit) {}
                 .statusBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 14.dp),
         )
@@ -127,7 +130,8 @@ fun TabScreen(tab: TopTab, onTab: (TopTab) -> Unit, content: @Composable (top: D
                 .align(Alignment.BottomCenter)
                 .onSizeChanged { barHeight.intValue = it.height }
                 .offset { IntOffset(0, barShift.floatValue.roundToInt()) }
-                .frosted(page, c.bg) { Offset(0f, pageHeight.intValue - barHeight.intValue + barShift.floatValue) },
+                .frosted(page, c.bg) { Offset(0f, pageHeight.intValue - barHeight.intValue + barShift.floatValue) }
+                .pointerInput(Unit) {},
         ) {
             BottomBar(tab, onTab)
         }

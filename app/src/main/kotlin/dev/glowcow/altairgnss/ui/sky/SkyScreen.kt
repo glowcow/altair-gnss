@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -84,7 +86,7 @@ private fun SkyContent(top: Dp, bottom: Dp) {
 
 /**
  * The sky from above: the zenith in the centre, the horizon on the rim. [turn] is where the top of
- * the screen points; labels stay upright. A dot is filled when in the fix.
+ * the screen points; labels stay upright and do not overlap. A dot is filled when in the fix.
  */
 @Composable
 private fun SkyPlot(satellites: List<Signal>, turn: Float, modifier: Modifier = Modifier) {
@@ -114,12 +116,28 @@ private fun SkyPlot(satellites: List<Signal>, turn: Float, modifier: Modifier = 
         }
 
         val dot = 5.dp.toPx()
-        for (satellite in satellites) {
-            val p = at(satellite.elevation, satellite.azimuth)
-            val color = signalColor(satellite.cn0DbHz)
+        // A satellite the receiver cannot place has no spot in the sky.
+        val placed = satellites.filter { it.hasPosition }.map { it to at(it.elevation, it.azimuth) }
+        for ((satellite, p) in placed) {
+            // Expected but not heard: no level to colour it with.
+            val color = if (satellite.isHeard) signalColor(satellite.cn0DbHz) else c.muted
             if (satellite.usedInFix) drawCircle(color, dot, p) else drawCircle(color, dot - 0.75.dp.toPx(), p, style = Stroke(1.5.dp.toPx()))
+        }
+        // A label goes under its dot, or over it or beside it where that is free, and is left out
+        // where nothing is; satellites of the fix and stronger ones choose first.
+        val taken = placed.map { (_, p) -> Rect(p, dot) }.toMutableList()
+        val gap = dot + 1.dp.toPx()
+        for ((satellite, p) in placed.sortedByDescending { (s, _) -> s.cn0DbHz + if (s.usedInFix) 100f else 0f }) {
             val layout = measurer.measure(satellite.label, labelStyle)
-            drawText(layout, topLeft = Offset(p.x - layout.size.width / 2, p.y + dot + 1.dp.toPx()))
+            val (w, h) = layout.size.width.toFloat() to layout.size.height.toFloat()
+            val spot = listOf(
+                Offset(p.x - w / 2, p.y + gap),
+                Offset(p.x - w / 2, p.y - gap - h),
+                Offset(p.x + gap, p.y - h / 2),
+                Offset(p.x - gap - w, p.y - h / 2),
+            ).map { Rect(it, Size(w, h)) }.firstOrNull { free -> taken.none { it.overlaps(free) } } ?: continue
+            taken += spot
+            drawText(layout, topLeft = spot.topLeft)
         }
     }
 }

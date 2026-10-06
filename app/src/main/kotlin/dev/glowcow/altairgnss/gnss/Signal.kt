@@ -27,6 +27,12 @@ data class Signal(
     val carrierHz: Float? = null,
 ) {
     val label: String get() = "${constellation.letter}$svid"
+
+    /** False while the receiver tracks the signal without knowing where its satellite is: both angles are zero then. */
+    val hasPosition: Boolean get() = elevation != 0f || azimuth != 0f
+
+    /** False for a satellite the receiver only expects, with no signal measured. */
+    val isHeard: Boolean get() = cn0DbHz > 0f
     val band: String? get() = carrierHz?.let { Bands.name(constellation, it) }
 }
 

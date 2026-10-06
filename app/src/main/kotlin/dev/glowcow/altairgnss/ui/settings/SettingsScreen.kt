@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -44,6 +42,7 @@ import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
 import dev.glowcow.altairgnss.ui.components.GroupSheet
+import dev.glowcow.altairgnss.ui.components.SwitchRow
 import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
@@ -245,18 +244,6 @@ fun SettingsScreen(
         }
         null -> Unit
     }
-}
-
-@Composable
-private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    val c = AltairTheme.colors
-    GroupRow(title, subtitle = subtitle, onClick = { onChange(!checked) }, trailing = {
-        Switch(
-            checked = checked,
-            onCheckedChange = onChange,
-            colors = SwitchDefaults.colors(checkedTrackColor = c.accent, uncheckedTrackColor = c.chip, uncheckedBorderColor = c.line),
-        )
-    })
 }
 
 private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, START_TAB, CLEAR_ASSIST }
