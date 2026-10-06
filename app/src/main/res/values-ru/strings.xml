@@ -2,6 +2,7 @@
 <resources>
     <string name="tab_status">Статус</string>
     <string name="tab_sky">Небо</string>
+    <string name="tab_record">Запись активности</string>
     <string name="tab_altimeter">Альтиметр</string>
     <string name="tab_instruments">Приборы</string>
     <string name="tab_settings">Настройки</string>
@@ -38,8 +39,12 @@
     <string name="sort_cn0">Сортировка по сигналу</string>
 
     <string name="unit_metres">%1$s м</string>
-    <string name="unit_accuracy_metres">±%1$s м</string>
+    <string name="unit_feet">%1$s фт</string>
     <string name="unit_kmh">%1$s км/ч</string>
+    <string name="unit_mph">%1$s миль/ч</string>
+    <string name="unit_knots">%1$s уз</string>
+    <string name="unit_fpm">%1$s фт/мин</string>
+    <string name="unit_miles">%1$s миль</string>
     <string name="unit_seconds">%1$s с</string>
     <string name="unit_dbhz">%1$s дБ·Гц</string>
 
@@ -75,6 +80,7 @@
     <string name="label_barometer_altitude">Высота по барометру</string>
     <string name="label_calibrated">Калибровка</string>
     <string name="label_drift">Ожидаемая ошибка</string>
+    <string name="label_air_temperature">Температура воздуха</string>
     <string name="unit_hpa">%1$s гПа</string>
 
     <string name="calibrate_gnss">Калибровать по GNSS</string>
@@ -90,9 +96,10 @@
     <string name="airport_no_position">Координат пока нет: чтобы найти аэропорты, нужны хотя бы примерные</string>
     <string name="airport_failed">Не удалось связаться с сервисом погоды</string>
     <string name="airport_none">Свежих сводок в радиусе 200 км нет</string>
-    <string name="airport_row">%1$s км · %2$s гПа · %3$s</string>
+    <string name="airport_row">%1$s · %2$s гПа · %3$s</string>
     <string name="airport_hint">Сводки берутся у Aviation Weather Center. В запросе указывается область шириной в несколько сотен километров, а не ваши координаты. Чем дальше аэропорт, тем меньше его давление говорит о вашем.</string>
     <string name="input_altitude">Высота над уровнем моря, м</string>
+    <string name="input_altitude_feet">Высота над уровнем моря, фт</string>
     <string name="save">Сохранить</string>
 
     <string name="compass_true">Истинный север</string>
@@ -102,6 +109,8 @@
 
     <string name="speed_course">Курс %1$s</string>
     <string name="unit_kmh_label">км/ч</string>
+    <string name="unit_mph_label">миль/ч</string>
+    <string name="unit_knots_label">уз</string>
     <string name="back">Назад</string>
     <string name="title_compass">Компас</string>
     <string name="title_speed">Скорость</string>
@@ -127,7 +136,7 @@
     <string name="label_speed_accuracy">Точность скорости</string>
     <string name="trip_reset">Сбросить поездку</string>
     <string name="trip_hint">Максимум, средняя, путь и время начнутся заново</string>
-    <string name="speed_scale_hint">Шкала растёт вместе со скоростью: 10, 20, 40, 80 км/ч и далее. Поездка считается, пока открыта вкладка, которой нужен GNSS.</string>
+    <string name="speed_scale_hint">Шкала растёт вместе со скоростью: 10, 20, 40, 80 и далее. Поездка считается, пока открыта вкладка, которой нужен GNSS.</string>
     <string name="map_sun">Солнце в зените</string>
     <string name="map_you">Вы</string>
     <string name="map_no_position">Координат пока нет</string>
@@ -175,6 +184,13 @@
     <string name="settings_language">Язык</string>
     <string name="language_system">Как в системе</string>
     <string name="settings_coordinates">Формат координат</string>
+    <string name="settings_length">Высота и расстояние</string>
+    <string name="length_metres">Метры</string>
+    <string name="length_feet">Футы</string>
+    <string name="settings_speed">Скорость</string>
+    <string name="speed_kmh">Километры в час</string>
+    <string name="speed_mph">Мили в час</string>
+    <string name="speed_knots">Узлы</string>
     <string name="coordinates_dd">Десятичные градусы</string>
     <string name="coordinates_ddm">Градусы и десятичные минуты</string>
     <string name="coordinates_dms">Градусы, минуты, секунды</string>
@@ -210,4 +226,100 @@
     <string name="settings_map_images">Снимки для карты</string>
     <string name="settings_version">Версия</string>
     <string name="settings_font">Шрифт</string>
+    <string name="recording_channel">Запись</string>
+    <string name="recording_notification">Идёт запись трека</string>
+    <string name="recording_notification_text">Продолжается и при выключенном экране. Нажмите, чтобы открыть</string>
+    <string name="recording_record">Запись</string>
+    <string name="recording_waiting_short">Ждём фиксацию</string>
+    <string name="recording_running">Запись идёт</string>
+    <string name="recording_stop_short">Стоп</string>
+    <string name="recording_stop">Остановить запись</string>
+    <string name="recording_position">GPS-трек</string>
+    <string name="recording_position_hint">Выключите под землёй: пишется только высота, приёмник не держится включённым</string>
+    <string name="recording_waiting">Ждём устойчивую фиксацию: %1$d с</string>
+    <string name="settings_moving">Движение от</string>
+    <string name="settings_moving_hint">Медленнее — остановка: не идёт в среднюю скорость и время в движении</string>
+    <string name="settings_steady_fix">Устойчивая фиксация перед записью</string>
+    <string name="settings_steady_fix_hint">Запись с GPS-треком начинается, когда положение держится столько времени</string>
+    <string name="steady_fix_off">Сразу</string>
+    <string name="recording_zero">Обнулить здесь</string>
+    <string name="recording_zero_hint">Подъём и глубина считаются от этой точки</string>
+    <string name="recordings">Записи</string>
+    <string name="recordings_empty">Записей пока нет</string>
+    <string name="recording_now">Идёт запись</string>
+    <string name="recording_no_points">За эту запись высота ни разу не была получена.</string>
+    <string name="label_elapsed">Время</string>
+    <string name="label_from_zero">От нуля</string>
+    <string name="label_climbed">Набор</string>
+    <string name="label_descended">Спуск</string>
+    <string name="label_lowest">Нижняя точка</string>
+    <string name="label_highest">Верхняя точка</string>
+    <string name="label_start_altitude">Высота в начале</string>
+    <string name="label_end_from_zero">Конец, от нуля</string>
+    <string name="chart_description">Высота за время записи</string>
+    <string name="track_description">Трек в объёме, цвет — скорость</string>
+    <string name="track_fullscreen">Открыть во весь экран</string>
+    <string name="export_csv">Выгрузить в CSV</string>
+    <string name="export_done">Сохранено</string>
+    <string name="export_failed">Не удалось сохранить файл</string>
+    <string name="recording_delete">Удалить запись</string>
+    <string name="recording_delete_text">Её точки и метки удаляются безвозвратно.</string>
+    <string name="recording_delete_confirm">Удалить</string>
+    <string name="tools_nmea">Сообщения NMEA</string>
+    <string name="tools_nmea_hint">Что сообщает приёмник, по мере поступления</string>
+    <string name="tools_scatter">Разброс положения</string>
+    <string name="tools_scatter_hint">Как далеко фиксы уходят от точки</string>
+    <string name="nmea_empty">Пока пусто. Приёмник шлёт сообщения, когда работает.</string>
+    <string name="nmea_record">Писать в файл</string>
+    <string name="nmea_record_hint">Все сообщения, пока открыта вкладка, которой нужен GNSS</string>
+    <string name="nmea_stop">Остановить запись</string>
+    <string name="nmea_save">Сохранить записанный файл</string>
+    <plurals name="nmea_lines">
+        <item quantity="one">%d сообщение</item>
+        <item quantity="few">%d сообщения</item>
+        <item quantity="many">%d сообщений</item>
+        <item quantity="other">%d сообщения</item>
+    </plurals>
+    <string name="scatter_description">Фиксы вокруг опорной точки, север вверху</string>
+    <string name="scatter_no_fix">Ждём фиксацию. Фиксы копятся, пока открыта эта страница.</string>
+    <string name="scatter_ring">Внешнее кольцо: %1$s</string>
+    <string name="label_fixes">Фиксов</string>
+    <string name="label_now_from_point">Сейчас, от точки</string>
+    <string name="label_mean_error">Среднее расстояние</string>
+    <string name="label_cep50">Половина в пределах</string>
+    <string name="label_cep95" formatted="false">95 % в пределах</string>
+    <string name="label_farthest">Самый дальний</string>
+    <string name="label_vertical_spread">Разброс высоты</string>
+    <string name="scatter_offset">%1$s, %2$s</string>
+    <string name="scatter_reference">Опорная точка</string>
+    <string name="scatter_reference_mean">Среднее фиксов</string>
+    <string name="scatter_reference_now">Положение сейчас</string>
+    <string name="scatter_reference_enter">Ввести координаты</string>
+    <string name="scatter_reference_fixed">Заданная точка</string>
+    <string name="scatter_reset">Начать заново</string>
+    <string name="scatter_reset_hint">Сбросить накопленные фиксы</string>
+    <string name="scatter_hint">Вокруг среднего фиксов разброс показывает, насколько приёмник устойчив; вокруг точки с известными координатами — насколько он точен.</string>
+    <string name="input_latitude">Широта, десятичные градусы</string>
+    <string name="input_longitude">Долгота, десятичные градусы</string>
+    <string name="input_coordinates">Координаты точки</string>
+    <string name="settings_backup_save">Сохранить копию</string>
+    <string name="settings_backup_restore">Восстановить из копии</string>
+    <string name="backup_password">Пароль</string>
+    <string name="backup_save_pick">Выбрать, куда сохранить</string>
+    <string name="backup_saved">Копия сохранена</string>
+    <string name="backup_save_failed">Не получилось сохранить копию</string>
+    <string name="backup_encrypted">Эта копия зашифрована</string>
+    <string name="backup_restore">Восстановить</string>
+    <string name="backup_overwrite">Заменять то, что уже есть</string>
+    <string name="backup_wrong_password">Неверный пароль</string>
+    <string name="settings_backup_save_hint">Записи и настройки в одном файле</string>
+    <string name="settings_backup_restore_hint">Добавляет записи из файла к уже имеющимся</string>
+    <string name="backup_password_note">С паролем файл шифруется. Без пароля любой, кому попадёт файл, увидит, где вы были.</string>
+    <string name="backup_overwrite_hint">Записи, которые есть и здесь, и в файле, и настройки</string>
+    <string name="backup_restored">Восстановлено записей: %1$d</string>
+    <string name="backup_invalid">Это не бэкап Altair GNSS</string>
+    <string name="settings_map">Карта под треком</string>
+    <string name="settings_map_hint">OpenStreetMap, загружается при открытии записи; запрос сообщает серверу карт, где проходит трек</string>
+    <string name="settings_map_clear">Очистить кэш карт</string>
+    <string name="settings_map_data">Данные карты</string>
 </resources>

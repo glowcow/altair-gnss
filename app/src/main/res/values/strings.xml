@@ -4,6 +4,7 @@
 
     <string name="tab_status">Status</string>
     <string name="tab_sky">Sky</string>
+    <string name="tab_record">Activity record</string>
     <string name="tab_altimeter">Altimeter</string>
     <string name="tab_instruments">Instruments</string>
     <string name="tab_settings">Settings</string>
@@ -44,8 +45,12 @@
     <string name="sort_cn0">Sorted by signal</string>
 
     <string name="unit_metres">%1$s m</string>
-    <string name="unit_accuracy_metres">±%1$s m</string>
+    <string name="unit_feet">%1$s ft</string>
     <string name="unit_kmh">%1$s km/h</string>
+    <string name="unit_mph">%1$s mph</string>
+    <string name="unit_knots">%1$s kn</string>
+    <string name="unit_fpm">%1$s ft/min</string>
+    <string name="unit_miles">%1$s mi</string>
     <string name="unit_seconds">%1$s s</string>
     <string name="unit_degrees" translatable="false">%1$s°</string>
     <string name="unit_dbhz">%1$s dB-Hz</string>
@@ -68,6 +73,8 @@
     <string name="dial_mbar" translatable="false">mbar</string>
     <string name="dial_mmhg" translatable="false">mmHg</string>
     <string name="dial_scale" translatable="false">x10 m</string>
+    <string name="dial_feet" translatable="false">FEET</string>
+    <string name="dial_scale_feet" translatable="false">x100 ft</string>
     <string name="altimeter_description">Altimeter dial: %1$s</string>
     <string name="label_altitude">Altitude</string>
     <string name="label_vertical_speed">Vertical speed</string>
@@ -88,6 +95,8 @@
     <string name="label_barometer_altitude">Barometric altitude</string>
     <string name="label_calibrated">Calibrated</string>
     <string name="label_drift">Expected error</string>
+    <string name="label_air_temperature">Air temperature</string>
+    <string name="unit_celsius" translatable="false">%1$s °C</string>
     <string name="unit_hpa">%1$s hPa</string>
     <string name="value_with_accuracy" translatable="false">%1$s %2$s</string>
 
@@ -104,9 +113,10 @@
     <string name="airport_no_position">No position yet: even a rough one is needed to find airports</string>
     <string name="airport_failed">Couldn’t reach the weather service</string>
     <string name="airport_none">No fresh reports within 200 km</string>
-    <string name="airport_row">%1$s km · %2$s hPa · %3$s</string>
+    <string name="airport_row">%1$s · %2$s hPa · %3$s</string>
     <string name="airport_hint">Reports come from the Aviation Weather Center. The request names an area a few hundred kilometres wide, not your position. The farther the airport, the less its pressure says about yours.</string>
     <string name="input_altitude">Altitude above sea level, m</string>
+    <string name="input_altitude_feet">Altitude above sea level, ft</string>
     <string name="save">Save</string>
 
     <string name="compass_true">True north</string>
@@ -116,6 +126,8 @@
 
     <string name="speed_course">Course %1$s</string>
     <string name="unit_kmh_label">km/h</string>
+    <string name="unit_mph_label">mph</string>
+    <string name="unit_knots_label">kn</string>
     <string name="back">Back</string>
     <string name="title_compass">Compass</string>
     <string name="title_speed">Speed</string>
@@ -141,7 +153,7 @@
     <string name="label_speed_accuracy">Speed accuracy</string>
     <string name="trip_reset">Reset the trip</string>
     <string name="trip_hint">Maximum, average, distance and time start over</string>
-    <string name="speed_scale_hint">The scale grows with the speed: 10, 20, 40, 80 km/h and on. The trip is counted while a tab that uses GNSS is open.</string>
+    <string name="speed_scale_hint">The scale grows with the speed: 10, 20, 40, 80 and on. The trip is counted while a tab that uses GNSS is open.</string>
     <string name="map_sun">The sun is overhead</string>
     <string name="map_you">You</string>
     <string name="map_no_position">No position yet</string>
@@ -188,6 +200,13 @@
     <string name="settings_language">Language</string>
     <string name="language_system">System default</string>
     <string name="settings_coordinates">Coordinate format</string>
+    <string name="settings_length">Altitude and distance</string>
+    <string name="length_metres">Metres</string>
+    <string name="length_feet">Feet</string>
+    <string name="settings_speed">Speed</string>
+    <string name="speed_kmh">Kilometres per hour</string>
+    <string name="speed_mph">Miles per hour</string>
+    <string name="speed_knots">Knots</string>
     <string name="coordinates_dd">Decimal degrees</string>
     <string name="coordinates_ddm">Degrees and decimal minutes</string>
     <string name="coordinates_dms">Degrees, minutes, seconds</string>
@@ -223,4 +242,99 @@
     <string name="settings_map_images">Map images</string>
     <string name="settings_version">Version</string>
     <string name="settings_font">Font</string>
+    <string name="recording_channel">Recording</string>
+    <string name="recording_notification">Recording the track</string>
+    <string name="recording_notification_text">It goes on with the screen off. Tap to open</string>
+    <string name="recording_record">Record</string>
+    <string name="recording_waiting_short">Waiting for a fix</string>
+    <string name="recording_running">Recording</string>
+    <string name="recording_stop_short">Stop</string>
+    <string name="recording_stop">Stop recording</string>
+    <string name="recording_position">GPS track</string>
+    <string name="recording_position_hint">Off for underground: only the altitude is written and the receiver is not kept on</string>
+    <string name="recording_waiting">Waiting for a steady fix: %1$d s</string>
+    <string name="settings_moving">Moving from</string>
+    <string name="settings_moving_hint">Slower than this is a stop: it does not count into the average speed or the moving time</string>
+    <string name="settings_steady_fix">Steady fix before recording</string>
+    <string name="settings_steady_fix_hint">A recording with a GPS track starts once the position has held this long</string>
+    <string name="steady_fix_off">At once</string>
+    <string name="recording_zero">Set the zero here</string>
+    <string name="recording_zero_hint">Climb and depth are counted from this point</string>
+    <string name="recordings">Recordings</string>
+    <string name="recordings_empty">Nothing recorded yet</string>
+    <string name="recording_now">Recording now</string>
+    <string name="recording_no_points">No altitude was read during this recording.</string>
+    <string name="label_elapsed">Time</string>
+    <string name="label_from_zero">From the zero</string>
+    <string name="label_climbed">Climbed</string>
+    <string name="label_descended">Descended</string>
+    <string name="label_lowest">Lowest</string>
+    <string name="label_highest">Highest</string>
+    <string name="label_start_altitude">Altitude at the start</string>
+    <string name="label_end_from_zero">End, from the zero</string>
+    <string name="chart_description">Altitude over the time of the recording</string>
+    <string name="track_description">The track in three dimensions, coloured by speed</string>
+    <string name="track_fullscreen">Open full screen</string>
+    <string name="export_csv">Export as CSV</string>
+    <string name="export_done">Saved</string>
+    <string name="export_failed">Couldn’t save the file</string>
+    <string name="recording_delete">Delete the recording</string>
+    <string name="recording_delete_text">Its points and marks are removed for good.</string>
+    <string name="recording_delete_confirm">Delete</string>
+    <string name="tools_nmea">NMEA sentences</string>
+    <string name="tools_nmea_hint">What the receiver reports, as it comes</string>
+    <string name="tools_scatter">Position scatter</string>
+    <string name="tools_scatter_hint">How far the fixes wander round a point</string>
+    <string name="nmea_empty">Nothing yet. The receiver sends sentences once it runs.</string>
+    <string name="nmea_record">Record to a file</string>
+    <string name="nmea_record_hint">Every sentence, while a tab that uses GNSS is open</string>
+    <string name="nmea_stop">Stop recording</string>
+    <string name="nmea_save">Save the recorded file</string>
+    <plurals name="nmea_lines">
+        <item quantity="one">%d sentence</item>
+        <item quantity="other">%d sentences</item>
+    </plurals>
+    <string name="scatter_description">Fixes plotted round the reference point, north up</string>
+    <string name="scatter_no_fix">Waiting for a fix. Fixes are collected while this page is open.</string>
+    <string name="scatter_ring">Outer ring: %1$s</string>
+    <string name="label_fixes">Fixes</string>
+    <string name="label_now_from_point">Now, from the point</string>
+    <string name="label_mean_error">Mean distance</string>
+    <string name="label_cep50">Half are within</string>
+    <string name="label_cep95" formatted="false">95 % are within</string>
+    <string name="label_farthest">Farthest</string>
+    <string name="label_vertical_spread">Height spread</string>
+    <string name="scatter_offset">%1$s, %2$s</string>
+    <string name="scatter_reference">Reference point</string>
+    <string name="scatter_reference_mean">Mean of the fixes</string>
+    <string name="scatter_reference_now">The position now</string>
+    <string name="scatter_reference_enter">Enter coordinates</string>
+    <string name="scatter_reference_fixed">A fixed point</string>
+    <string name="scatter_reset">Start over</string>
+    <string name="scatter_reset_hint">Drop the collected fixes</string>
+    <string name="scatter_hint">Round the mean of the fixes the spread shows how steady the receiver is; round a point whose coordinates are known, how accurate it is.</string>
+    <string name="input_latitude">Latitude, decimal degrees</string>
+    <string name="input_longitude">Longitude, decimal degrees</string>
+    <string name="input_coordinates">Coordinates of the point</string>
+    <string name="settings_backup_save">Save a backup</string>
+    <string name="settings_backup_restore">Restore from a backup</string>
+    <string name="backup_password">Password</string>
+    <string name="backup_save_pick">Choose where to save</string>
+    <string name="backup_saved">Backup saved</string>
+    <string name="backup_save_failed">Couldn’t save the backup</string>
+    <string name="backup_encrypted">This backup is encrypted</string>
+    <string name="backup_restore">Restore</string>
+    <string name="backup_overwrite">Replace what is already here</string>
+    <string name="backup_wrong_password">Wrong password</string>
+    <string name="settings_backup_save_hint">Recordings and settings in one file</string>
+    <string name="settings_backup_restore_hint">Adds the recordings from the file to the ones here</string>
+    <string name="backup_password_note">With a password the file is encrypted. Without one anybody who gets the file can see where you have been.</string>
+    <string name="backup_overwrite_hint">Recordings that are both here and in the file, and the settings</string>
+    <string name="backup_restored">Recordings restored: %1$d</string>
+    <string name="backup_invalid">This is not an Altair GNSS backup</string>
+    <string name="settings_map">Map under the track</string>
+    <string name="settings_map_hint">OpenStreetMap, downloaded when a recording is opened; the request tells the map server where the track is</string>
+    <string name="settings_map_clear">Clear the map cache</string>
+    <string name="settings_map_data">Map data</string>
+    <string name="map_credit" translatable="false">© OpenStreetMap contributors</string>
 </resources>

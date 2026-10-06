@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,6 +28,7 @@ import dev.glowcow.altairgnss.altimeter.AltitudeSource
 import dev.glowcow.altairgnss.altimeter.Barometry
 import dev.glowcow.altairgnss.altimeter.Drift
 import dev.glowcow.altairgnss.container
+import dev.glowcow.altairgnss.ui.components.AltitudeSheet
 import dev.glowcow.altairgnss.ui.components.ChoiceSheet
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
@@ -41,9 +39,12 @@ import dev.glowcow.altairgnss.ui.components.NO_VALUE
 import dev.glowcow.altairgnss.ui.components.StatGrid
 import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
+import dev.glowcow.altairgnss.ui.components.accuracyText
 import dev.glowcow.altairgnss.ui.components.decimals
+import dev.glowcow.altairgnss.ui.components.lengthText
+import dev.glowcow.altairgnss.ui.components.signed
+import dev.glowcow.altairgnss.ui.components.verticalSpeedText
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
-import java.util.Locale
 
 @Composable
 fun AltimeterScreen(onTab: (TopTab) -> Unit) = TabScreen(TopTab.ALTIMETER, onTab) { top, bottom ->
@@ -59,7 +60,7 @@ private fun AltimeterContent(top: Dp, bottom: Dp) {
     val state by altimeter.state.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf<Sheet?>(null) }
 
-    val plusMinus = @Composable { v: Float -> stringResource(R.string.unit_accuracy_metres, v.decimals(1)) }
+    val plusMinus = @Composable { v: Float -> accuracyText(v) }
     val sourceName = stringResource(SOURCES.first { it.first == state.source }.second)
 
     Column(
@@ -117,12 +118,7 @@ private fun AltimeterContent(top: Dp, bottom: Dp) {
             onSelect = altimeter::setSource,
             onDismiss = { sheet = null },
         )
-        Sheet.ALTITUDE -> NumberSheet(
-            title = stringResource(R.string.input_altitude),
-            range = -500.0..9000.0,
-            onSave = { altimeter.calibrateToAltitude(it) },
-            onDismiss = { sheet = null },
-        )
+        Sheet.ALTITUDE -> AltitudeSheet(onSave = { altimeter.calibrateToAltitude(it) }, onDismiss = { sheet = null })
         Sheet.AIRPORT -> AirportSheet(onPick = altimeter::calibrateToAirport, onDismiss = { sheet = null })
         null -> Unit
     }
@@ -130,21 +126,23 @@ private fun AltimeterContent(top: Dp, bottom: Dp) {
 
 @Composable
 private fun stats(state: AltimeterState): List<Pair<String, String>> {
-    val metres = @Composable { v: Double? -> v?.let { stringResource(R.string.unit_metres, it.decimals(1)) } ?: NO_VALUE }
+    val metres = @Composable { v: Double? -> v?.let { lengthText(it) } ?: NO_VALUE }
     val calibration = state.calibration
     val now = System.currentTimeMillis()
     return listOf(
         stringResource(R.string.label_barometer_altitude) to metres(state.barometerAltitude),
         stringResource(R.string.label_gnss_altitude) to (
-            state.gnssAccuracy?.let { stringResource(R.string.value_with_accuracy, metres(state.gnssAltitude), stringResource(R.string.unit_accuracy_metres, it.decimals(1))) }
+            state.gnssAccuracy?.let { stringResource(R.string.value_with_accuracy, metres(state.gnssAltitude), accuracyText(it)) }
                 ?: metres(state.gnssAltitude)
             ),
         stringResource(R.string.label_calibrated) to (
             calibration?.let { DateUtils.getRelativeTimeSpanString(it.timeMs, now, DateUtils.MINUTE_IN_MILLIS).toString() } ?: NO_VALUE
             ),
         stringResource(R.string.label_drift) to (
-            calibration?.let { stringResource(R.string.unit_accuracy_metres, Drift.estimate(it.accuracy, now - it.timeMs).decimals(1)) } ?: NO_VALUE
+            calibration?.let { accuracyText(Drift.estimate(it.accuracy, now - it.timeMs)) } ?: NO_VALUE
             ),
+    ) + listOfNotNull(
+        calibration?.temperatureC?.let { stringResource(R.string.label_air_temperature) to stringResource(R.string.unit_celsius, signed(it, 0)) },
     )
 }
 
@@ -154,9 +152,9 @@ private fun readings(state: AltimeterState): List<Pair<String, String>> {
     val hpa = @Composable { v: Double? -> v?.let { stringResource(R.string.unit_hpa, it.decimals(1)) } ?: NO_VALUE }
     val mmhg = @Composable { v: Double? -> v?.let { stringResource(R.string.unit_mmhg, (it * Barometry.MMHG_PER_HPA).decimals(1)) } ?: NO_VALUE }
     return listOf(
-        stringResource(R.string.label_altitude) to (state.altitude?.let { stringResource(R.string.unit_metres, it.decimals(1)) } ?: NO_VALUE),
+        stringResource(R.string.label_altitude) to (state.altitude?.let { lengthText(it) } ?: NO_VALUE),
         stringResource(R.string.label_vertical_speed) to (
-            state.verticalSpeed?.let { stringResource(R.string.unit_mps, String.format(Locale.getDefault(), "%+.1f", it)) } ?: NO_VALUE
+            state.verticalSpeed?.let { verticalSpeedText(it) } ?: NO_VALUE
             ),
         stringResource(R.string.label_pressure) to hpa(state.pressureHpa),
         stringResource(R.string.label_pressure_mmhg) to mmhg(state.pressureHpa),
@@ -164,22 +162,6 @@ private fun readings(state: AltimeterState): List<Pair<String, String>> {
         stringResource(R.string.label_reference_mmhg) to mmhg(state.referenceHpa),
     )
 }
-
-/** A sheet that takes one number within [range]; a comma works as the decimal point. */
-@Composable
-private fun NumberSheet(title: String, range: ClosedFloatingPointRange<Double>, onSave: (Double) -> Unit, onDismiss: () -> Unit) =
-    GroupSheet(title, onDismiss) { pick ->
-        var text by rememberSaveable { mutableStateOf("") }
-        val value = text.replace(',', '.').toDoubleOrNull()?.takeIf { it in range }
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-        )
-        Group { GroupRow(stringResource(R.string.save), onClick = value?.let { v -> { pick { onSave(v) } } }) }
-    }
 
 private val SOURCES = listOf(
     AltitudeSource.AUTO to R.string.source_auto,

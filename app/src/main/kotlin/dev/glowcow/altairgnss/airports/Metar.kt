@@ -24,6 +24,9 @@ data class AirportReport(
     val qnhHpa: Double,
     /** When it was observed, milliseconds since the epoch. */
     val timeMs: Long,
+    /** Air temperature at the airport, °C, and how high the airport stands, metres; a report may lack either. */
+    val temperatureC: Double? = null,
+    val elevation: Double? = null,
 )
 
 data class NearbyAirport(val report: AirportReport, val distanceKm: Double) {
@@ -55,6 +58,8 @@ object Metar {
             longitude = o["lon"]?.jsonPrimitive?.doubleOrNull ?: return null,
             qnhHpa = qnh,
             timeMs = (o["obsTime"]?.jsonPrimitive?.longOrNull ?: return null) * 1000,
+            temperatureC = o["temp"]?.jsonPrimitive?.doubleOrNull?.takeIf { it in -80.0..60.0 },
+            elevation = o["elev"]?.jsonPrimitive?.doubleOrNull,
         )
     }
 

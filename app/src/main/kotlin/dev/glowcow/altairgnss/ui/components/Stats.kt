@@ -14,10 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import java.util.Locale
 
@@ -31,6 +33,24 @@ fun tabular(): TextStyle = LocalTextStyle.current.copy(fontFeatureSettings = "tn
 fun Float.decimals(digits: Int): String = String.format(Locale.getDefault(), "%.${digits}f", this)
 
 fun Double.decimals(digits: Int): String = String.format(Locale.getDefault(), "%.${digits}f", this)
+
+/** A number with its sign, except for what rounds to zero: "-0" reads as a fault. */
+fun signed(value: Double, digits: Int): String {
+    val text = String.format(Locale.getDefault(), "%+.${digits}f", value)
+    return if (text.none { it in '1'..'9' }) text.drop(1) else text
+}
+
+fun signed(value: Float, digits: Int): String = signed(value.toDouble(), digits)
+
+/** The eight compass points in the user's language, north first, clockwise. */
+@Composable
+fun compassPoints(): List<String> {
+    val (n, e, s, w) = listOf(R.string.sky_north, R.string.sky_east, R.string.sky_south, R.string.sky_west).map { stringResource(it) }
+    return listOf(n, n + e, e, s + e, s, s + w, w, n + w)
+}
+
+/** A span of time as hours, minutes and seconds. */
+fun clock(ms: Long): String = (ms / 1000).let { String.format(Locale.ROOT, "%d:%02d:%02d", it / 3600, it / 60 % 60, it % 60) }
 
 /** Labelled values in two columns inside a [Group]. */
 @Composable

@@ -2,14 +2,10 @@ package dev.glowcow.altairgnss.ui.sky
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,20 +19,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.container
 import dev.glowcow.altairgnss.gnss.Signal
+import dev.glowcow.altairgnss.ui.components.DetailScreen
 import dev.glowcow.altairgnss.ui.components.Group
-import dev.glowcow.altairgnss.ui.components.LocationGate
 import dev.glowcow.altairgnss.ui.components.NO_VALUE
 import dev.glowcow.altairgnss.ui.components.SignalLegend
 import dev.glowcow.altairgnss.ui.components.Stat
-import dev.glowcow.altairgnss.ui.components.TabScreen
-import dev.glowcow.altairgnss.ui.components.TopTab
 import dev.glowcow.altairgnss.ui.components.animatedTurn
 import dev.glowcow.altairgnss.ui.components.decimals
 import dev.glowcow.altairgnss.ui.components.rememberScreenHeading
@@ -47,12 +40,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun SkyScreen(onTab: (TopTab) -> Unit) = TabScreen(TopTab.SKY, onTab) { top, bottom ->
-    LocationGate(top) { SkyContent(top, bottom) }
-}
-
-@Composable
-private fun SkyContent(top: Dp, bottom: Dp) {
+fun SkyScreen(onBack: () -> Unit) = DetailScreen(stringResource(R.string.tab_sky), onBack) {
     val state by LocalContext.current.container.gnss.state.collectAsStateWithLifecycle()
     // A satellite heard on two carriers is one dot; it is in the fix if any of its signals is.
     val satellites = state.signals
@@ -62,24 +50,19 @@ private fun SkyContent(top: Dp, bottom: Dp) {
     // The plot turns with the phone, so its north stays over the real one.
     val turn = animatedTurn(rememberScreenHeading().degrees)
 
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = top, bottom = bottom + 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Group {
-            SkyPlot(satellites, turn, Modifier.fillMaxWidth().aspectRatio(1f).padding(14.dp))
-            SignalLegend(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp))
-        }
-        Group {
-            Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Stat(stringResource(R.string.sky_in_view), satellites.size.toString(), Modifier.weight(1f))
-                Stat(stringResource(R.string.sky_in_fix), used.size.toString(), Modifier.weight(1f))
-                Stat(
-                    stringResource(R.string.sky_average),
-                    if (used.isEmpty()) NO_VALUE else stringResource(R.string.unit_dbhz, used.map { it.cn0DbHz }.average().decimals(1)),
-                    Modifier.weight(1.4f),
-                )
-            }
+    Group {
+        SkyPlot(satellites, turn, Modifier.fillMaxWidth().aspectRatio(1f).padding(14.dp))
+        SignalLegend(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp))
+    }
+    Group {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Stat(stringResource(R.string.sky_in_view), satellites.size.toString(), Modifier.weight(1f))
+            Stat(stringResource(R.string.sky_in_fix), used.size.toString(), Modifier.weight(1f))
+            Stat(
+                stringResource(R.string.sky_average),
+                if (used.isEmpty()) NO_VALUE else stringResource(R.string.unit_dbhz, used.map { it.cn0DbHz }.average().decimals(1)),
+                Modifier.weight(1.4f),
+            )
         }
     }
 }

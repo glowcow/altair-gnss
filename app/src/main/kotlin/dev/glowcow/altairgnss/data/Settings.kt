@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -24,6 +25,8 @@ data class AppSettings(
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val palette: Palette = Palette.CLASSIC,
     val coordinates: CoordinateFormat = CoordinateFormat.DD,
+    val length: LengthUnit = LengthUnit.METRES,
+    val speed: SpeedUnit = SpeedUnit.KMH,
     val keepScreenOn: Boolean = true,
     /** Name of the tab the app opens on. */
     val startTab: String = "STATUS",
@@ -31,7 +34,18 @@ data class AppSettings(
     val trueNorth: Boolean = true,
     /** Look for a new version of the app once a week. */
     val appUpdate: Boolean = false,
-)
+    /** A recording keeps the position and the speed of its points; off, it is altitude alone and leaves the receiver be. */
+    val recordPosition: Boolean = true,
+    /** Slower than this many km/h a recording counts as standing. */
+    val movingKmh: Int = 3,
+    /** A recording with positions starts once the receiver has held a fix for this many seconds; 0 starts at once. */
+    val steadyFixSeconds: Int = 15,
+    /** Draw a recording's track on a map downloaded for it. */
+    val mapTiles: Boolean = false,
+) {
+    /** [movingKmh] in metres per second. */
+    val movingSpeed: Float get() = movingKmh / 3.6f
+}
 
 /** What the altimeter remembers between launches. */
 data class AltimeterPrefs(
@@ -45,16 +59,24 @@ class SettingsStore(private val context: Context) {
     private val themeKey = stringPreferencesKey("theme")
     private val paletteKey = stringPreferencesKey("palette")
     private val coordinatesKey = stringPreferencesKey("coordinates")
+    private val lengthKey = stringPreferencesKey("length_unit")
+    private val speedKey = stringPreferencesKey("speed_unit")
     private val keepScreenOnKey = booleanPreferencesKey("keep_screen_on")
     private val startTabKey = stringPreferencesKey("start_tab")
     private val trueNorthKey = booleanPreferencesKey("true_north")
     private val appUpdateKey = booleanPreferencesKey("app_update")
+    private val mapTilesKey = booleanPreferencesKey("map_tiles")
+    private val recordPositionKey = booleanPreferencesKey("record_position")
+    private val movingKey = intPreferencesKey("moving_kmh")
+    private val steadyFixKey = intPreferencesKey("steady_fix_seconds")
 
     private val sourceKey = stringPreferencesKey("altitude_source")
     private val referenceKey = doublePreferencesKey("calibration_reference")
     private val calibratedKey = longPreferencesKey("calibration_time")
     private val accuracyKey = floatPreferencesKey("calibration_accuracy")
     private val kindKey = stringPreferencesKey("calibration_kind")
+    private val temperatureKey = doublePreferencesKey("calibration_temperature")
+    private val baseKey = doublePreferencesKey("calibration_base")
 
     val altimeter: Flow<AltimeterPrefs> = context.dataStore.data.map { p ->
         AltimeterPrefs(
@@ -65,6 +87,8 @@ class SettingsStore(private val context: Context) {
                     timeMs = p[calibratedKey] ?: 0,
                     accuracy = p[accuracyKey],
                     kind = p[kindKey]?.let { runCatching { CalibrationKind.valueOf(it) }.getOrNull() } ?: CalibrationKind.ALTITUDE,
+                    temperatureC = p[temperatureKey],
+                    baseAltitude = p[baseKey],
                 )
             },
         )
@@ -77,6 +101,8 @@ class SettingsStore(private val context: Context) {
         it[calibratedKey] = calibration.timeMs
         it[kindKey] = calibration.kind.name
         if (calibration.accuracy != null) it[accuracyKey] = calibration.accuracy else it.remove(accuracyKey)
+        if (calibration.temperatureC != null) it[temperatureKey] = calibration.temperatureC else it.remove(temperatureKey)
+        if (calibration.baseAltitude != null) it[baseKey] = calibration.baseAltitude else it.remove(baseKey)
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -84,11 +110,34 @@ class SettingsStore(private val context: Context) {
             theme = p[themeKey]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
             palette = p[paletteKey]?.let { runCatching { Palette.valueOf(it) }.getOrNull() } ?: Palette.CLASSIC,
             coordinates = p[coordinatesKey]?.let { runCatching { CoordinateFormat.valueOf(it) }.getOrNull() } ?: CoordinateFormat.DD,
+            length = p[lengthKey]?.let { runCatching { LengthUnit.valueOf(it) }.getOrNull() } ?: LengthUnit.METRES,
+            speed = p[speedKey]?.let { runCatching { SpeedUnit.valueOf(it) }.getOrNull() } ?: SpeedUnit.KMH,
             keepScreenOn = p[keepScreenOnKey] ?: true,
             startTab = p[startTabKey] ?: "STATUS",
             trueNorth = p[trueNorthKey] ?: true,
             appUpdate = p[appUpdateKey] ?: false,
+            mapTiles = p[mapTilesKey] ?: false,
+            recordPosition = p[recordPositionKey] ?: true,
+            movingKmh = p[movingKey] ?: 3,
+            steadyFixSeconds = p[steadyFixKey] ?: 15,
         )
+    }
+
+    /** Replaces every setting at once, as when a backup is restored. */
+    suspend fun restore(s: AppSettings) = context.dataStore.edit {
+        it[themeKey] = s.theme.name
+        it[paletteKey] = s.palette.name
+        it[coordinatesKey] = s.coordinates.name
+        it[lengthKey] = s.length.name
+        it[speedKey] = s.speed.name
+        it[keepScreenOnKey] = s.keepScreenOn
+        it[startTabKey] = s.startTab
+        it[trueNorthKey] = s.trueNorth
+        it[appUpdateKey] = s.appUpdate
+        it[mapTilesKey] = s.mapTiles
+        it[recordPositionKey] = s.recordPosition
+        it[movingKey] = s.movingKmh
+        it[steadyFixKey] = s.steadyFixSeconds
     }
 
     suspend fun setTheme(mode: ThemeMode) = context.dataStore.edit { it[themeKey] = mode.name }
@@ -97,11 +146,23 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setCoordinates(format: CoordinateFormat) = context.dataStore.edit { it[coordinatesKey] = format.name }
 
+    suspend fun setLength(unit: LengthUnit) = context.dataStore.edit { it[lengthKey] = unit.name }
+
+    suspend fun setSpeed(unit: SpeedUnit) = context.dataStore.edit { it[speedKey] = unit.name }
+
     suspend fun setKeepScreenOn(on: Boolean) = context.dataStore.edit { it[keepScreenOnKey] = on }
 
     suspend fun setStartTab(tab: String) = context.dataStore.edit { it[startTabKey] = tab }
 
     suspend fun setTrueNorth(on: Boolean) = context.dataStore.edit { it[trueNorthKey] = on }
+
+    suspend fun setRecordPosition(on: Boolean) = context.dataStore.edit { it[recordPositionKey] = on }
+
+    suspend fun setMovingKmh(kmh: Int) = context.dataStore.edit { it[movingKey] = kmh }
+
+    suspend fun setSteadyFixSeconds(seconds: Int) = context.dataStore.edit { it[steadyFixKey] = seconds }
+
+    suspend fun setMapTiles(on: Boolean) = context.dataStore.edit { it[mapTilesKey] = on }
 
     suspend fun setAppUpdate(on: Boolean) = context.dataStore.edit { it[appUpdateKey] = on }
 

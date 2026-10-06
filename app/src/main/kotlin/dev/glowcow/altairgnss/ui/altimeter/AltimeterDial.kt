@@ -30,7 +30,10 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.altimeter.Barometry
+import dev.glowcow.altairgnss.data.LengthUnit
+import dev.glowcow.altairgnss.ui.components.LocalUnits
 import dev.glowcow.altairgnss.ui.components.NO_VALUE
+import dev.glowcow.altairgnss.ui.components.lengthText
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import dev.glowcow.altairgnss.ui.theme.AppFont
 import java.util.Locale
@@ -41,17 +44,26 @@ import kotlin.math.sin
 
 /**
  * An aircraft-style altimeter: the hand goes round once per 100 m, so a figure is tens of metres
- * and a small mark is 2 m; the drum counts whole metres, the two windows show the pressure the
- * barometer reads now. The face is dark in any theme.
+ * and a small mark is 2 m; in feet, once per 1000 ft, a figure being hundreds of feet. The drum
+ * counts whole metres or feet, the two windows show the pressure the barometer reads now. The
+ * face is dark in any theme. [altitude] is in metres whatever the unit.
  */
 @Composable
 fun AltimeterDial(altitude: Double?, pressureHpa: Double?, modifier: Modifier = Modifier) {
     val accent = AltairTheme.colors.accent
     val measurer = rememberTextMeasurer()
     // The hand glides between readings; after a jump, such as a calibration, it runs round to the new one.
-    val shown by animateFloatAsState(altitude?.toFloat() ?: 0f, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessLow), label = "altitude")
-    val labels = listOf(R.string.dial_altitude, R.string.dial_metres, R.string.dial_mbar, R.string.dial_mmhg, R.string.dial_scale).map { stringResource(it) }
-    val description = stringResource(R.string.altimeter_description, altitude?.let { stringResource(R.string.unit_metres, it.roundToInt().toString()) } ?: NO_VALUE)
+    val unit = LocalUnits.current.length
+    val turn = if (unit == LengthUnit.METRES) TURN_METRES else TURN_FEET
+    val shown by animateFloatAsState(altitude?.let { (it * unit.perMetre).toFloat() } ?: 0f, spring(Spring.DampingRatioNoBouncy, Spring.StiffnessLow), label = "altitude")
+    val labels = listOf(
+        R.string.dial_altitude,
+        if (unit == LengthUnit.METRES) R.string.dial_metres else R.string.dial_feet,
+        R.string.dial_mbar,
+        R.string.dial_mmhg,
+        if (unit == LengthUnit.METRES) R.string.dial_scale else R.string.dial_scale_feet,
+    ).map { stringResource(it) }
+    val description = stringResource(R.string.altimeter_description, altitude?.let { lengthText(it, 0) } ?: NO_VALUE)
 
     Canvas(modifier.fillMaxWidth().aspectRatio(1f).semantics { contentDescription = description }) {
         val r = size.minDimension / 2
@@ -62,7 +74,7 @@ fun AltimeterDial(altitude: Double?, pressureHpa: Double?, modifier: Modifier = 
         drawCircle(BEZEL_EDGE, r * 0.965f, style = Stroke(1.5.dp.toPx()))
         drawCircle(FACE, r * 0.93f)
 
-        // Fifty marks of 2 m; every fifth is ten metres and carries a figure.
+        // Fifty marks to a turn; every fifth carries a figure.
         for (i in 0 until 50) {
             val ten = i % 5 == 0
             rotate(i * 7.2f) {
@@ -88,11 +100,11 @@ fun AltimeterDial(altitude: Double?, pressureHpa: Double?, modifier: Modifier = 
         val drumAt = Offset(center.x - drum.width / 2, center.y - r * 0.36f)
         drawRoundRect(WINDOW, drumAt, drum, CornerRadius(r * 0.03f))
         drawRoundRect(WINDOW_EDGE, drumAt, drum, CornerRadius(r * 0.03f), style = Stroke(1.dp.toPx()))
-        val metres = shown.roundToInt()
+        val whole = shown.roundToInt()
         val figures = when {
             altitude == null -> "-----"
-            metres < 0 -> "-" + String.format(Locale.ROOT, "%04d", abs(metres) % 10_000)
-            else -> String.format(Locale.ROOT, "%05d", metres % 100_000)
+            whole < 0 -> "-" + String.format(Locale.ROOT, "%04d", abs(whole) % 10_000)
+            else -> String.format(Locale.ROOT, "%05d", whole % 100_000)
         }
         val cell = drum.width / figures.length
         figures.forEachIndexed { i, figure ->
@@ -116,7 +128,7 @@ fun AltimeterDial(altitude: Double?, pressureHpa: Double?, modifier: Modifier = 
         centred(measurer, labels[4], style(0.068f, FontWeight.Medium), Offset(center.x, center.y + r * 0.455f))
 
         // The hand: a long tapered pointer with a short tail, over a hub.
-        rotate(shown.mod(TURN_METRES) * 360f / TURN_METRES) {
+        rotate(shown.mod(turn) * 360f / turn) {
             drawPath(
                 Path().apply {
                     moveTo(center.x, center.y - r * 0.8f)
@@ -139,8 +151,9 @@ private fun DrawScope.centred(measurer: TextMeasurer, text: String, style: TextS
     drawText(layout, topLeft = Offset(at.x - layout.size.width / 2, at.y - layout.size.height / 2))
 }
 
-/** Metres in one turn of the hand. */
+/** What one turn of the hand is worth, in metres and in feet. */
 private const val TURN_METRES = 100f
+private const val TURN_FEET = 1000f
 
 private val BEZEL = Color(0xFF1D1D20)
 private val BEZEL_EDGE = Color(0xFF45454B)

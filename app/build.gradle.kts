@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room3)
 }
 
 // Release version comes from the git tag (vX.Y.Z) via -PappVersion; X.Y.Z → X*10000+Y*100+Z.
@@ -80,6 +82,10 @@ kotlin {
     }
 }
 
+room3 {
+    schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
@@ -97,6 +103,9 @@ dependencies {
     implementation(libs.navigation3.runtime)
     implementation(libs.navigation3.ui)
 
+    implementation(libs.room3.runtime)
+    implementation(libs.sqlite.bundled)
+    ksp(libs.room3.compiler)
     implementation(libs.datastore.preferences)
 
     implementation(libs.kotlinx.serialization.json)

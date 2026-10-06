@@ -30,9 +30,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.instruments.Heading
+import dev.glowcow.altairgnss.ui.components.LocalUnits
 import dev.glowcow.altairgnss.ui.components.NO_VALUE
 import dev.glowcow.altairgnss.ui.components.animatedTurn
+import dev.glowcow.altairgnss.ui.components.compassPoints
 import dev.glowcow.altairgnss.ui.components.decimals
+import dev.glowcow.altairgnss.ui.components.speedLabel
 import dev.glowcow.altairgnss.ui.components.tabular
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import dev.glowcow.altairgnss.ui.theme.AppFont
@@ -66,8 +69,7 @@ fun Compass(heading: Float?, modifier: Modifier = Modifier, large: Boolean = fal
     val c = AltairTheme.colors
     val measurer = rememberTextMeasurer()
     val cardinals = listOf(R.string.sky_north, R.string.sky_east, R.string.sky_south, R.string.sky_west).map { stringResource(it) }
-    val (n, e, s, w) = cardinals
-    val points = listOf(n, n + e, e, s + e, s, s + w, w, n + w)
+    val points = compassPoints()
     val card = animatedTurn(heading)
     val letter = TextStyle(color = c.text, fontSize = if (large) 20.sp else 13.sp, fontFamily = AppFont, fontWeight = FontWeight.Bold)
     val degree = TextStyle(color = c.muted, fontSize = 12.sp, fontFamily = AppFont)
@@ -126,15 +128,16 @@ fun Compass(heading: Float?, modifier: Modifier = Modifier, large: Boolean = fal
 }
 
 /**
- * An arc that fills with speed. Its full scale is the smallest of [SPEED_SCALES] the speed fits in,
- * so walking and flying both use most of the arc.
+ * An arc that fills with speed, shown in the chosen unit. Its full scale is the smallest of
+ * [SPEED_SCALES] the speed fits in, so walking and flying both use most of the arc.
  */
 @Composable
-fun Speedometer(kmh: Float?, modifier: Modifier = Modifier, large: Boolean = false) {
+fun Speedometer(mps: Float?, modifier: Modifier = Modifier, large: Boolean = false) {
+    val speed = mps?.let { (it * LocalUnits.current.speed.perMps).toFloat() }
     val c = AltairTheme.colors
     val measurer = rememberTextMeasurer()
-    val full = SPEED_SCALES.firstOrNull { (kmh ?: 0f) <= it } ?: SPEED_SCALES.last()
-    val filled by animateFloatAsState(((kmh ?: 0f) / full).coerceIn(0f, 1f), label = "speed")
+    val full = SPEED_SCALES.firstOrNull { (speed ?: 0f) <= it } ?: SPEED_SCALES.last()
+    val filled by animateFloatAsState(((speed ?: 0f) / full).coerceIn(0f, 1f), label = "speed")
     val scale = TextStyle(color = c.muted, fontSize = if (large) 14.sp else 11.sp, fontFamily = AppFont)
 
     Box(modifier.fillMaxWidth().aspectRatio(1f).padding(start = 12.dp, end = 12.dp, top = 12.dp), contentAlignment = Alignment.Center) {
@@ -150,13 +153,13 @@ fun Speedometer(kmh: Float?, modifier: Modifier = Modifier, large: Boolean = fal
             for (step in 0..steps) {
                 val a = Math.toRadians((ARC_START + ARC_SWEEP * step / steps).toDouble())
                 val at = radius - width / 2 - (if (large) 20 else 13).dp.toPx()
-                // A quarter of the 10 km/h scale is 2.5, not 2.
+                // A quarter of the scale of 10 is 2.5, not 2.
                 val figure = full.toFloat() * step / steps
                 val layout = measurer.measure(if (figure % 1f == 0f) figure.toInt().toString() else figure.decimals(1), scale)
                 drawText(layout, topLeft = Offset(center.x + at * cos(a).toFloat() - layout.size.width / 2, center.y + at * sin(a).toFloat() - layout.size.height / 2))
             }
         }
-        DialReading(kmh?.decimals(if (kmh < 100f) 1 else 0) ?: NO_VALUE, stringResource(R.string.unit_kmh_label), large)
+        DialReading(speed?.decimals(if (speed < 100f) 1 else 0) ?: NO_VALUE, speedLabel(), large)
     }
 }
 
@@ -167,7 +170,7 @@ private const val RING_LARGE = 0.56f
 // Height of a capital letter of the font, as a part of its size.
 private const val CAP_HEIGHT = 0.716f
 
-/** Full scales of the speedometer, km/h. */
+/** Full scales of the speedometer, in the unit shown. */
 private val SPEED_SCALES = listOf(10, 20, 40, 80, 160, 320, 1000)
 
 // The arc opens downwards: from the lower left, clockwise over the top, to the lower right.

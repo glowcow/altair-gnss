@@ -96,7 +96,7 @@ private fun InstrumentsContent(top: Dp, bottom: Dp, onCompass: () -> Unit, onSpe
                 )
             }
             Group(Modifier.weight(1f).then(dial).clickable(onClick = onSpeed)) {
-                Speedometer(fix?.speed?.let { it * 3.6f })
+                Speedometer(fix?.speed)
                 DialNote(
                     stringResource(
                         R.string.speed_course,

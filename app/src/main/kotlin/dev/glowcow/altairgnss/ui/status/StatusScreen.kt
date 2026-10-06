@@ -51,7 +51,10 @@ import dev.glowcow.altairgnss.ui.components.SignalLegend
 import dev.glowcow.altairgnss.ui.components.StatGrid
 import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
+import dev.glowcow.altairgnss.ui.components.accuracyText
 import dev.glowcow.altairgnss.ui.components.decimals
+import dev.glowcow.altairgnss.ui.components.lengthText
+import dev.glowcow.altairgnss.ui.components.speedText
 import dev.glowcow.altairgnss.ui.components.signalColor
 import dev.glowcow.altairgnss.ui.components.tabular
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
@@ -60,12 +63,12 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun StatusScreen(onTab: (TopTab) -> Unit) = TabScreen(TopTab.STATUS, onTab) { top, bottom ->
-    LocationGate(top) { StatusContent(top, bottom) }
+fun StatusScreen(onTab: (TopTab) -> Unit, onSky: () -> Unit, onNmea: () -> Unit, onScatter: () -> Unit) = TabScreen(TopTab.STATUS, onTab) { top, bottom ->
+    LocationGate(top) { StatusContent(top, bottom, onSky, onNmea, onScatter) }
 }
 
 @Composable
-private fun StatusContent(top: Dp, bottom: Dp) {
+private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> Unit, onScatter: () -> Unit) {
     val c = AltairTheme.colors
     val context = LocalContext.current
     val state by context.container.gnss.state.collectAsStateWithLifecycle()
@@ -83,22 +86,26 @@ private fun StatusContent(top: Dp, bottom: Dp) {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = top, bottom = bottom + 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(Modifier.padding(horizontal = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                stringResource(
-                    when {
-                        !state.enabled -> R.string.status_off
-                        state.hasFix -> R.string.status_fix
-                        else -> R.string.status_searching
-                    },
-                ),
-                color = if (state.hasFix) c.accent else c.text,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-            )
-            if (state.enabled) {
-                Text(stringResource(R.string.status_signals, state.usedCount, state.signals.size), color = c.muted, fontSize = 14.sp)
+        Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    stringResource(
+                        when {
+                            !state.enabled -> R.string.status_off
+                            state.hasFix -> R.string.status_fix
+                            else -> R.string.status_searching
+                        },
+                    ),
+                    color = if (state.hasFix) c.accent else c.text,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                if (state.enabled) {
+                    Text(stringResource(R.string.status_signals, state.usedCount, state.signals.size), color = c.muted, fontSize = 14.sp)
+                }
             }
+            // The same satellites on a plot of the sky.
+            if (state.enabled) Chip(stringResource(R.string.tab_sky), selected = false, onClick = onSky)
         }
         if (!state.enabled) {
             Group {
@@ -110,6 +117,12 @@ private fun StatusContent(top: Dp, bottom: Dp) {
         }
 
         Group { StatGrid(fixStats(state, settings.coordinates)) }
+        // Above the signals: their table can be eighty rows long.
+        Group {
+            GroupRow(stringResource(R.string.tools_scatter), subtitle = stringResource(R.string.tools_scatter_hint), onClick = onScatter)
+            GroupDivider()
+            GroupRow(stringResource(R.string.tools_nmea), subtitle = stringResource(R.string.tools_nmea_hint), onClick = onNmea)
+        }
 
         if (state.signals.isEmpty()) {
             Text(stringResource(R.string.status_no_signals), color = c.muted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
@@ -139,8 +152,8 @@ private fun fixStats(state: GnssState, format: CoordinateFormat): List<Pair<Stri
     val fix = state.fix?.takeIf { state.hasFix }
     // Without a fix the receiver reports a placeholder DOP.
     val dop = state.dop?.takeIf { state.hasFix }
-    val metres = @Composable { v: Double? -> v?.let { stringResource(R.string.unit_metres, it.decimals(1)) } ?: NO_VALUE }
-    val accuracy = @Composable { v: Float? -> v?.let { stringResource(R.string.unit_accuracy_metres, it.decimals(1)) } ?: NO_VALUE }
+    val metres = @Composable { v: Double? -> v?.let { lengthText(it) } ?: NO_VALUE }
+    val accuracy = @Composable { v: Float? -> v?.let { accuracyText(it) } ?: NO_VALUE }
     return listOf(
         stringResource(R.string.label_latitude) to (fix?.let { Coordinates.latitude(it.latitude, format) } ?: NO_VALUE),
         stringResource(R.string.label_longitude) to (fix?.let { Coordinates.longitude(it.longitude, format) } ?: NO_VALUE),
@@ -148,7 +161,7 @@ private fun fixStats(state: GnssState, format: CoordinateFormat): List<Pair<Stri
         stringResource(R.string.label_altitude_ellipsoid) to metres(fix?.altitude),
         stringResource(R.string.label_accuracy_h) to accuracy(fix?.horizontalAccuracy),
         stringResource(R.string.label_accuracy_v) to accuracy(fix?.verticalAccuracy),
-        stringResource(R.string.label_speed) to (fix?.speed?.let { stringResource(R.string.unit_kmh, (it * 3.6f).decimals(1)) } ?: NO_VALUE),
+        stringResource(R.string.label_speed) to (fix?.speed?.let { speedText(it) } ?: NO_VALUE),
         stringResource(R.string.label_bearing) to (fix?.bearing?.let { stringResource(R.string.unit_degrees, it.decimals(0)) } ?: NO_VALUE),
         stringResource(R.string.label_pdop) to (dop?.pdop?.decimals(1) ?: NO_VALUE),
         stringResource(R.string.label_hvdop) to (dop?.let { "${it.hdop.decimals(1)} / ${it.vdop.decimals(1)}" } ?: NO_VALUE),

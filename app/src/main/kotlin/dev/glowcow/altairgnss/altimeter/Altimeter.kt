@@ -111,7 +111,7 @@ class Altimeter(
         }
         if (newFix) lastFixTime = fix.timeMs
 
-        val barometerAltitude = prefs.calibration?.let { c -> hpa?.let { Barometry.altitude(it, c.referenceHpa) } }
+        val barometerAltitude = prefs.calibration?.let { c -> hpa?.let { Barometry.altitude(it, c) } }
         val blendedAltitude = blended?.let { r -> hpa?.let { Barometry.altitude(it, r) } }
         return AltimeterState(
             hasBarometer = hasBarometer,
@@ -174,10 +174,11 @@ class Altimeter(
         return true
     }
 
-    /** Takes the sea-level pressure an airport reports as the reference. */
+    /** Takes the sea-level pressure an airport reports as the reference, and its air temperature with it. */
     fun calibrateToAirport(airport: NearbyAirport) {
         failed.value = false
-        save(Calibration(airport.report.qnhHpa, System.currentTimeMillis(), airport.accuracy, CalibrationKind.AIRPORT))
+        val report = airport.report
+        save(Calibration(report.qnhHpa, System.currentTimeMillis(), airport.accuracy, CalibrationKind.AIRPORT, report.temperatureC, report.elevation))
     }
 
     companion object {

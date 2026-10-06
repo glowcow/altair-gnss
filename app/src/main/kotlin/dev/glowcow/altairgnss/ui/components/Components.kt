@@ -30,10 +30,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
@@ -56,12 +61,12 @@ import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 enum class TopTab(val icon: ImageVector, val label: Int) {
     STATUS(AltairIcons.Status, R.string.tab_status),
-    SKY(AltairIcons.Sky, R.string.tab_sky),
+    RECORD(AltairIcons.Record, R.string.tab_record),
     ALTIMETER(AltairIcons.Altimeter, R.string.tab_altimeter),
     INSTRUMENTS(AltairIcons.Instruments, R.string.tab_instruments),
     SETTINGS(AltairIcons.Settings, R.string.tab_settings),
@@ -140,10 +145,11 @@ fun TabScreen(tab: TopTab, onTab: (TopTab) -> Unit, content: @Composable (top: D
 
 /**
  * Frosted glass: the part of [page] lying under this element, blurred and tinted with [ground].
- * [origin] is where the element sits in the page.
+ * [origin] is where the element sits in the page. With [fade] the glass comes in gradually over
+ * that much of its top instead of starting at an edge — of its bottom when [fadeDown].
  */
 @Composable
-private fun Modifier.frosted(page: GraphicsLayer, ground: Color, origin: () -> Offset): Modifier {
+fun Modifier.frosted(page: GraphicsLayer, ground: Color, fade: Dp = 0.dp, fadeDown: Boolean = false, origin: () -> Offset): Modifier {
     val frost = rememberGraphicsLayer()
     return drawBehind {
         val radius = FROST_BLUR.toPx()
@@ -154,15 +160,34 @@ private fun Modifier.frosted(page: GraphicsLayer, ground: Color, origin: () -> O
             drawRect(ground)
             translate(-at.x, -at.y) { drawLayer(page) }
         }
-        // The blur spills past the bounds of its layer.
-        clipRect { drawLayer(frost) }
-        drawRect(ground.copy(alpha = FROST_TINT))
+        val glass = {
+            // The blur spills past the bounds of its layer.
+            clipRect { drawLayer(frost) }
+            drawRect(ground.copy(alpha = FROST_TINT))
+        }
+        if (fade <= 0.dp) {
+            glass()
+        } else {
+            drawIntoCanvas { canvas ->
+                canvas.saveLayer(Rect(Offset.Zero, size), Paint())
+                glass()
+                val edge = (fade.toPx() / size.height).coerceIn(0f, 1f)
+                val mask = if (fadeDown) {
+                    Brush.verticalGradient(0f to Color.Black, 1f - edge to Color.Black, 1f to Color.Transparent)
+                } else {
+                    Brush.verticalGradient(0f to Color.Transparent, edge to Color.Black, 1f to Color.Black)
+                }
+                drawRect(mask, blendMode = BlendMode.DstIn)
+                canvas.restore()
+            }
+        }
     }
 }
 
 private val FROST_BLUR = 20.dp
 
-private const val FROST_TINT = 0.6f
+// One strength of glass for every bar and panel of the app.
+private const val FROST_TINT = 0.5f
 
 @Composable
 fun BottomBar(current: TopTab, onSelect: (TopTab) -> Unit) {

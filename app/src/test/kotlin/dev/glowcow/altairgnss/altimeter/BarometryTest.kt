@@ -93,4 +93,27 @@ class BarometryTest {
         assertEquals(1000.0, smoother.update(1000.0, 0), 1e-9)
         assertEquals(1000.632, smoother.update(1001.0, 1_000_000_000), 1e-3)
     }
+
+    @Test
+    fun `standard air needs no temperature correction`() {
+        // At 200 m the standard atmosphere is 13.7 °C.
+        assertEquals(1200.0, Barometry.temperatureCorrected(1200.0, 200.0, 13.7), 0.01)
+    }
+
+    @Test
+    fun `cold air puts the real altitude below the reckoned one`() {
+        // -20 °C at an airport 200 m up: a kilometre above it shrinks by about 12 %.
+        assertEquals(1082.5, Barometry.temperatureCorrected(1200.0, 200.0, -20.0), 0.5)
+        // At the airport's own level nothing changes, and below it the sign turns.
+        assertEquals(200.0, Barometry.temperatureCorrected(200.0, 200.0, -20.0), 1e-9)
+        assertEquals(111.7, Barometry.temperatureCorrected(100.0, 200.0, -20.0), 0.5)
+    }
+
+    @Test
+    fun `a calibration without a temperature is the plain formula`() {
+        val plain = Calibration(1013.25, 0, null, CalibrationKind.ALTITUDE)
+        assertEquals(Barometry.altitude(900.0, 1013.25), Barometry.altitude(900.0, plain), 1e-9)
+        val warm = plain.copy(kind = CalibrationKind.AIRPORT, temperatureC = 35.0, baseAltitude = 0.0)
+        assertEquals(Barometry.altitude(900.0, 1013.25) * 308.15 / 288.15, Barometry.altitude(900.0, warm), 1e-6)
+    }
 }

@@ -1,0 +1,82 @@
+package dev.glowcow.altairgnss.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import dev.glowcow.altairgnss.R
+import dev.glowcow.altairgnss.ui.theme.AltairIcons
+import dev.glowcow.altairgnss.ui.theme.AltairTheme
+
+/**
+ * A page opened from a tab: a column of blocks that scrolls under a frosted header with a back
+ * button and a title, as a tab's page scrolls under its own.
+ */
+@Composable
+fun DetailScreen(title: String, onBack: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    val c = AltairTheme.colors
+    val page = rememberGraphicsLayer()
+    var header by remember { mutableIntStateOf(0) }
+    Box(Modifier.fillMaxSize().background(c.groupBg)) {
+        Box(
+            Modifier.fillMaxSize().drawWithContent {
+                page.record { this@drawWithContent.drawContent() }
+                drawLayer(page)
+            },
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = with(LocalDensity.current) { header.toDp() })
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                content = content,
+            )
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .onSizeChanged { header = it.height }
+                .frosted(page, c.groupBg) { Offset.Zero }
+                // What shows through the glass is not tappable through it.
+                .pointerInput(Unit) {}
+                .statusBarsPadding()
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
+            Text(title, color = c.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}

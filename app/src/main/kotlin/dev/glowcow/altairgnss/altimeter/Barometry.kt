@@ -18,6 +18,9 @@ data class Calibration(
     /** Error of the altitude it was made from, metres. */
     val accuracy: Float?,
     val kind: CalibrationKind,
+    /** Air temperature, °C, taken at [baseAltitude] metres: an airport's report carries both. */
+    val temperatureC: Double? = null,
+    val baseAltitude: Double? = null,
 )
 
 /** The international barometric formula of the standard atmosphere. */
@@ -26,10 +29,31 @@ object Barometry {
     const val MMHG_PER_HPA = 0.750062
     private const val SCALE = 44330.77
     private const val EXPONENT = 0.190263
+    private const val KELVIN = 273.15
+    // Sea-level temperature of the standard atmosphere and how fast it falls with height, K per metre.
+    private const val STANDARD_KELVIN = 288.15
+    private const val LAPSE = 0.0065
 
     /** Altitude in metres at [pressureHpa] when sea level reads [referenceHpa]. */
     fun altitude(pressureHpa: Double, referenceHpa: Double): Double =
         SCALE * (1 - (pressureHpa / referenceHpa).pow(EXPONENT))
+
+    /**
+     * Takes the standard atmosphere's temperature out of [altitude]. The formula assumes 15 °C at
+     * sea level; in colder air a layer is thinner than it reckons, in warmer air thicker. So the
+     * height above [base], where [celsius] was measured, is scaled by the real temperature over
+     * the standard one for that level.
+     */
+    fun temperatureCorrected(altitude: Double, base: Double, celsius: Double): Double =
+        base + (altitude - base) * (celsius + KELVIN) / (STANDARD_KELVIN - LAPSE * base)
+
+    /** Altitude by [calibration], corrected for the air temperature where it carries one. */
+    fun altitude(pressureHpa: Double, calibration: Calibration): Double {
+        val standard = altitude(pressureHpa, calibration.referenceHpa)
+        val celsius = calibration.temperatureC ?: return standard
+        val base = calibration.baseAltitude ?: return standard
+        return temperatureCorrected(standard, base, celsius)
+    }
 
     /** Sea-level pressure that puts [pressureHpa] at [altitude] metres. */
     fun reference(pressureHpa: Double, altitude: Double): Double =

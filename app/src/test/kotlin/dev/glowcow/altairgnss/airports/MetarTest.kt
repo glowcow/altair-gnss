@@ -7,7 +7,7 @@ import org.junit.Test
 class MetarTest {
     private val json = """
         [
-          {"icaoId":"UUDD","obsTime":1791212400,"altim":1013,"lat":55.409,"lon":37.906,"elev":165,"name":"Moscow/Domodedovo Arpt, MO, RU","clouds":[{"cover":"BKN","base":3500}]},
+          {"icaoId":"UUDD","obsTime":1791212400,"altim":1013,"temp":-7,"lat":55.409,"lon":37.906,"elev":165,"name":"Moscow/Domodedovo Arpt, MO, RU","clouds":[{"cover":"BKN","base":3500}]},
           {"icaoId":"UUEE","obsTime":1791212400,"altim":1012.4,"lat":55.973,"lon":37.415,"elev":186,"name":"Moscow/Sheremetyevo Intl, MO, RU"},
           {"icaoId":"XXXX","obsTime":1791212400,"lat":55.0,"lon":37.0,"name":"No pressure"},
           {"icaoId":"YYYY","obsTime":1791212400,"altim":29.92,"lat":55.0,"lon":37.0,"name":"Inches by mistake"},
@@ -23,6 +23,10 @@ class MetarTest {
         assertEquals(1012.4, reports[1].qnhHpa, 1e-9)
         assertEquals(1_791_212_400_000L, reports[0].timeMs)
         assertEquals("Moscow/Domodedovo Arpt, MO, RU", reports[0].name)
+        assertEquals(-7.0, reports[0].temperatureC!!, 1e-9)
+        assertEquals(165.0, reports[0].elevation!!, 1e-9)
+        assertEquals(null, reports[1].temperatureC)
+        assertEquals(null, reports[2].elevation)
     }
 
     @Test

@@ -2,15 +2,25 @@ package dev.glowcow.altairgnss.ui.settings
 
 import android.Manifest
 import android.app.LocaleManager
+import android.net.Uri
 import android.os.LocaleList
+import android.text.format.Formatter
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,9 +29,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -31,21 +48,29 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.glowcow.altairgnss.AltairApp
 import dev.glowcow.altairgnss.R
+import dev.glowcow.altairgnss.backup.Backup
+import dev.glowcow.altairgnss.backup.RestoreOutcome
 import dev.glowcow.altairgnss.data.AppSettings
+import dev.glowcow.altairgnss.data.LengthUnit
 import dev.glowcow.altairgnss.data.Palette
 import dev.glowcow.altairgnss.data.SettingsStore
+import dev.glowcow.altairgnss.data.SpeedUnit
 import dev.glowcow.altairgnss.data.ThemeMode
 import dev.glowcow.altairgnss.gnss.CoordinateFormat
 import dev.glowcow.altairgnss.gnss.GnssMonitor
+import dev.glowcow.altairgnss.maps.TileStore
 import dev.glowcow.altairgnss.ui.components.ChoiceSheet
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
 import dev.glowcow.altairgnss.ui.components.GroupSheet
+import dev.glowcow.altairgnss.ui.components.LocalUnits
 import dev.glowcow.altairgnss.ui.components.SwitchRow
 import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
+import dev.glowcow.altairgnss.ui.components.speedText
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
+import dev.glowcow.altairgnss.ui.theme.AppFont
 import dev.glowcow.altairgnss.update.AppRelease
 import dev.glowcow.altairgnss.update.AppUpdateState
 import dev.glowcow.altairgnss.update.AppUpdater
@@ -53,12 +78,63 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
-class SettingsViewModel(private val store: SettingsStore, val updater: AppUpdater, val gnss: GnssMonitor) : ViewModel() {
+class SettingsViewModel(
+    private val store: SettingsStore,
+    val updater: AppUpdater,
+    val gnss: GnssMonitor,
+    private val backup: Backup,
+    private val tiles: TileStore,
+) : ViewModel() {
+    /** Bytes of downloaded map on the phone; null until counted. */
+    var mapCache by mutableStateOf<Long?>(null)
+        private set
+
+    init {
+        viewModelScope.launch { mapCache = tiles.size() }
+    }
+
+    fun setMapTiles(on: Boolean) = viewModelScope.launch { store.setMapTiles(on) }
+    fun setMovingKmh(kmh: Int) = viewModelScope.launch { store.setMovingKmh(kmh) }
+    fun setSteadyFix(seconds: Int) = viewModelScope.launch { store.setSteadyFixSeconds(seconds) }
+
+    fun clearMapCache() = viewModelScope.launch {
+        tiles.clear()
+        mapCache = tiles.size()
+    }
+
+    /** A backup is being written or read. */
+    var busy by mutableStateOf(false)
+        private set
+
+    fun saveBackup(uri: Uri, password: String, onDone: (Boolean) -> Unit) = work { onDone(backup.save(uri, password)) }
+
+    /** Tells whether the file at [uri] wants a password; null when it cannot be read. */
+    fun inspectBackup(uri: Uri, onDone: (Boolean?) -> Unit) = work { onDone(backup.isEncrypted(uri)) }
+
+    fun restoreBackup(uri: Uri, password: String, overwrite: Boolean, onDone: (RestoreOutcome) -> Unit) = work {
+        onDone(backup.restore(uri, password, overwrite))
+    }
+
+    private fun work(block: suspend () -> Unit) {
+        if (busy) return
+        busy = true
+        viewModelScope.launch {
+            try {
+                block()
+            } finally {
+                busy = false
+            }
+        }
+    }
+
     val settings: StateFlow<AppSettings> = store.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
     fun setTheme(mode: ThemeMode) = viewModelScope.launch { store.setTheme(mode) }
     fun setPalette(palette: Palette) = viewModelScope.launch { store.setPalette(palette) }
     fun setCoordinates(format: CoordinateFormat) = viewModelScope.launch { store.setCoordinates(format) }
+    fun setLength(unit: LengthUnit) = viewModelScope.launch { store.setLength(unit) }
+    fun setSpeed(unit: SpeedUnit) = viewModelScope.launch { store.setSpeed(unit) }
     fun setKeepScreenOn(on: Boolean) = viewModelScope.launch { store.setKeepScreenOn(on) }
     fun setStartTab(tab: TopTab) = viewModelScope.launch { store.setStartTab(tab.name) }
     fun setTrueNorth(on: Boolean) = viewModelScope.launch { store.setTrueNorth(on) }
@@ -68,7 +144,7 @@ class SettingsViewModel(private val store: SettingsStore, val updater: AppUpdate
 @Composable
 fun SettingsScreen(
     onTab: (TopTab) -> Unit,
-    vm: SettingsViewModel = viewModel { (this[APPLICATION_KEY] as AltairApp).container.let { SettingsViewModel(it.settings, it.appUpdater, it.gnss) } },
+    vm: SettingsViewModel = viewModel { (this[APPLICATION_KEY] as AltairApp).container.let { SettingsViewModel(it.settings, it.appUpdater, it.gnss, it.backup, it.tiles) } },
 ) {
     val c = AltairTheme.colors
     val settings by vm.settings.collectAsStateWithLifecycle()
@@ -92,6 +168,40 @@ fun SettingsScreen(
         locales.applicationLocales = tag?.let { LocaleList.forLanguageTags(it) } ?: LocaleList.getEmptyLocaleList()
     }
     val startTab = TopTab.entries.firstOrNull { it.name == settings.startTab } ?: TopTab.STATUS
+    // Where a backup goes and where it comes from is the user's pick in the system file picker.
+    var sheet by rememberSaveable { mutableStateOf<BackupSheet?>(null) }
+    var password by remember { mutableStateOf("") }
+    var source by remember { mutableStateOf<Uri?>(null) }
+    var locked by remember { mutableStateOf(false) }
+    var overwrite by remember { mutableStateOf(false) }
+    val resources = LocalResources.current
+    fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+    fun restored(outcome: RestoreOutcome) {
+        toast(
+            when (outcome) {
+                is RestoreOutcome.Restored -> resources.getString(R.string.backup_restored, outcome.recordings)
+                RestoreOutcome.WrongPassword -> resources.getString(R.string.backup_wrong_password)
+                RestoreOutcome.Invalid -> resources.getString(R.string.backup_invalid)
+            },
+        )
+        // A mistyped password is asked for again, for the same file.
+        if (outcome == RestoreOutcome.WrongPassword) sheet = BackupSheet.RESTORE
+    }
+    val saveTo = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        if (uri != null) vm.saveBackup(uri, password) { toast(resources.getString(if (it) R.string.backup_saved else R.string.backup_save_failed)) }
+        password = ""
+    }
+    val restoreFrom = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            vm.inspectBackup(uri) { encrypted ->
+                if (encrypted == null) return@inspectBackup restored(RestoreOutcome.Invalid)
+                source = uri
+                locked = encrypted
+                overwrite = false
+                sheet = BackupSheet.RESTORE
+            }
+        }
+    }
 
     TabScreen(TopTab.SETTINGS, onTab) { top, bottom ->
         Column(
@@ -129,6 +239,18 @@ fun SettingsScreen(
                     onClick = { picker = Picker.COORDINATES },
                 )
                 GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_length),
+                    value = stringResource(LENGTHS.first { it.first == settings.length }.second),
+                    onClick = { picker = Picker.LENGTH },
+                )
+                GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_speed),
+                    value = stringResource(SPEEDS.first { it.first == settings.speed }.second),
+                    onClick = { picker = Picker.SPEED },
+                )
+                GroupDivider()
                 SwitchRow(stringResource(R.string.settings_true_north), stringResource(R.string.settings_true_north_hint), settings.trueNorth, vm::setTrueNorth)
             }
             Group {
@@ -152,6 +274,44 @@ fun SettingsScreen(
                     color = c.muted,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(horizontal = 4.dp),
+                )
+            }
+            Group {
+                GroupRow(
+                    stringResource(R.string.settings_moving),
+                    subtitle = stringResource(R.string.settings_moving_hint),
+                    value = movingText(settings.movingKmh),
+                    onClick = { picker = Picker.MOVING },
+                )
+                GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_steady_fix),
+                    subtitle = stringResource(R.string.settings_steady_fix_hint),
+                    value = steadyText(settings.steadyFixSeconds),
+                    onClick = { picker = Picker.STEADY_FIX },
+                )
+            }
+            Group {
+                SwitchRow(stringResource(R.string.settings_map), stringResource(R.string.settings_map_hint), settings.mapTiles, vm::setMapTiles)
+                GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_map_clear),
+                    value = vm.mapCache?.let { Formatter.formatShortFileSize(context, it) },
+                    onClick = vm::clearMapCache,
+                    trailing = {},
+                )
+            }
+            Group {
+                GroupRow(
+                    stringResource(R.string.settings_backup_save),
+                    subtitle = stringResource(R.string.settings_backup_save_hint),
+                    onClick = if (vm.busy) null else ({ sheet = BackupSheet.SAVE }),
+                )
+                GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_backup_restore),
+                    subtitle = stringResource(R.string.settings_backup_restore_hint),
+                    onClick = if (vm.busy) null else ({ restoreFrom.launch(arrayOf("*/*")) }),
                 )
             }
             Group {
@@ -181,6 +341,8 @@ fun SettingsScreen(
                 GroupRow(stringResource(R.string.settings_licence), value = "GPL-3.0-or-later")
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_map_images), value = "NASA Blue Marble")
+                GroupDivider()
+                GroupRow(stringResource(R.string.settings_map_data), value = "OpenStreetMap · ODbL")
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_font), value = "Arimo · SIL OFL 1.1")
             }
@@ -223,6 +385,34 @@ fun SettingsScreen(
             onSelect = ::setLanguage,
             onDismiss = { picker = null },
         )
+        Picker.LENGTH -> ChoiceSheet(
+            title = stringResource(R.string.settings_length),
+            options = LENGTHS.map { (unit, label) -> unit to stringResource(label) },
+            selected = settings.length,
+            onSelect = vm::setLength,
+            onDismiss = { picker = null },
+        )
+        Picker.SPEED -> ChoiceSheet(
+            title = stringResource(R.string.settings_speed),
+            options = SPEEDS.map { (unit, label) -> unit to stringResource(label) },
+            selected = settings.speed,
+            onSelect = vm::setSpeed,
+            onDismiss = { picker = null },
+        )
+        Picker.MOVING -> ChoiceSheet(
+            title = stringResource(R.string.settings_moving),
+            options = MOVING_KMH.map { it to movingText(it) },
+            selected = settings.movingKmh,
+            onSelect = vm::setMovingKmh,
+            onDismiss = { picker = null },
+        )
+        Picker.STEADY_FIX -> ChoiceSheet(
+            title = stringResource(R.string.settings_steady_fix),
+            options = STEADY_SECONDS.map { it to steadyText(it) },
+            selected = settings.steadyFixSeconds,
+            onSelect = vm::setSteadyFix,
+            onDismiss = { picker = null },
+        )
         Picker.COORDINATES -> ChoiceSheet(
             title = stringResource(R.string.settings_coordinates),
             options = COORDINATES.map { (format, label) -> format to stringResource(label) },
@@ -244,9 +434,62 @@ fun SettingsScreen(
         }
         null -> Unit
     }
+
+    when (sheet) {
+        BackupSheet.SAVE -> GroupSheet(stringResource(R.string.settings_backup_save), onDismiss = { sheet = null }) { pick ->
+            Text(stringResource(R.string.backup_password_note), color = c.muted, fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 14.dp))
+            PasswordField(password) { password = it }
+            Group(Modifier.padding(top = 12.dp)) {
+                GroupRow(stringResource(R.string.backup_save_pick), onClick = { pick { saveTo.launch(backupName()) } })
+            }
+        }
+        BackupSheet.RESTORE -> GroupSheet(stringResource(R.string.settings_backup_restore), onDismiss = { sheet = null }) { pick ->
+            var typed by remember { mutableStateOf("") }
+            if (locked) {
+                Text(stringResource(R.string.backup_encrypted), color = c.muted, fontSize = 14.sp, modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 14.dp))
+                PasswordField(typed) { typed = it }
+            }
+            Group(Modifier.padding(top = if (locked) 12.dp else 0.dp)) {
+                SwitchRow(stringResource(R.string.backup_overwrite), stringResource(R.string.backup_overwrite_hint), overwrite) { overwrite = it }
+            }
+            Group(Modifier.padding(top = 12.dp)) {
+                GroupRow(
+                    stringResource(R.string.backup_restore),
+                    onClick = { pick { source?.let { vm.restoreBackup(it, typed, overwrite, ::restored) } } },
+                )
+            }
+        }
+        null -> Unit
+    }
 }
 
-private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, START_TAB, CLEAR_ASSIST }
+private enum class BackupSheet { SAVE, RESTORE }
+
+/** `altair-gnss-2026-10-06.altair` */
+private fun backupName() = "altair-gnss-${LocalDate.now()}.altair"
+
+@Composable
+private fun PasswordField(value: String, onChange: (String) -> Unit) {
+    val c = AltairTheme.colors
+    Box(
+        Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(20.dp)).background(c.group).padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        if (value.isEmpty()) Text(stringResource(R.string.backup_password), color = c.muted)
+        BasicTextField(
+            value = value,
+            onValueChange = onChange,
+            singleLine = true,
+            textStyle = TextStyle(color = c.text, fontFamily = AppFont, fontSize = 15.sp),
+            cursorBrush = SolidColor(c.accent),
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, LENGTH, SPEED, MOVING, STEADY_FIX, START_TAB, CLEAR_ASSIST }
 
 private val THEMES = listOf(
     ThemeMode.SYSTEM to R.string.theme_system,
@@ -265,8 +508,39 @@ private val COORDINATES = listOf(
     CoordinateFormat.DMS to R.string.coordinates_dms,
 )
 
+/** A speed of so many km/h in the unit chosen: whole in km/h, to a tenth in the others. */
+@Composable
+private fun movingText(kmh: Int): String = speedText(kmh / 3.6f, if (LocalUnits.current.speed == SpeedUnit.KMH) 0 else 1)
+
+@Composable
+private fun steadyText(seconds: Int): String =
+    if (seconds == 0) stringResource(R.string.steady_fix_off) else stringResource(R.string.unit_seconds, seconds.toString())
+
+private val MOVING_KMH = listOf(1, 2, 3, 5, 8)
+
+private val STEADY_SECONDS = listOf(0, 5, 10, 15, 30, 60)
+
+private val LENGTHS = listOf(
+    LengthUnit.METRES to R.string.length_metres,
+    LengthUnit.FEET to R.string.length_feet,
+)
+
+private val SPEEDS = listOf(
+    SpeedUnit.KMH to R.string.speed_kmh,
+    SpeedUnit.MPH to R.string.speed_mph,
+    SpeedUnit.KNOTS to R.string.speed_knots,
+)
+
 /** Language tags with names written in that language. */
 private val LANGUAGES = listOf(
     "en" to "English",
+    "be" to "Беларуская",
+    "de" to "Deutsch",
+    "es" to "Español",
+    "fr" to "Français",
+    "it" to "Italiano",
+    "pl" to "Polski",
     "ru" to "Русский",
+    "sr" to "Српски",
+    "he" to "עברית",
 )

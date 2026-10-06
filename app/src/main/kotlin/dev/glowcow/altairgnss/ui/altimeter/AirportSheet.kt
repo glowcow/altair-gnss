@@ -19,6 +19,8 @@ import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
 import dev.glowcow.altairgnss.ui.components.GroupSheet
 import dev.glowcow.altairgnss.ui.components.decimals
+import dev.glowcow.altairgnss.ui.components.distanceText
+import dev.glowcow.altairgnss.ui.components.signed
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 
 private sealed interface Airports {
@@ -52,10 +54,10 @@ fun AirportSheet(onPick: (NearbyAirport) -> Unit, onDismiss: () -> Unit) =
                         "${airport.report.name.substringBefore(',')} · ${airport.report.icao}",
                         subtitle = stringResource(
                             R.string.airport_row,
-                            airport.distanceKm.decimals(0),
+                            distanceText(airport.distanceKm * 1000, 0),
                             airport.report.qnhHpa.decimals(0),
                             DateUtils.getRelativeTimeSpanString(airport.report.timeMs, now, DateUtils.MINUTE_IN_MILLIS).toString(),
-                        ),
+                        ) + airport.report.temperatureC?.let { " · " + stringResource(R.string.unit_celsius, signed(it, 0)) }.orEmpty(),
                         onClick = { pick { onPick(airport) } },
                     )
                 }

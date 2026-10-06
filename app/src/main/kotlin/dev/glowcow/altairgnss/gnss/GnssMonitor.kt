@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.stateIn
  */
 class GnssMonitor(private val context: Context, scope: CoroutineScope) {
     private val manager = context.getSystemService(LocationManager::class.java)
+    /** The receiver's NMEA sentences, as they come while it runs. */
+    val nmea = NmeaLog(java.io.File(context.cacheDir, "nmea"))
     private val tripCounter = Trip()
     private val tripState = MutableStateFlow(TripStats())
 
@@ -80,13 +82,16 @@ class GnssMonitor(private val context: Context, scope: CoroutineScope) {
             override fun onProviderEnabled(provider: String) = update { it.copy(enabled = true) }
             override fun onProviderDisabled(provider: String) = update { GnssState(enabled = false) }
         }
-        val nmea = OnNmeaMessageListener { message, _ -> Nmea.dop(message)?.let { dop -> update { it.copy(dop = dop) } } }
+        val sentences = OnNmeaMessageListener { message, _ ->
+            nmea.add(message)
+            Nmea.dop(message)?.let { dop -> update { it.copy(dop = dop) } }
+        }
 
         // Every callback arrives on the main thread, so the state needs no lock.
         val executor = context.mainExecutor
         try {
             manager.registerGnssStatusCallback(executor, status)
-            manager.addNmeaListener(executor, nmea)
+            manager.addNmeaListener(executor, sentences)
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, INTERVAL_MS, 0f, executor, location)
         } catch (_: SecurityException) {
             close()
@@ -94,7 +99,7 @@ class GnssMonitor(private val context: Context, scope: CoroutineScope) {
         trySend(current)
         awaitClose {
             manager.unregisterGnssStatusCallback(status)
-            manager.removeNmeaListener(nmea)
+            manager.removeNmeaListener(sentences)
             manager.removeUpdates(location)
         }
     }.conflate().stateIn(scope, SharingStarted.WhileSubscribed(STOP_DELAY_MS), GnssState())
