@@ -231,6 +231,7 @@
     <string name="recording_network">Position par les réseaux</string>
     <string name="recording_network_hint">Le Wi-Fi et les antennes aident à placer les points là où les satellites sont brouillés ; le service de localisation du téléphone apprend où vous êtes</string>
     <string name="recording_waiting">En attente d’une position stable : %1$d s</string>
+    <string name="recording_waiting_coarse">La position n’est pour l’instant précise qu’à %1$s ; il faut %2$s ou mieux</string>
     <string name="settings_moving">En mouvement à partir de</string>
     <string name="settings_moving_hint">Plus lent, c’est un arrêt : il ne compte ni dans la vitesse moyenne ni dans le temps en mouvement</string>
     <string name="settings_steady_fix">Position stable avant l’enregistrement</string>

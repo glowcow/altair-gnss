@@ -246,6 +246,7 @@
     <string name="recording_network">Помощь сетей</string>
     <string name="recording_network_hint">Wi-Fi и сотовые вышки помогают ставить точки там, где спутники глушат; служба геолокации телефона при этом узнаёт, где вы</string>
     <string name="recording_waiting">Ждём устойчивую фиксацию: %1$d с</string>
+    <string name="recording_waiting_coarse">Пока положение известно с точностью %1$s; нужно %2$s или лучше</string>
     <string name="settings_moving">Движение от</string>
     <string name="settings_moving_hint">Медленнее — остановка: не идёт в среднюю скорость и время в движении</string>
     <string name="settings_steady_fix">Устойчивая фиксация перед записью</string>

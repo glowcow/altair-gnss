@@ -38,6 +38,8 @@ data class LiveProfile(
     val movingMs: Long?,
     /** Seconds the fix still has to hold before the recording begins; null once it runs. */
     val waitingSeconds: Int? = null,
+    /** While it waits: metres the only position at hand may be off by, when that is too coarse to start on. */
+    val coarse: Float? = null,
 )
 
 /**
@@ -144,8 +146,8 @@ class Recorder(
             // A place of the blend makes one point: it comes less often than a point is written, and
             // written again it would be a stop followed by a leap. [take] marks it used.
             var taken = 0L
-            fun blend(): Fix? = blended?.takeIf {
-                SystemClock.elapsedRealtime() - it.elapsedRealtimeMs < BLEND_FRESH_MS && (it.horizontalAccuracy ?: Float.MAX_VALUE) <= BLEND_ACCURACY
+            fun blend(fresh: Long = BLEND_FRESH_MS): Fix? = blended?.takeIf {
+                SystemClock.elapsedRealtime() - it.elapsedRealtimeMs < fresh && (it.horizontalAccuracy ?: Float.MAX_VALUE) <= BLEND_ACCURACY
             }
             fun place(take: Boolean = false): Fix? {
                 if (!placing) return null
@@ -168,11 +170,13 @@ class Recorder(
                 var heldSince: Long? = null
                 while (placing && steadyMs > 0) {
                     val now = SystemClock.elapsedRealtime()
-                    val fixed = place() != null
+                    // The blend reports seldom indoors: a pause between two of its places is not a lost fix.
+                    val fixed = place() != null || blend(BLEND_HELD_MS) != null
                     heldSince = if (fixed) heldSince ?: now else null
                     val held = heldSince?.let { now - it } ?: 0L
                     if (held >= steadyMs) break
-                    liveState.value = LiveProfile(0, 0.0, 0.0, null, null, 0.0, null, null, null, null, ((steadyMs - held + 999) / 1000).toInt())
+                    val coarse = blended?.takeIf { !fixed && now - it.elapsedRealtimeMs < BLEND_HELD_MS }?.horizontalAccuracy
+                    liveState.value = LiveProfile(0, 0.0, 0.0, null, null, 0.0, null, null, null, null, ((steadyMs - held + 999) / 1000).toInt(), coarse)
                     delay(INTERVAL_MS)
                 }
                 if (steadyMs > 0 && heldSince != null) {
@@ -249,7 +253,7 @@ class Recorder(
         }
     }
 
-    private companion object {
+    companion object {
         const val INTERVAL_MS = 1_000L
         // A fix older than this describes where the phone was, not where it is.
         const val FRESH_MS = 3_000L
@@ -258,5 +262,7 @@ class Recorder(
         // The blend reports less often than the receiver, and counts only when it claims to be this close, metres.
         const val BLEND_FRESH_MS = 10_000L
         const val BLEND_ACCURACY = 30f
+        // While waiting to start, a place of the blend counts as held this long.
+        const val BLEND_HELD_MS = 30_000L
     }
 }

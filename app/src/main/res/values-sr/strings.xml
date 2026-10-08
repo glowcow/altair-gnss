@@ -231,6 +231,7 @@
     <string name="recording_network">Положај из мрежа</string>
     <string name="recording_network_hint">Wi-Fi и базне станице помажу да се тачке поставе тамо где су сателити ометани; услуга локације телефона сазнаје где сте</string>
     <string name="recording_waiting">Чека се стабилан положај: %1$d с</string>
+    <string name="recording_waiting_coarse">За сада је положај тачан само до %1$s; потребно је %2$s или боље</string>
     <string name="settings_moving">Кретање од</string>
     <string name="settings_moving_hint">Спорије је застој: не рачуна се у просечну брзину ни у време кретања</string>
     <string name="settings_steady_fix">Стабилан положај пре снимања</string>

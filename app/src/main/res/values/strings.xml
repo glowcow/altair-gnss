@@ -262,6 +262,7 @@
     <string name="recording_network">Network positioning</string>
     <string name="recording_network_hint">Wi-Fi and cell towers help place the points where satellites are jammed; the phone’s location service learns where you are</string>
     <string name="recording_waiting">Waiting for a steady fix: %1$d s</string>
+    <string name="recording_waiting_coarse">The position is only good to %1$s so far; %2$s or better is needed</string>
     <string name="settings_moving">Moving from</string>
     <string name="settings_moving_hint">Slower than this is a stop: it does not count into the average speed or the moving time</string>
     <string name="settings_steady_fix">Steady fix before recording</string>

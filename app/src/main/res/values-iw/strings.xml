@@ -231,6 +231,7 @@
     <string name="recording_network">מיקום מרשתות</string>
     <string name="recording_network_hint">Wi-Fi ואנטנות סלולריות עוזרות למקם את הנקודות היכן שהלוויינים משובשים; שירות המיקום של הטלפון ידע היכן אתם</string>
     <string name="recording_waiting">ממתין למיקום יציב: %1$d שנ׳</string>
+    <string name="recording_waiting_coarse">בינתיים המיקום מדויק רק עד %1$s; נדרש %2$s או טוב יותר</string>
     <string name="settings_moving">תנועה החל מ־</string>
     <string name="settings_moving_hint">לאט יותר זו עצירה: היא לא נספרת במהירות הממוצעת ובזמן בתנועה</string>
     <string name="settings_steady_fix">מיקום יציב לפני ההקלטה</string>

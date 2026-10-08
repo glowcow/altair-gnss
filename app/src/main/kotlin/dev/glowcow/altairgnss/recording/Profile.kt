@@ -153,6 +153,8 @@ class TrackPath(val points: List<PathPoint>, val centre: GeoPoint, val stops: Li
 /**
  * One point of a track on a plane round its middle: metres east and north, metres above the level
  * heights are counted from; with what it was like there — the altitude, the speed, the time and the way since the start.
+ * [afterGap] says the recording had no place for a while before this point, so the way to it from
+ * the point before is a straight guess.
  */
 data class PathPoint(
     val east: Double,
@@ -162,6 +164,7 @@ data class PathPoint(
     val altitude: Double,
     val elapsedMs: Long,
     val distance: Double,
+    val afterGap: Boolean = false,
 )
 
 object Profile {
@@ -189,6 +192,7 @@ object Profile {
                 altitudes[i],
                 point.timeMs - points.first().timeMs,
                 way.metres,
+                afterGap = n > 0 && point.timeMs - points[placed[n - 1]].timeMs > GAP_MS,
             )
         }
         return TrackPath(laid, Scatter.shift(origin, centreEast, centreNorth), stops(laid, moving))
@@ -326,6 +330,9 @@ object Profile {
     // Standing this long is a stop worth marking on the track.
     private const val STOP_MS = 30_000L
     private const val MAX_STEP_MS = 10_000L
+
+    // Longer than this without a place is a gap in the track, not a late second.
+    private const val GAP_MS = 3_000L
 
     // How far to either side of a point its altitude is evened out.
     private const val SMOOTH_MS = 7_000L

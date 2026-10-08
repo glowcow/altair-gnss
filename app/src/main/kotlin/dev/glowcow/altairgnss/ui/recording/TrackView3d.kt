@@ -127,7 +127,12 @@ fun TrackScene(
     val inset = with(LocalDensity.current) { READOUT_INSET.toPx() }
     val readoutY = with(LocalDensity.current) { readoutTop.toPx() } + inset
     // More points than the eye can tell apart: every n-th is enough for the ribbon.
-    val shown = remember(path) { (path.size / MAX_SEGMENTS + 1).let { step -> path.filterIndexed { i, _ -> i % step == 0 || i == path.lastIndex } } }
+    val shown = remember(path) {
+        val step = path.size / MAX_SEGMENTS + 1
+        val kept = path.indices.filter { it % step == 0 || it == path.lastIndex }
+        // A gap that fell between two points kept is still a gap on the way to the second.
+        kept.mapIndexed { n, i -> if (n == 0) path[i] else path[i].copy(afterGap = (kept[n - 1] + 1..i).any { path[it].afterGap }) }
+    }
     var picked by remember(shown) { mutableStateOf<Int?>(null) }
 
     Box(modifier.onSizeChanged { height = it.height }) {
@@ -260,7 +265,7 @@ private class Camera(width: Float, height: Float, yaw: Float, pitch: Float, zoom
 
 /**
  * A ribbon standing on the ground and rising to the altitude of each point, coloured by the speed
- * there, with a pause sign where it stood still. A finger moved sideways turns it; moved down it pulls the near side down, towards a view
+ * there, with a pause sign where it stood still; grey where the recording had no position and the line is a straight guess. A finger moved sideways turns it; moved down it pulls the near side down, towards a view
  * from above. When [explorable],
  * two fingers zoom and move it, a tap on the line picks the point there and a tap elsewhere lets
  * it go. Heights are stretched to read well next to the ground distances.
@@ -404,7 +409,9 @@ private fun TrackView3d(
         for (i in order) {
             val (ax, ay, az) = points[i]
             val (bx, by, bz) = points[i + 1]
-            val colour = speedColour(shown[i + 1].speed ?: shown[i].speed, top, c.muted)
+            // Across a gap in the positions the line is a straight guess: grey, and with no wall under it.
+            val guessed = shown[i + 1].afterGap
+            val colour = if (guessed) c.muted else speedColour(shown[i + 1].speed ?: shown[i].speed, top, c.muted)
             val a = camera.project(ax, ay, az)
             val b = camera.project(bx, by, bz)
             val wall = Path().apply {
@@ -415,7 +422,7 @@ private fun TrackView3d(
                 camera.project(bx, by, 0.0).let { lineTo(it.x, it.y) }
                 close()
             }
-            drawPath(wall, colour.copy(alpha = 0.3f))
+            if (!guessed) drawPath(wall, colour.copy(alpha = 0.3f))
             drawLine(c.muted.copy(alpha = 0.45f), camera.project(ax, ay, 0.0), camera.project(bx, by, 0.0), 1.dp.toPx())
             drawLine(colour, a, b, 3.dp.toPx(), StrokeCap.Round)
         }

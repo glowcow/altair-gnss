@@ -231,6 +231,7 @@
     <string name="recording_network">Posición por redes</string>
     <string name="recording_network_hint">El Wi-Fi y las antenas ayudan a situar los puntos donde los satélites están interferidos; el servicio de ubicación del teléfono sabrá dónde está</string>
     <string name="recording_waiting">Esperando una posición estable: %1$d s</string>
+    <string name="recording_waiting_coarse">Por ahora la posición solo tiene una precisión de %1$s; hace falta %2$s o mejor</string>
     <string name="settings_moving">En movimiento desde</string>
     <string name="settings_moving_hint">Más lento es una parada: no cuenta para la velocidad media ni para el tiempo en movimiento</string>
     <string name="settings_steady_fix">Posición estable antes de grabar</string>

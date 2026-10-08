@@ -49,6 +49,7 @@ import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.altimeter.AltitudeSource
 import dev.glowcow.altairgnss.container
 import dev.glowcow.altairgnss.data.AppSettings
+import dev.glowcow.altairgnss.recording.Recorder
 import dev.glowcow.altairgnss.recording.Track
 import dev.glowcow.altairgnss.ui.components.ChoiceSheet
 import dev.glowcow.altairgnss.ui.components.FloatingButton
@@ -178,6 +179,15 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit) {
         }
         progress?.waitingSeconds?.let { left ->
             Text(stringResource(R.string.recording_waiting, left), color = c.muted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
+        }
+        // A position there is, but too coarse to start a track on: say so, or the wait looks stuck.
+        progress?.coarse?.let { off ->
+            Text(
+                stringResource(R.string.recording_waiting_coarse, lengthText(off.toDouble(), 0), lengthText(Recorder.BLEND_ACCURACY.toDouble(), 0)),
+                color = c.muted,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
         }
         // What the recording is made from: where the altitude comes from, and whether points get a place.
         Group {

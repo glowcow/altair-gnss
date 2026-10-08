@@ -232,6 +232,7 @@
     <string name="recording_network">Дапамога сетак</string>
     <string name="recording_network_hint">Wi-Fi і сотавыя вышкі дапамагаюць ставіць кропкі там, дзе спадарожнікі глушаць; служба геалакацыі тэлефона пры гэтым даведваецца, дзе вы</string>
     <string name="recording_waiting">Чакаем устойлівай фіксацыі: %1$d с</string>
+    <string name="recording_waiting_coarse">Пакуль становішча вядома з дакладнасцю %1$s; трэба %2$s або лепш</string>
     <string name="settings_moving">Рух ад</string>
     <string name="settings_moving_hint">Павольней — прыпынак: не ідзе ў сярэднюю хуткасць і час у руху</string>
     <string name="settings_steady_fix">Устойлівая фіксацыя перад запісам</string>

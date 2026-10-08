@@ -190,4 +190,13 @@ class ProfileTest {
         val before = walked.add(55.00038, 37.0, 20f, 651_000)
         assertEquals(before, walked.add(55.01, 37.0, 20f, 652_000))
     }
+
+    @Test
+    fun pathMarksTheWayAcrossAGapInPositions() {
+        fun placed(second: Int) = point(second, 100.0).copy(latitude = 55.0 + second * 1e-5, longitude = 37.0)
+        // Positions every second, none from the 4th to the 9th second, then again.
+        val points = (0..3).map(::placed) + (4..9).map { point(it, 100.0) } + (10..12).map(::placed)
+        val path = Profile.path(points, points.map { it.altitude })!!.points
+        assertEquals(listOf(false, false, false, false, true, false, false), path.map { it.afterGap })
+    }
 }

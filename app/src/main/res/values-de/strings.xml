@@ -230,6 +230,7 @@
     <string name="recording_network">Netzwerkortung</string>
     <string name="recording_network_hint">WLAN und Mobilfunk helfen, die Punkte zu setzen, wo Satelliten gestört sind; der Standortdienst des Telefons erfährt dabei, wo Sie sind</string>
     <string name="recording_waiting">Warten auf eine stabile Position: %1$d s</string>
+    <string name="recording_waiting_coarse">Die Position ist bisher nur auf %1$s genau; nötig sind %2$s oder besser</string>
     <string name="settings_moving">Bewegung ab</string>
     <string name="settings_moving_hint">Langsamer gilt als Halt: zählt nicht zur Durchschnittsgeschwindigkeit und zur Zeit in Bewegung</string>
     <string name="settings_steady_fix">Stabile Position vor der Aufzeichnung</string>
