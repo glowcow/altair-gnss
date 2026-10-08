@@ -38,14 +38,13 @@ object AltairIcons {
             "M5 15a4 4 0 0 1 4 4",
         ),
         fill = listOf(circle(5f, 19f, 1.1f)),
-        width = 1.7f,
     )
     val Record = icon("record", stroke = listOf(circle(12f, 12f, 8.5f)), fill = listOf(circle(12f, 12f, 3.6f)))
     val Altimeter = icon("altimeter", listOf("M2.5 19.5L9 8l4 6.5 2.5-3.5 6 8.5z"))
     val Instruments = icon("instruments", listOf(circle(12f, 12f, 8.5f), "M15.5 8.5l-2 5-5 2 2-5z"))
     val Settings = icon("settings", listOf("M4 7h9M17 7h3M4 17h3M11 17h9", circle(15f, 7f, 2f), circle(9f, 17f, 2f)))
     val Plus = icon("plus", listOf("M12 5v14M5 12h14"), width = 2.2f)
-    val Expand = icon("expand", listOf("M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"), width = 2f)
+    val Expand = icon("expand", listOf("M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"))
     val Back = icon("back", listOf("M19 12H5M11 6l-6 6 6 6"), width = 2f)
     val Chevron = icon("chevron", listOf("M9 5l7 7-7 7"))
     val Check = icon("check", listOf("M5 12.5l4.5 4.5L19 7.5"), width = 2.2f)

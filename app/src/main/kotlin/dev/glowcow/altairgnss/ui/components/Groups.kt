@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -41,6 +43,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -124,7 +128,7 @@ fun GroupSheet(title: String, onDismiss: () -> Unit, content: @Composable Column
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state, containerColor = c.groupBg) {
-        Column(Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+        Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
             Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = c.text, modifier = Modifier.padding(start = 4.dp, bottom = 14.dp))
             content { action ->
                 scope.launch { state.hide() }.invokeOnCompletion {
@@ -138,7 +142,7 @@ fun GroupSheet(title: String, onDismiss: () -> Unit, content: @Composable Column
 
 /**
  * A row to type into: a small label above the text. A tap anywhere on it focuses the field; with
- * [focused] it takes the cursor as soon as it appears.
+ * [focused] it takes the cursor as soon as it appears, and [secret] hides what is typed.
  */
 @Composable
 fun GroupField(
@@ -149,6 +153,7 @@ fun GroupField(
     keyboard: KeyboardType = KeyboardType.Text,
     capitalize: Boolean = false,
     focused: Boolean = false,
+    secret: Boolean = false,
 ) {
     val c = AltairTheme.colors
     val focus = remember { FocusRequester() }
@@ -170,8 +175,9 @@ fun GroupField(
                 singleLine = true,
                 textStyle = TextStyle(color = c.text, fontFamily = AppFont, fontSize = 15.sp),
                 cursorBrush = SolidColor(c.accent),
+                visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = keyboard,
+                    keyboardType = if (secret) KeyboardType.Password else keyboard,
                     capitalization = if (capitalize) KeyboardCapitalization.Sentences else KeyboardCapitalization.None,
                 ),
                 modifier = Modifier.fillMaxWidth().focusRequester(focus),

@@ -10,7 +10,7 @@ languages.
 <p>
   <img src="docs/screenshots/status.png" width="150" alt="Status: the fix, the tools and the signal bars coloured by strength">
   <img src="docs/screenshots/record.png" width="150" alt="Activity record: live figures, the Record and Stop buttons and the recordings">
-  <img src="docs/screenshots/track.png" width="150" alt="A recording: its track in three dimensions on the map, coloured by speed, and the height chart">
+  <img src="docs/screenshots/track.png" width="150" alt="A recording: its track in three dimensions on the map, coloured by speed, with checkpoints, and the height chart">
   <img src="docs/screenshots/track-full.png" width="150" alt="The track full screen in the dark theme, with the figures of a tapped point">
   <img src="docs/screenshots/altimeter.png" width="150" alt="Altimeter: an aircraft-style dial with a drum counter">
   <img src="docs/screenshots/instruments.png" width="150" alt="Instruments: compass, speedometer, clocks, the sun and a daylight map">

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -297,7 +298,7 @@ fun TrackViewScreen(id: Long, onBack: () -> Unit) {
                 bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
             )
         }
-        Box(Modifier.statusBarsPadding().padding(horizontal = 8.dp, vertical = 6.dp)) {
+        Box(Modifier.statusBarsPadding().padding(4.dp)) {
             IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
         }
     }
@@ -310,9 +311,9 @@ fun ChartScreen(id: Long, onBack: () -> Unit) {
     val context = LocalContext.current
     val data = rememberTrackData(id)
     Column(Modifier.fillMaxSize().background(c.groupBg).statusBarsPadding().navigationBarsPadding()) {
-        Row(Modifier.padding(horizontal = 8.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.heightIn(min = 56.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
-            Text(data.track?.let { startTime(context, it) }.orEmpty(), color = c.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(data.track?.let { startTime(context, it) }.orEmpty(), color = c.text, fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 4.dp))
         }
         Group(Modifier.weight(1f).padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
             ProfileChart(data.points.map { it.timeMs }, data.altitudes.map { it - data.base }, absolute = data.absolute, marks = data.chartMarks, full = true)

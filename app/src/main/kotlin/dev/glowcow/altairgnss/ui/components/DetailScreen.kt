@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -30,6 +31,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
@@ -45,6 +47,7 @@ fun DetailScreen(title: String, onBack: () -> Unit, content: @Composable ColumnS
     val c = AltairTheme.colors
     val page = rememberGraphicsLayer()
     var header by remember { mutableIntStateOf(0) }
+    val scroll = rememberScrollState()
     Box(Modifier.fillMaxSize().background(c.groupBg)) {
         Box(
             Modifier.fillMaxSize().drawWithContent {
@@ -55,7 +58,7 @@ fun DetailScreen(title: String, onBack: () -> Unit, content: @Composable ColumnS
             Column(
                 Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scroll)
                     .padding(top = with(LocalDensity.current) { header.toDp() })
                     .navigationBarsPadding()
                     .padding(horizontal = 16.dp)
@@ -64,19 +67,28 @@ fun DetailScreen(title: String, onBack: () -> Unit, content: @Composable ColumnS
                 content = content,
             )
         }
-        Row(
+        Column(
             Modifier
                 .fillMaxWidth()
                 .onSizeChanged { header = it.height }
                 .frosted(page, c.groupBg) { Offset.Zero }
                 // What shows through the glass is not tappable through it.
                 .pointerInput(Unit) {}
-                .statusBarsPadding()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .statusBarsPadding(),
         ) {
-            IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
-            Text(title, color = c.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
+                Text(
+                    title,
+                    color = c.text,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(start = 4.dp, end = 8.dp),
+                )
+            }
+            HeaderLine(shown = scroll.value > 0)
         }
     }
 }

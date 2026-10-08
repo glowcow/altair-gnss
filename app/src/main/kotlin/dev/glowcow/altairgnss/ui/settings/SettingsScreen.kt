@@ -8,19 +8,12 @@ import android.text.format.Formatter
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,16 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -63,6 +50,7 @@ import dev.glowcow.altairgnss.maps.TileStore
 import dev.glowcow.altairgnss.ui.components.ChoiceSheet
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
+import dev.glowcow.altairgnss.ui.components.GroupField
 import dev.glowcow.altairgnss.ui.components.GroupRow
 import dev.glowcow.altairgnss.ui.components.GroupSheet
 import dev.glowcow.altairgnss.ui.components.LocalUnits
@@ -71,15 +59,14 @@ import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
 import dev.glowcow.altairgnss.ui.components.speedText
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
-import dev.glowcow.altairgnss.ui.theme.AppFont
 import dev.glowcow.altairgnss.update.AppRelease
 import dev.glowcow.altairgnss.update.AppUpdateState
 import dev.glowcow.altairgnss.update.AppUpdater
+import java.time.LocalDate
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class SettingsViewModel(
     private val store: SettingsStore,
@@ -488,25 +475,8 @@ private enum class BackupSheet { SAVE, RESTORE }
 private fun backupName() = "altair-gnss-${LocalDate.now()}.altair"
 
 @Composable
-private fun PasswordField(value: String, onChange: (String) -> Unit) {
-    val c = AltairTheme.colors
-    Box(
-        Modifier.fillMaxWidth().height(52.dp).clip(RoundedCornerShape(20.dp)).background(c.group).padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterStart,
-    ) {
-        if (value.isEmpty()) Text(stringResource(R.string.backup_password), color = c.muted)
-        BasicTextField(
-            value = value,
-            onValueChange = onChange,
-            singleLine = true,
-            textStyle = TextStyle(color = c.text, fontFamily = AppFont, fontSize = 15.sp),
-            cursorBrush = SolidColor(c.accent),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
+private fun PasswordField(value: String, onChange: (String) -> Unit) =
+    Group { GroupField(stringResource(R.string.backup_password), value, onChange, secret = true) }
 
 private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, LENGTH, SPEED, MOVING, STEADY_FIX, TRACK_ZERO, START_TAB, CLEAR_ASSIST }
 
