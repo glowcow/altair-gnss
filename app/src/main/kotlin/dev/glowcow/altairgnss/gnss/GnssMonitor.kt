@@ -2,11 +2,14 @@ package dev.glowcow.altairgnss.gnss
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.GnssMeasurementsEvent
 import android.location.GnssStatus
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.location.OnNmeaMessageListener
+import android.os.SystemClock
+import dev.glowcow.altairgnss.data.SettingsStore
 import dev.glowcow.altairgnss.instruments.Trip
 import dev.glowcow.altairgnss.instruments.TripStats
 import kotlinx.coroutines.CoroutineScope
@@ -16,13 +19,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * The receiver as one state. It runs only while [state] is collected, and collecting needs the
  * precise location permission.
  */
-class GnssMonitor(private val context: Context, scope: CoroutineScope) {
+class GnssMonitor(private val context: Context, private val scope: CoroutineScope, private val settings: SettingsStore) {
     private val manager = context.getSystemService(LocationManager::class.java)
     /** The receiver's NMEA sentences, as they come while it runs. */
     val nmea = NmeaLog(java.io.File(context.cacheDir, "nmea"))
@@ -69,10 +75,36 @@ class GnssMonitor(private val context: Context, scope: CoroutineScope) {
             trySend(current)
         }
 
+        val watch = DisturbanceWatch()
+        var gains = GainWatch()
+        var jammed = false
+        var savedAt = 0L
+        // A list that comes empty after one with signals is the receiver starting its search over.
+        fun heard(signals: List<Signal>) = update {
+            it.copy(
+                signals = signals,
+                restarted = if (signals.isEmpty()) it.restarted || it.signals.isNotEmpty() else false,
+                disturbance = watch.update(signals, SystemClock.elapsedRealtime(), jammed),
+            )
+        }
+
         val status = object : GnssStatus.Callback() {
-            override fun onSatelliteStatusChanged(status: GnssStatus) = update { it.copy(signals = status.toSignals()) }
+            override fun onSatelliteStatusChanged(status: GnssStatus) = heard(status.toSignals())
             override fun onFirstFix(ttffMillis: Int) = update { it.copy(ttffMs = ttffMillis) }
-            override fun onStopped() = update { it.copy(signals = emptyList()) }
+            override fun onStopped() = heard(emptyList())
+        }
+        val gain = object : GnssMeasurementsEvent.Callback() {
+            override fun onGnssMeasurementsReceived(event: GnssMeasurementsEvent) {
+                val levels = event.gnssAutomaticGainControls.associate { "${it.constellationType}:${it.carrierFrequencyHz / 1_000_000}" to it.levelDb }
+                val before = gains.baseline.toMap()
+                jammed = gains.update(levels, current.hasFix)
+                val now = SystemClock.elapsedRealtime()
+                if (gains.baseline != before && now - savedAt > SAVE_EVERY_MS) {
+                    savedAt = now
+                    val learnt = gains.baseline.toMap()
+                    scope.launch { settings.setGainBaseline(learnt) }
+                }
+            }
         }
         val location = object : LocationListener {
             override fun onLocationChanged(location: Location) {
@@ -96,8 +128,21 @@ class GnssMonitor(private val context: Context, scope: CoroutineScope) {
         } catch (_: SecurityException) {
             close()
         }
+        // The gain is listened to only while the setting asks for it: it takes the receiver's full measurements.
+        launch {
+            settings.settings.map { it.gainWatch }.distinctUntilChanged().collect { on ->
+                if (on) {
+                    gains = GainWatch(settings.gainBaseline())
+                    runCatching { manager.registerGnssMeasurementsCallback(executor, gain) }
+                } else {
+                    manager.unregisterGnssMeasurementsCallback(gain)
+                    jammed = false
+                }
+            }
+        }
         trySend(current)
         awaitClose {
+            manager.unregisterGnssMeasurementsCallback(gain)
             manager.unregisterGnssStatusCallback(status)
             manager.removeNmeaListener(sentences)
             manager.removeUpdates(location)
@@ -127,24 +172,10 @@ class GnssMonitor(private val context: Context, scope: CoroutineScope) {
         )
     }
 
-    private fun Location.toFix() = Fix(
-        latitude = latitude,
-        longitude = longitude,
-        altitude = if (hasAltitude()) altitude else null,
-        mslAltitude = if (hasMslAltitude()) mslAltitudeMeters else null,
-        horizontalAccuracy = if (hasAccuracy()) accuracy else null,
-        verticalAccuracy = if (hasVerticalAccuracy()) verticalAccuracyMeters else null,
-        speed = if (hasSpeed()) speed else null,
-        speedAccuracy = if (hasSpeedAccuracy()) speedAccuracyMetersPerSecond else null,
-        bearing = if (hasBearing()) bearing else null,
-        bearingAccuracy = if (hasBearingAccuracy()) bearingAccuracyDegrees else null,
-        timeMs = time,
-        elapsedRealtimeMs = elapsedRealtimeNanos / 1_000_000,
-    )
-
     private companion object {
         const val INTERVAL_MS = 1_000L
         // Survives a rotation or a switch between tabs without restarting the receiver.
         const val STOP_DELAY_MS = 2_000L
+        const val SAVE_EVERY_MS = 60_000L
     }
 }

@@ -9,7 +9,9 @@ import dev.glowcow.altairgnss.data.Palette
 import dev.glowcow.altairgnss.data.SettingsStore
 import dev.glowcow.altairgnss.data.SpeedUnit
 import dev.glowcow.altairgnss.data.ThemeMode
+import dev.glowcow.altairgnss.data.TrackZero
 import dev.glowcow.altairgnss.gnss.CoordinateFormat
+import dev.glowcow.altairgnss.recording.Mark
 import dev.glowcow.altairgnss.recording.Track
 import dev.glowcow.altairgnss.recording.TrackDao
 import kotlinx.coroutines.Dispatchers
@@ -41,10 +43,12 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
                     BackupManifest(
                         createdAt = System.currentTimeMillis(),
                         app = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
-                        tracks = finished.map { t -> BackupTrack(t.startedAt, t.endedAt, t.zeroAltitude) },
+                        tracks = finished.map { t ->
+                            BackupTrack(t.startedAt, t.endedAt, t.zeroAltitude, tracks.marks(t.id).map { m -> BackupMark(m.timeMs, m.label) })
+                        },
                         settings = BackupSettings(
                             s.theme.name, s.palette.name, s.coordinates.name, s.length.name, s.speed.name,
-                            s.keepScreenOn, s.startTab, s.trueNorth, s.appUpdate, source.name, s.mapTiles, s.recordPosition, s.movingKmh, s.steadyFixSeconds,
+                            s.keepScreenOn, s.startTab, s.trueNorth, s.appUpdate, source.name, s.mapTiles, s.recordPosition, s.movingKmh, s.steadyFixSeconds, s.trackZero.name, s.gainWatch, s.networkPosition,
                         ),
                     ),
                 )
@@ -112,6 +116,7 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
             return false
         }
         points.chunked(BATCH).forEach { tracks.insertAll(it) }
+        tracks.insertMarks(track.marks.take(MAX_MARKS).map { Mark(trackId = id, timeMs = it.timeMs, label = it.label.take(MAX_LABEL)) })
         return true
     }
 
@@ -132,12 +137,17 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
                 recordPosition = b.recordPosition,
                 movingKmh = b.movingKmh.coerceIn(1, 20),
                 steadyFixSeconds = b.steadyFixSeconds.coerceIn(0, 300),
+                trackZero = runCatching { TrackZero.valueOf(b.trackZero) }.getOrDefault(d.trackZero),
+                gainWatch = b.gainWatch,
+                networkPosition = b.networkPosition,
             ),
         )
         runCatching { AltitudeSource.valueOf(b.altitudeSource) }.getOrNull()?.let { settings.setAltitudeSource(it) }
     }
 
     private companion object {
+        const val MAX_MARKS = 10_000
+        const val MAX_LABEL = 80
         const val BATCH = 2_000
     }
 }

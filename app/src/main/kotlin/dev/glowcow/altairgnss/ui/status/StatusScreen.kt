@@ -18,8 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,15 +38,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.container
 import dev.glowcow.altairgnss.data.AppSettings
+import dev.glowcow.altairgnss.gnss.Disturbance
 import dev.glowcow.altairgnss.gnss.Constellation
 import dev.glowcow.altairgnss.gnss.CoordinateFormat
 import dev.glowcow.altairgnss.gnss.Coordinates
 import dev.glowcow.altairgnss.gnss.GnssState
 import dev.glowcow.altairgnss.gnss.Signal
+import dev.glowcow.altairgnss.ui.components.Alert
 import dev.glowcow.altairgnss.ui.components.Chip
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
+import dev.glowcow.altairgnss.ui.components.GroupSheet
 import dev.glowcow.altairgnss.ui.components.LocationGate
 import dev.glowcow.altairgnss.ui.components.NO_VALUE
 import dev.glowcow.altairgnss.ui.components.SignalLegend
@@ -63,15 +68,42 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun StatusScreen(onTab: (TopTab) -> Unit, onSky: () -> Unit, onNmea: () -> Unit, onScatter: () -> Unit) = TabScreen(TopTab.STATUS, onTab) { top, bottom ->
-    LocationGate(top) { StatusContent(top, bottom, onSky, onNmea, onScatter) }
+fun StatusScreen(onTab: (TopTab) -> Unit, onSky: () -> Unit, onNmea: () -> Unit, onScatter: () -> Unit) {
+    // What seems to be spoiling the signals is said in the title row, whatever the page is scrolled to.
+    var disturbance by remember { mutableStateOf(Disturbance.NONE) }
+    var explaining by remember { mutableStateOf<Disturbance?>(null) }
+    TabScreen(
+        TopTab.STATUS,
+        onTab,
+        trailing = {
+            when (disturbance) {
+                Disturbance.SPOOFING -> Alert(stringResource(R.string.disturbance_spoofing)) { explaining = Disturbance.SPOOFING }
+                Disturbance.INTERFERENCE -> Alert(stringResource(R.string.disturbance_interference)) { explaining = Disturbance.INTERFERENCE }
+                Disturbance.NONE -> Unit
+            }
+        },
+    ) { top, bottom ->
+        LocationGate(top) { StatusContent(top, bottom, onSky, onNmea, onScatter) { disturbance = it } }
+    }
+    explaining?.let { what ->
+        val spoofing = what == Disturbance.SPOOFING
+        GroupSheet(stringResource(if (spoofing) R.string.disturbance_spoofing else R.string.disturbance_interference), onDismiss = { explaining = null }) {
+            Text(
+                stringResource(if (spoofing) R.string.disturbance_spoofing_hint else R.string.disturbance_interference_hint),
+                color = AltairTheme.colors.muted,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 14.dp),
+            )
+        }
+    }
 }
 
 @Composable
-private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> Unit, onScatter: () -> Unit) {
+private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> Unit, onScatter: () -> Unit, onDisturbance: (Disturbance) -> Unit) {
     val c = AltairTheme.colors
     val context = LocalContext.current
     val state by context.container.gnss.state.collectAsStateWithLifecycle()
+    LaunchedEffect(state.disturbance) { onDisturbance(state.disturbance) }
     val settings by context.container.settings.settings.collectAsStateWithLifecycle(AppSettings())
     var hidden by rememberSaveable { mutableStateOf(emptySet<Constellation>()) }
     var bySignal by rememberSaveable { mutableStateOf(true) }
@@ -86,7 +118,7 @@ private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> 
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = top, bottom = bottom + 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     stringResource(
@@ -125,7 +157,7 @@ private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> 
         }
 
         if (state.signals.isEmpty()) {
-            Text(stringResource(R.string.status_no_signals), color = c.muted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
+            Text(stringResource(if (state.restarted) R.string.status_restarted else R.string.status_no_signals), color = c.muted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 4.dp))
             return@Column
         }
 

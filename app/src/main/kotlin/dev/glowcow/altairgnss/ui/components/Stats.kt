@@ -13,6 +13,8 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -74,14 +76,25 @@ fun Stat(label: String, value: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** A toggle in a row of filters. */
+/** A word of warning in a pill, the orange of a weak signal in either theme; no taller than a page title. A tap explains it. */
+@Composable
+fun Alert(text: String, onClick: () -> Unit) {
+    Box(Modifier.clip(RoundedCornerShape(16.dp)).background(ALERT_ORANGE).clickable(role = Role.Button, onClick = onClick).padding(horizontal = 12.dp, vertical = 5.dp)) {
+        Text(text, color = ALERT_INK, fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+    }
+}
+
+private val ALERT_ORANGE = Color(0xFFF2913D)
+private val ALERT_INK = Color(0xFF1A1A18)
+
+/** A toggle in a row of filters; it lies on the ground of a grouped page, so it takes the colour of a block. */
 @Composable
 fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
     val c = AltairTheme.colors
     Box(
         Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) c.accent else c.chip)
+            .background(if (selected) c.accent else c.group)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp),
     ) {

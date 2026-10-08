@@ -7,6 +7,7 @@ import dev.glowcow.altairgnss.altimeter.Altimeter
 import dev.glowcow.altairgnss.altimeter.PressureMonitor
 import dev.glowcow.altairgnss.backup.Backup
 import dev.glowcow.altairgnss.data.SettingsStore
+import dev.glowcow.altairgnss.gnss.FusedPosition
 import dev.glowcow.altairgnss.gnss.GnssMonitor
 import dev.glowcow.altairgnss.instruments.CompassMonitor
 import dev.glowcow.altairgnss.maps.MapLoader
@@ -26,11 +27,11 @@ import java.io.File
 class AppContainer(context: Context) {
     val settings = SettingsStore(context)
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    val gnss = GnssMonitor(context, scope)
+    val gnss = GnssMonitor(context, scope, settings)
     val compass = CompassMonitor(context)
     val altimeter = Altimeter(scope, gnss, PressureMonitor(context), settings)
     val tracks = AltairDatabase.create(context).tracks()
-    val recorder = Recorder(context, scope, tracks, altimeter, gnss, settings)
+    val recorder = Recorder(context, scope, tracks, altimeter, gnss, FusedPosition(context), settings)
     val backup = Backup(context, tracks, settings)
     val appUpdater = AppUpdater(context, scope)
     val airports = AirportService("altair-gnss/${appUpdater.current}")

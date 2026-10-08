@@ -29,8 +29,23 @@ data class Point(
     val altitude: Double,
     /** The barometer's reading; null on a phone without one. */
     val hpa: Double?,
-    /** Where the receiver placed the phone and how fast it moved, m/s; null where it had no fix. */
+    /** Where the phone was placed and how fast it moved, m/s; null where nothing placed it. */
     val latitude: Double? = null,
     val longitude: Double? = null,
     val speed: Float? = null,
+    /** Metres the place may be off by, as its source claimed; null where it did not say or there is no place. */
+    val accuracy: Float? = null,
+)
+
+/** A checkpoint: a moment of a recording the user marked, with what they wrote about it; the label may be empty. */
+@Entity(
+    tableName = "marks",
+    foreignKeys = [ForeignKey(Track::class, ["id"], ["trackId"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index("trackId", "timeMs")],
+)
+data class Mark(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val trackId: Long,
+    val timeMs: Long,
+    val label: String = "",
 )

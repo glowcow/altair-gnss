@@ -5,13 +5,14 @@ import kotlin.math.asinh
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.log2
+import kotlin.math.round
 import kotlin.math.tan
 
 /** The arithmetic of map tiles in the Web Mercator projection, as every tile server lays them out. */
 object Tiles {
     /** Pixels along the side of a tile. */
     const val SIZE = 256
-    const val MAX_ZOOM = 17
+    const val MAX_ZOOM = 19
     private const val EQUATOR = 40_075_016.686
 
     /** Where a longitude falls across the world at [zoom], in tiles from its western edge. */
@@ -22,6 +23,10 @@ object Tiles {
 
     /** Metres on the ground a pixel of a tile covers at [latitude]. */
     fun metresPerPixel(latitude: Double, zoom: Int): Double = EQUATOR * cos(Math.toRadians(latitude)) / (SIZE.toDouble() * (1 shl zoom))
+
+    /** The zoom whose pixel is nearest to [metresPerPixel] at [latitude]. */
+    fun zoomAt(metresPerPixel: Double, latitude: Double): Int =
+        round(log2(EQUATOR * cos(Math.toRadians(latitude)) / (SIZE * metresPerPixel))).toInt().coerceIn(0, MAX_ZOOM)
 
     /** The deepest zoom at which [metres] at [latitude] still fit into [pixels]. */
     fun zoomFor(metres: Double, latitude: Double, pixels: Int): Int =

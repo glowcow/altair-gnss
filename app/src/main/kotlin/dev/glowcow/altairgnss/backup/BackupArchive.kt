@@ -28,11 +28,18 @@ data class BackupSettings(
     val recordPosition: Boolean = true,
     val movingKmh: Int = 3,
     val steadyFixSeconds: Int = 15,
+    val trackZero: String = "LOWEST",
+    val gainWatch: Boolean = false,
+    val networkPosition: Boolean = false,
 )
 
 /** A recording as the manifest lists it; its points are in `tracks/<startedAt>.csv`. */
 @Serializable
-data class BackupTrack(val startedAt: Long, val endedAt: Long? = null, val zeroAltitude: Double? = null)
+data class BackupTrack(val startedAt: Long, val endedAt: Long? = null, val zeroAltitude: Double? = null, val marks: List<BackupMark> = emptyList())
+
+/** A marked moment of a recording. */
+@Serializable
+data class BackupMark(val timeMs: Long, val label: String = "")
 
 /** `backup.json` of an archive. */
 @Serializable
@@ -46,7 +53,8 @@ data class BackupManifest(
 
 /**
  * A backup is a zip: `backup.json` and the points of each recording as `tracks/<startedAt>.csv`, a
- * line a point: time, altitude, pressure, latitude, longitude, speed, the unknown ones left empty.
+ * line a point: time, altitude, pressure, latitude, longitude, speed, accuracy, the unknown ones
+ * left empty; a backup made before points kept their accuracy has six cells to a line.
  */
 object BackupArchive {
     const val MANIFEST = "backup.json"
@@ -76,7 +84,7 @@ object BackupArchive {
             for (p in points) {
                 text.append(p.timeMs).append(',').append(p.altitude).append(',')
                 text.append(p.hpa ?: "").append(',').append(p.latitude ?: "").append(',').append(p.longitude ?: "").append(',')
-                text.append(p.speed ?: "").append('\n')
+                text.append(p.speed ?: "").append(',').append(p.accuracy ?: "").append('\n')
             }
             zip.write(text.toString().toByteArray())
             zip.closeEntry()
@@ -116,7 +124,7 @@ object BackupArchive {
     fun points(file: File, trackId: Long): List<Point> = file.useLines { lines ->
         lines.mapNotNull { line ->
             val cells = line.split(',')
-            if (cells.size != 6) return@mapNotNull null
+            if (cells.size !in 6..7) return@mapNotNull null
             Point(
                 trackId = trackId,
                 timeMs = cells[0].toLongOrNull() ?: return@mapNotNull null,
@@ -125,6 +133,7 @@ object BackupArchive {
                 latitude = cells[3].toDoubleOrNull()?.takeIf { it in -90.0..90.0 },
                 longitude = cells[4].toDoubleOrNull()?.takeIf { it in -180.0..180.0 },
                 speed = cells[5].toFloatOrNull()?.takeIf { it.isFinite() },
+                accuracy = cells.getOrNull(6)?.toFloatOrNull()?.takeIf { it.isFinite() && it >= 0f },
             )
         }.toList()
     }

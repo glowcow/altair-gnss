@@ -3,7 +3,9 @@ package dev.glowcow.altairgnss.ui.components
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
@@ -76,9 +80,17 @@ enum class TopTab(val icon: ImageVector, val label: Int) {
  * A tab's page. The content runs under the status bar and the title, which blur it like frosted
  * glass, and under the tab bar, frosted too, which slides away while the page scrolls down and
  * comes back when it scrolls up. [content] gets the heights the two cover, to pad its ends.
+ * [trailing] stands at the end of the title row: a word about the state of what the tab shows.
+ * [floating] lies over the page and outside its blur, and gets what the tab bar covers now.
  */
 @Composable
-fun TabScreen(tab: TopTab, onTab: (TopTab) -> Unit, content: @Composable (top: Dp, bottom: Dp) -> Unit) {
+fun TabScreen(
+    tab: TopTab,
+    onTab: (TopTab) -> Unit,
+    trailing: (@Composable () -> Unit)? = null,
+    floating: @Composable BoxScope.(bottom: Dp) -> Unit = {},
+    content: @Composable (top: Dp, bottom: Dp) -> Unit,
+) {
     val c = AltairTheme.colors
     val density = LocalDensity.current
     val page = rememberGraphicsLayer()
@@ -116,20 +128,23 @@ fun TabScreen(tab: TopTab, onTab: (TopTab) -> Unit, content: @Composable (top: D
         ) {
             content(with(density) { headerHeight.toDp() }, with(density) { barHeight.intValue.toDp() })
         }
-        Text(
-            stringResource(tab.label),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = c.text,
-            modifier = Modifier
+        floating(with(density) { (barHeight.intValue - barShift.floatValue).coerceAtLeast(0f).toDp() })
+        Row(
+            Modifier
                 .fillMaxWidth()
                 .onSizeChanged { headerHeight = it.height }
                 .frosted(page, c.groupBg) { Offset.Zero }
                 // What shows through the glass is not tappable through it.
                 .pointerInput(Unit) {}
                 .statusBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-        )
+                // The title is inset like a caption; what stands at the end lines up with the blocks below.
+                .padding(start = 20.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(stringResource(tab.label), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = c.text, modifier = Modifier.weight(1f))
+            trailing?.invoke()
+        }
         Box(
             Modifier
                 .align(Alignment.BottomCenter)
@@ -140,6 +155,25 @@ fun TabScreen(tab: TopTab, onTab: (TopTab) -> Unit, content: @Composable (top: D
         ) {
             BottomBar(tab, onTab)
         }
+    }
+}
+
+/** The round button that floats over a tab's page, 20 dp above what the tab bar covers. */
+@Composable
+fun BoxScope.FloatingButton(icon: ImageVector, description: String, bottom: Dp, onClick: () -> Unit) {
+    val c = AltairTheme.colors
+    Box(
+        Modifier
+            .align(Alignment.BottomEnd)
+            .padding(end = 16.dp, bottom = bottom + 20.dp)
+            .size(56.dp)
+            .shadow(10.dp, CircleShape)
+            .clip(CircleShape)
+            .background(c.text)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, description, tint = c.bg, modifier = Modifier.size(22.dp))
     }
 }
 

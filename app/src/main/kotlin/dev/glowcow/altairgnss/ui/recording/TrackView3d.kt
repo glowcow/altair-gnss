@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,9 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -57,7 +59,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
@@ -75,13 +83,15 @@ import dev.glowcow.altairgnss.ui.components.lengthText
 import dev.glowcow.altairgnss.ui.components.speedText
 import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
+import dev.glowcow.altairgnss.ui.theme.AppFont
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
-import kotlin.math.sqrt
 import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlinx.coroutines.delay
 
 /**
  * The track in space with what goes over it: the speed scale on frosted glass along the bottom,
@@ -89,7 +99,7 @@ import kotlin.math.sin
  * screen. A drag turns and tilts it. When [explorable], the full-screen view, two fingers zoom and
  * move it and a tap on the line shows the figures of the point there. [top] is the speed the scale
  * ends at, m/s; [ground] is the colour it lies on. With [map] the track stands on a real map instead
- * of the bare disc. [topInset] is the status bar the scene runs
+ * of the bare disc, and [closer] fetches a finer piece of it for a view zoomed in. [topInset] is the status bar the scene runs
  * under: it gets frosted glass of its own, so the clock stays readable over a zoomed track, and
  * [bottomInset] keeps the scale clear of the navigation bar.
  */
@@ -101,7 +111,9 @@ fun TrackScene(
     modifier: Modifier = Modifier,
     explorable: Boolean = false,
     stops: List<PathStop> = emptyList(),
+    marks: List<SceneMark> = emptyList(),
     map: GroundMap? = null,
+    closer: CloserMap? = null,
     topInset: Dp = 0.dp,
     bottomInset: Dp = 0.dp,
     onExpand: (() -> Unit)? = null,
@@ -126,7 +138,9 @@ fun TrackScene(
             onPick = { picked = it },
             explorable = explorable,
             stops = stops,
+            marks = marks,
             map = map,
+            closer = closer,
             modifier = Modifier.fillMaxSize().drawWithContent {
                 scene.record { this@drawWithContent.drawContent() }
                 drawLayer(scene)
@@ -185,10 +199,19 @@ fun TrackScene(
     }
 }
 
+/** A marked moment on the track: where it was, and what stands on its flag. */
+class SceneMark(val at: PathPoint, val text: String)
+
+/** Fetches the map within `reach` metres of a place `east`, `north` of the ground's centre, a pixel of it about `perPixel` metres. */
+typealias CloserMap = suspend (east: Double, north: Double, reach: Double, perPixel: Double) -> MapLayer?
+
+/** A closer piece of map and the view it was fetched for: the middle of the screen on the ground, metres, and metres to a pixel. */
+private class Closer(val layer: MapLayer, val east: Double, val north: Double, val perPixel: Double)
+
 /** Where the view looks from and how it lays the scene out on [width] by [height], [zoom] times larger and moved by [pan]. */
 private class Camera(width: Float, height: Float, yaw: Float, pitch: Float, zoom: Float = 1f, pan: Offset = Offset.Zero) {
     // The ground fits across at any turn, and its near edge reaches under the scale along the bottom.
-    private val unit = minOf(width, height) * 0.42f * zoom
+    val unit = minOf(width, height) * 0.42f * zoom
     private val centre = Offset(width / 2, height * 0.56f) + pan
     private val turn = Math.toRadians(yaw.toDouble())
     private val tilt = Math.toRadians(pitch.toDouble())
@@ -216,6 +239,16 @@ private class Camera(width: Float, height: Float, yaw: Float, pitch: Float, zoom
         }
     }
 
+    /** The place on the ground under a point of the screen, in radii of the ground. */
+    fun groundAt(at: Offset): Pair<Double, Double> {
+        val across = (at.x - centre.x) / unit.toDouble()
+        val away = (centre.y - at.y) / (sin(tilt) * unit)
+        return (across * cos(turn) + away * sin(turn)) to (away * cos(turn) - across * sin(turn))
+    }
+
+    /** How far from its middle a screen of [width] by [height] sees the ground, in radii of it: a tilted view sees farther. */
+    fun reach(width: Float, height: Float): Double = hypot(width / 2.0, height / 2.0 / sin(tilt)) / unit
+
     fun project(x: Double, y: Double, z: Double): Offset {
         val across = x * cos(turn) - y * sin(turn)
         return Offset(
@@ -240,7 +273,9 @@ private fun TrackView3d(
     onPick: (Int?) -> Unit,
     explorable: Boolean,
     stops: List<PathStop>,
+    marks: List<SceneMark>,
     map: GroundMap?,
+    closer: CloserMap?,
     modifier: Modifier = Modifier,
 ) {
     val c = AltairTheme.colors
@@ -250,13 +285,39 @@ private fun TrackView3d(
     var panX by rememberSaveable { mutableFloatStateOf(0f) }
     var panY by rememberSaveable { mutableFloatStateOf(0f) }
     val description = stringResource(R.string.track_description)
+    val measurer = rememberTextMeasurer()
+    val flag = TextStyle(color = c.bg, fontSize = 10.sp, fontFamily = AppFont)
     // The ground is a disc that reaches a fifth farther than the farthest point of the track.
     val half = remember(shown) { max(shown.maxOf { hypot(it.east, it.north) } * GROUND_MARGIN, MIN_GROUND) }
-    val rise = remember(shown) { max(shown.maxOf { it.up }, MIN_RISE) }
+    // Heights are stretched to be seen, but only so far: a walk on the flat stays flat.
+    val rise = remember(shown) { maxOf(shown.maxOf { abs(it.up) }, half * RISE_PART, MIN_RISE) }
     val points = remember(shown) { shown.map { Triple(it.east / half, it.north / half, it.up / rise) } }
+
+    var view by remember { mutableStateOf(IntSize.Zero) }
+    var close by remember(map) { mutableStateOf<Closer?>(null) }
+    if (map != null && closer != null) {
+        // Once the view has come to rest zoomed in past what the map holds, a finer piece of it is fetched.
+        LaunchedEffect(map, view, zoom, panX, panY, yaw, pitch) {
+            if (view == IntSize.Zero) return@LaunchedEffect
+            delay(SETTLE_MS)
+            val camera = Camera(view.width.toFloat(), view.height.toFloat(), yaw, pitch, zoom, Offset(panX, panY))
+            // A tile is drawn for a coarser screen: stretched, its lettering stays readable.
+            val perPixel = half / camera.unit * TILE_STRETCH
+            if (perPixel > map.sharp.metresPerPixel * CLOSER_FROM) {
+                close = null
+                return@LaunchedEffect
+            }
+            val (x, y) = camera.groundAt(Offset(view.width / 2f, view.height / 2f))
+            val reach = camera.reach(view.width.toFloat(), view.height.toFloat()) * half
+            val had = close
+            val fits = had != null && perPixel / had.perPixel in 0.7..1.4 && hypot(x * half - had.east, y * half - had.north) < reach * CLOSER_KEPT
+            if (!fits) closer(x * half, y * half, reach, perPixel)?.let { close = Closer(it, x * half, y * half, perPixel) }
+        }
+    }
 
     Canvas(
         modifier
+            .onSizeChanged { view = it }
             .semantics { contentDescription = description }
             .pointerInput(explorable) {
                 awaitEachGesture {
@@ -316,6 +377,7 @@ private fun TrackView3d(
             val tone = if (c.isDark) MAP_DIM else null
             mapLayer(map.far, camera, half, whole = map.far.reach * FAR_WHOLE, gone = map.far.reach, tone)
             mapLayer(map.sharp, camera, half, whole = half, gone = minOf(map.sharp.reach, half * SHARP_GONE), tone)
+            close?.layer?.let { mapLayer(it, camera, half, whole = it.reach * CLOSER_WHOLE, gone = it.reach, tone) }
         } else {
             // The ground: a disc with a grid across it.
             val rim = Path().apply {
@@ -370,6 +432,24 @@ private fun TrackView3d(
             }
         }
 
+        // What was marked on the way: a pole from the line with the mark's words on a flag. A flag
+        // that would cover one already drawn stands higher on a longer pole.
+        val flags = mutableListOf<Rect>()
+        for (mark in marks) {
+            val at = camera.project(mark.at.east / half, mark.at.north / half, mark.at.up / rise)
+            val text = measurer.measure(mark.text, flag, overflow = TextOverflow.Ellipsis, maxLines = 1, constraints = Constraints(maxWidth = FLAG_WIDTH.roundToPx()))
+            val height = text.size.height + 4.dp.toPx()
+            val width = max(text.size.width + 10.dp.toPx(), height)
+            var foot = Offset(at.x, at.y - FLAG_POLE.toPx())
+            fun plate() = Rect(Offset(foot.x - width / 2, foot.y - height), Size(width, height))
+            while (flags.size < MAX_STACK && flags.any { it.overlaps(plate()) }) foot = foot.copy(y = foot.y - height - 3.dp.toPx())
+            flags += plate()
+            drawLine(c.text, at, foot, 1.5.dp.toPx())
+            drawCircle(c.text, 2.5.dp.toPx(), at)
+            drawRoundRect(c.text, Offset(foot.x - width / 2, foot.y - height), Size(width, height), CornerRadius(height / 2))
+            drawText(text, topLeft = Offset(foot.x - text.size.width / 2, foot.y - height + 2.dp.toPx()))
+        }
+
         // Where it began, hollow, and where it ended, solid.
         val start = points.first().let { camera.project(it.first, it.second, it.third) }
         val end = points.last().let { camera.project(it.first, it.second, it.third) }
@@ -391,7 +471,7 @@ private fun TrackView3d(
 
 /** One layer of the map on the ground: whole within [whole] metres of the centre, faded out by [gone]. */
 private fun DrawScope.mapLayer(layer: MapLayer, camera: Camera, half: Double, whole: Double, gone: Double, tone: ColorFilter?) {
-    val centre = Offset(layer.centreX, layer.centreY)
+    val centre = Offset(layer.focusX, layer.focusY)
     val mask = Brush.radialGradient(
         0f to Color.Black,
         (whole / gone).toFloat().coerceIn(0f, 0.99f) to Color.Black,
@@ -441,6 +521,9 @@ private const val GRID = 4
 internal const val MIN_GROUND = 10.0
 private const val MIN_RISE = 5.0
 
+// The least rise as a part of the ground's radius: heights are stretched no more than seven and a half times.
+private const val RISE_PART = 0.1
+
 // How tall the tallest point stands, as a part of the ground's radius.
 private const val HEIGHT = 0.75
 
@@ -460,6 +543,18 @@ private val MAP_DIM = ColorFilter.colorMatrix(
 private const val FAR_WHOLE = 0.6
 private const val SHARP_GONE = 1.6
 
+// A pixel of a closer map covers this many pixels of the screen, and it is fetched once that is
+// less than this part of a pixel of the sharp map.
+private const val TILE_STRETCH = 2.0
+private const val CLOSER_FROM = 0.7
+
+// A closer map stays while the view has moved less than this part of its reach; it is whole over this part of it.
+private const val CLOSER_KEPT = 0.25
+private const val CLOSER_WHOLE = 0.8
+
+// How long the view rests before a closer map is fetched.
+private const val SETTLE_MS = 350L
+
 private const val TURN_PER_PIXEL = 0.25f
 private const val MIN_PITCH = 8f
 private const val MAX_PITCH = 85f
@@ -470,6 +565,11 @@ private const val MAX_ZOOM = 8f
 private val TOUCH = 28.dp
 private val LEGEND_FADE = 22.dp
 private val READOUT_INSET = 10.dp
+
+// How tall a mark's pole stands over the line, and how wide its flag may be.
+private val FLAG_POLE = 18.dp
+private val FLAG_WIDTH = 96.dp
+private const val MAX_STACK = 40
 
 // The part of the status bar over which its glass fades out.
 private const val STATUS_FADE = 0.45f

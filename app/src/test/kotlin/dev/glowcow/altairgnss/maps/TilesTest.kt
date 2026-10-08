@@ -33,6 +33,14 @@ class TilesTest {
     }
 
     @Test
+    fun zoomNearestToAPixel() {
+        // At the equator zoom 17 has 1.19 m to a pixel and zoom 18 has 0.60.
+        assertEquals(17, Tiles.zoomAt(1.2, 0.0))
+        assertEquals(18, Tiles.zoomAt(0.7, 0.0))
+        assertEquals(Tiles.MAX_ZOOM, Tiles.zoomAt(0.01, 0.0))
+    }
+
+    @Test
     fun boxBlurKeepsAFlatPictureAndSpreadsADot() {
         val flat = IntArray(25) { 0xFF336699.toInt() }
         boxBlur(flat, 5, 5, 1)

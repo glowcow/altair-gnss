@@ -54,4 +54,22 @@ interface TrackDao {
 
     @Query("SELECT MAX(timeMs) FROM points WHERE trackId = :trackId")
     suspend fun lastPointTime(trackId: Long): Long?
+
+    @Insert
+    suspend fun insert(mark: Mark): Long
+
+    @Insert
+    suspend fun insertMarks(marks: List<Mark>)
+
+    @Query("SELECT * FROM marks WHERE trackId = :trackId ORDER BY timeMs")
+    fun observeMarks(trackId: Long): Flow<List<Mark>>
+
+    @Query("SELECT * FROM marks WHERE trackId = :trackId ORDER BY timeMs")
+    suspend fun marks(trackId: Long): List<Mark>
+
+    @Query("UPDATE marks SET label = :label WHERE id = :id")
+    suspend fun setMarkLabel(id: Long, label: String)
+
+    @Query("DELETE FROM marks WHERE id = :id")
+    suspend fun deleteMark(id: Long)
 }

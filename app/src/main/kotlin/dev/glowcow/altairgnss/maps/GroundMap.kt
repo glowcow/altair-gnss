@@ -16,10 +16,21 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlin.math.floor
 
-/** A piece of map as one picture: [centreX], [centreY] is where the centre it was made for falls in it, pixels. */
-class MapLayer(val image: ImageBitmap, val centreX: Float, val centreY: Float, val metresPerPixel: Double) {
-    /** How far from the centre the picture reaches on its nearest side, metres. */
-    val reach: Double get() = minOf(centreX, centreY, image.width - centreX, image.height - centreY) * metresPerPixel
+/**
+ * A piece of map as one picture: [centreX], [centreY] is where the centre of the ground falls in it,
+ * pixels, and [focusX], [focusY] the place it was fetched round — the same unless it is a closer
+ * look at a part of the ground.
+ */
+class MapLayer(
+    val image: ImageBitmap,
+    val centreX: Float,
+    val centreY: Float,
+    val metresPerPixel: Double,
+    val focusX: Float = centreX,
+    val focusY: Float = centreY,
+) {
+    /** How far from the focus the picture reaches on its nearest side, metres. */
+    val reach: Double get() = minOf(focusX, focusY, image.width - focusX, image.height - focusY) * metresPerPixel
 }
 
 /**
@@ -34,19 +45,33 @@ class MapLoader(private val store: TileStore) {
 
     /** The map round [centre] for a disc of [radius] metres; null when no tile of it could be had. */
     suspend fun load(centre: GeoPoint, radius: Double): GroundMap? {
-        // Three tiles across the disc: about a pixel of map to a pixel of screen.
+        // Three tiles across the disc: a pixel of map to a pixel or two of screen, so its lettering can be read.
         val zoom = Tiles.zoomFor(2 * radius, centre.latitude, 3 * Tiles.SIZE)
         val sharp = mosaic(centre, zoom, radius * SHARP_REACH) ?: return null
         val wide = mosaic(centre, (zoom - FAR_ZOOM_OUT).coerceAtLeast(0), radius * FAR_REACH) ?: return null
         return GroundMap(sharp.layer(), withContext(Dispatchers.Default) { blurred(wide) })
     }
 
-    private class Mosaic(val picture: Bitmap, val centreX: Float, val centreY: Float, val metresPerPixel: Double) {
-        fun layer() = MapLayer(picture.asImageBitmap(), centreX, centreY, metresPerPixel)
+    /**
+     * A closer look for a view zoomed in: the map within [reach] metres of [focus], a pixel of it
+     * about [metresPerPixel], laid out on the ground round [centre]. Null when it could not be had.
+     */
+    suspend fun detail(centre: GeoPoint, focus: GeoPoint, reach: Double, metresPerPixel: Double): MapLayer? =
+        mosaic(focus, Tiles.zoomAt(metresPerPixel, focus.latitude), reach, centre)?.layer()
+
+    private class Mosaic(
+        val picture: Bitmap,
+        val centreX: Float,
+        val centreY: Float,
+        val metresPerPixel: Double,
+        val focusX: Float = centreX,
+        val focusY: Float = centreY,
+    ) {
+        fun layer() = MapLayer(picture.asImageBitmap(), centreX, centreY, metresPerPixel, focusX, focusY)
     }
 
-    /** The tiles within [reach] metres of [centre] at [zoom], put together. */
-    private suspend fun mosaic(centre: GeoPoint, zoom: Int, reach: Double): Mosaic? = coroutineScope {
+    /** The tiles within [reach] metres of [centre] at [zoom], put together; laid out round [ground]. */
+    private suspend fun mosaic(centre: GeoPoint, zoom: Int, reach: Double, ground: GeoPoint = centre): Mosaic? = coroutineScope {
         val metresPerPixel = Tiles.metresPerPixel(centre.latitude, zoom)
         val cx = Tiles.x(centre.longitude, zoom) * Tiles.SIZE
         val cy = Tiles.y(centre.latitude, zoom) * Tiles.SIZE
@@ -64,7 +89,14 @@ class MapLoader(private val store: TileStore) {
         places.forEachIndexed { i, (x, y) ->
             tiles[i]?.let { canvas.drawBitmap(it, ((x - x0) * Tiles.SIZE).toFloat(), ((y - y0) * Tiles.SIZE).toFloat(), null) }
         }
-        Mosaic(picture, (cx - x0 * Tiles.SIZE).toFloat(), (cy - y0 * Tiles.SIZE).toFloat(), metresPerPixel)
+        Mosaic(
+            picture,
+            (Tiles.x(ground.longitude, zoom) * Tiles.SIZE - x0 * Tiles.SIZE).toFloat(),
+            (Tiles.y(ground.latitude, zoom) * Tiles.SIZE - y0 * Tiles.SIZE).toFloat(),
+            metresPerPixel,
+            (cx - x0 * Tiles.SIZE).toFloat(),
+            (cy - y0 * Tiles.SIZE).toFloat(),
+        )
     }
 
     /** The same country with nothing to read on it: shrunk, smeared, and drawn large again by the view. */
@@ -84,7 +116,7 @@ class MapLoader(private val store: TileStore) {
         const val SHARP_REACH = 1.7
         const val FAR_REACH = 5.0
         const val FAR_ZOOM_OUT = 3
-        const val MAX_SIDE = 6
+        const val MAX_SIDE = 8
         const val SHRINK = 4
         const val BLUR_RADIUS = 4
         const val BLUR_PASSES = 3

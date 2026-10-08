@@ -12,10 +12,15 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 
 @Database(
-    entities = [Track::class, Point::class],
-    version = 3,
+    entities = [Track::class, Point::class, Mark::class],
+    version = 5,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3, spec = AltairDatabase.DropUnused::class)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3, spec = AltairDatabase.DropUnused::class),
+        AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
+    ],
 )
 abstract class AltairDatabase : RoomDatabase() {
     abstract fun tracks(): TrackDao

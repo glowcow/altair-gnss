@@ -50,27 +50,94 @@ class Climb {
     }
 }
 
-/** Adds up the way along the ground; a step shorter than [STEP] is the receiver's wander and does not count. */
+/** The altitude as it comes in, with the sensor's jumps taken out: the median of the last [size] values. */
+class RunningMedian(private val size: Int = 15) {
+    private val last = ArrayDeque<Double>()
+
+    fun add(value: Double): Double {
+        last += value
+        if (last.size > size) last.removeFirst()
+        return last.sorted()[last.size / 2]
+    }
+}
+
+/**
+ * Adds up the way along the ground. A step shorter than [STEP], or than what either of its ends
+ * may be off by, is as likely the wander of the position as a move, and does not count.
+ */
 class PathLength {
     var metres = 0.0
         private set
     private var anchor: GeoPoint? = null
+    private var doubt = 0.0
 
-    fun add(latitude: Double, longitude: Double) {
+    /** [accuracy] is metres the place may be off by, where its source said. */
+    fun add(latitude: Double, longitude: Double, accuracy: Float? = null) {
         val here = GeoPoint(latitude, longitude)
+        val unsure = (accuracy?.toDouble() ?: 0.0).coerceAtMost(MAX_DOUBT)
         val from = anchor
         if (from == null) {
             anchor = here
+            doubt = unsure
             return
         }
         val step = Scatter.offset(here, from).distance
-        if (step < STEP) return
+        if (step < maxOf(STEP, doubt, unsure)) return
         metres += step
         anchor = here
+        doubt = unsure
     }
 
     private companion object {
         const val STEP = 3.0
+        // A place that claims to be farther off than this still counts once it has moved this far.
+        const val MAX_DOUBT = 30.0
+    }
+}
+
+/**
+ * A speed for places that came without one, as Wi-Fi and cell towers give them: the way from the
+ * last place the phone has clearly left, over the time it took. Standing inside what the place may
+ * be off by for as long as a move at [moving] m/s would have left it is a speed of zero.
+ */
+class WalkedSpeed(private val moving: Float) {
+    private var anchor: GeoPoint? = null
+    private var anchorAt = 0L
+    private var last: Float? = null
+
+    /** The speed at [timeMs] at a place that may be [accuracy] metres off; null until there is something to go by. */
+    fun add(latitude: Double, longitude: Double, accuracy: Float, timeMs: Long): Float? {
+        val here = GeoPoint(latitude, longitude)
+        val from = anchor
+        if (from == null) {
+            anchor = here
+            anchorAt = timeMs
+            return last
+        }
+        val window = (accuracy / moving * 1000).toLong()
+        val took = timeMs - anchorAt
+        if (took <= 0) return last
+        val moved = Scatter.offset(here, from).distance
+        if (moved >= accuracy) {
+            // A leap no one travels is the position jumping to another guess.
+            (moved / took * 1000).toFloat().takeIf { it <= MAX_SPEED }?.let { last = it }
+            anchor = here
+            anchorAt = timeMs
+        } else if (took >= window) {
+            last = 0f
+            // The wait behind a standing phone must not thin out the speed of its next move.
+            anchorAt = timeMs - window
+        }
+        return last
+    }
+
+    fun reset() {
+        anchor = null
+        last = null
+    }
+
+    private companion object {
+        const val MAX_SPEED = 70f
     }
 }
 
@@ -84,8 +151,8 @@ class TrackPath(val points: List<PathPoint>, val centre: GeoPoint, val stops: Li
 }
 
 /**
- * One point of a track on a plane round its middle: metres east and north, metres above its lowest
- * point; with what it was like there — the altitude, the speed, the time and the way since the start.
+ * One point of a track on a plane round its middle: metres east and north, metres above the level
+ * heights are counted from; with what it was like there — the altitude, the speed, the time and the way since the start.
  */
 data class PathPoint(
     val east: Double,
@@ -100,19 +167,20 @@ data class PathPoint(
 object Profile {
     /**
      * The points the receiver placed, laid out round the centre of the smallest circle that holds
-     * the track, so the track sits evenly on a round ground; [altitudes] go with [points].
+     * the track, so the track sits evenly on a round ground; [altitudes] go with [points]. The
+     * ground is at [base] metres above sea level, or at the lowest point of the track without one.
      */
-    fun path(points: List<Point>, altitudes: List<Double>, moving: Float = MOVING): TrackPath? {
+    fun path(points: List<Point>, altitudes: List<Double>, moving: Float = MOVING, base: Double? = null): TrackPath? {
         val placed = points.indices.filter { points[it].latitude != null && points[it].longitude != null }
         if (placed.size < 2) return null
         val origin = GeoPoint(points[placed.first()].latitude!!, points[placed.first()].longitude!!)
         val offsets = placed.map { Scatter.offset(GeoPoint(points[it].latitude!!, points[it].longitude!!), origin) }
         val (centreEast, centreNorth) = enclosingCentre(offsets.map { it.east to it.north })
-        val lowest = placed.minOf { altitudes[it] }
+        val lowest = base ?: placed.minOf { altitudes[it] }
         val way = PathLength()
         val laid = placed.mapIndexed { n, i ->
             val point = points[i]
-            way.add(point.latitude!!, point.longitude!!)
+            way.add(point.latitude!!, point.longitude!!, point.accuracy)
             PathPoint(
                 offsets[n].east - centreEast,
                 offsets[n].north - centreNorth,
@@ -124,6 +192,26 @@ object Profile {
             )
         }
         return TrackPath(laid, Scatter.shift(origin, centreEast, centreNorth), stops(laid, moving))
+    }
+
+    /**
+     * The altitudes of [points] with the sensor's jumps taken out: the median of the seconds round
+     * each point drops a lone spike, and the mean of the same stretch evens out what is left.
+     */
+    fun smooth(points: List<Point>): List<Double> {
+        val steady = around(points, points.map { it.altitude }) { it.sorted()[it.size / 2] }
+        return around(points, steady) { it.average() }
+    }
+
+    /** [fold] of the [values] within [SMOOTH_MS] of each point. */
+    private fun around(points: List<Point>, values: List<Double>, fold: (List<Double>) -> Double): List<Double> {
+        var from = 0
+        var to = 0
+        return points.indices.map { i ->
+            while (points[i].timeMs - points[from].timeMs > SMOOTH_MS) from++
+            while (to < points.lastIndex && points[to + 1].timeMs - points[i].timeMs <= SMOOTH_MS) to++
+            fold(values.subList(from, to + 1))
+        }
     }
 
     /** The stretches of [path] slower than [moving] that lasted at least [STOP_MS], each marked at its first point. */
@@ -191,7 +279,7 @@ object Profile {
         if (points.isEmpty()) return null
         val climb = Climb().also { altitudes.forEach(it::add) }
         val way = PathLength()
-        for (point in points) if (point.latitude != null && point.longitude != null) way.add(point.latitude, point.longitude)
+        for (point in points) if (point.latitude != null && point.longitude != null) way.add(point.latitude, point.longitude, point.accuracy)
         val speeds = points.mapNotNull { it.speed }
         val inMotion = speeds.filter { it >= moving }
         // The time of every step that ended at a moving point; a gap in the recording is not a step.
@@ -217,7 +305,7 @@ object Profile {
 
     /** The recording as a table, a row a point. */
     fun csv(points: List<Point>, altitudes: List<Double>, zero: Double): String = buildString {
-        append("time,elapsed_s,altitude_m,from_zero_m,pressure_hpa,latitude,longitude,speed_mps\n")
+        append("time,elapsed_s,altitude_m,from_zero_m,pressure_hpa,latitude,longitude,speed_mps,accuracy_m\n")
         val start = points.firstOrNull()?.timeMs ?: return@buildString
         points.forEachIndexed { i, point ->
             append(Instant.ofEpochMilli(point.timeMs)).append(',')
@@ -226,7 +314,8 @@ object Profile {
             append(point.hpa?.let { String.format(Locale.ROOT, "%.3f", it) }.orEmpty()).append(',')
             append(point.latitude?.let { String.format(Locale.ROOT, "%.6f", it) }.orEmpty()).append(',')
             append(point.longitude?.let { String.format(Locale.ROOT, "%.6f", it) }.orEmpty()).append(',')
-            append(point.speed?.let { String.format(Locale.ROOT, "%.2f", it) }.orEmpty())
+            append(point.speed?.let { String.format(Locale.ROOT, "%.2f", it) }.orEmpty()).append(',')
+            append(point.accuracy?.let { String.format(Locale.ROOT, "%.1f", it) }.orEmpty())
             append('\n')
         }
     }
@@ -237,6 +326,9 @@ object Profile {
     // Standing this long is a stop worth marking on the track.
     private const val STOP_MS = 30_000L
     private const val MAX_STEP_MS = 10_000L
+
+    // How far to either side of a point its altitude is evened out.
+    private const val SMOOTH_MS = 7_000L
 
     private const val SHRINK_STEPS = 60
 }

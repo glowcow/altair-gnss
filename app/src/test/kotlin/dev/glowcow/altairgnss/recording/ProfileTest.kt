@@ -2,6 +2,7 @@ package dev.glowcow.altairgnss.recording
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ProfileTest {
@@ -40,12 +41,12 @@ class ProfileTest {
     fun csvCarriesPlaceAndSpeedWhereKnown() {
         val points = listOf(
             point(0, 200.0, 990.0),
-            point(1, 198.5).copy(latitude = 55.5, longitude = 37.25, speed = 1.5f),
+            point(1, 198.5).copy(latitude = 55.5, longitude = 37.25, speed = 1.5f, accuracy = 12f),
         )
         val lines = Profile.csv(points, points.map { it.altitude }, 200.0).trim().lines()
-        assertEquals("time,elapsed_s,altitude_m,from_zero_m,pressure_hpa,latitude,longitude,speed_mps", lines[0])
-        assertEquals("1970-01-01T00:00:00Z,0,200.00,0.00,990.000,,,", lines[1])
-        assertEquals("1970-01-01T00:00:01Z,1,198.50,-1.50,,55.500000,37.250000,1.50", lines[2])
+        assertEquals("time,elapsed_s,altitude_m,from_zero_m,pressure_hpa,latitude,longitude,speed_mps,accuracy_m", lines[0])
+        assertEquals("1970-01-01T00:00:00Z,0,200.00,0.00,990.000,,,,", lines[1])
+        assertEquals("1970-01-01T00:00:01Z,1,198.50,-1.50,,55.500000,37.250000,1.50,12.0", lines[2])
     }
 
     @Test
@@ -127,5 +128,66 @@ class ProfileTest {
         assertEquals(40_000L, stops[0].durationMs)
         // Points without a speed, under ground, are not stops.
         assertEquals(0, Profile.stops((0..100).map { at(it, null) }).size)
+    }
+
+    @Test
+    fun smoothingDropsASpikeAndKeepsASlope() {
+        // A steady climb of a metre a second with one reading thrown twenty metres off.
+        val points = (0..60).map { point(it, 100.0 + it + if (it == 30) 20.0 else 0.0) }
+        val smooth = Profile.smooth(points)
+        assertEquals(130.0, smooth[30], 1.0)
+        assertEquals(120.0, smooth[20], 0.5)
+        // A level stretch stays where it was.
+        assertEquals(50.0, Profile.smooth((0..20).map { point(it, 50.0) })[10], 1e-9)
+    }
+
+    @Test
+    fun pathCountsHeightFromTheGivenLevel() {
+        val points = listOf(
+            point(0, 100.0).copy(latitude = 55.0, longitude = 37.0),
+            point(1, 130.0).copy(latitude = 55.002, longitude = 37.0),
+        )
+        val path = Profile.path(points, points.map { it.altitude }, base = 110.0)!!.points
+        assertEquals(-10.0, path[0].up, 1e-9)
+        assertEquals(20.0, path[1].up, 1e-9)
+    }
+
+    @Test
+    fun runningMedianHoldsThroughAJump() {
+        val median = RunningMedian(5)
+        listOf(10.0, 10.0, 10.0).forEach(median::add)
+        assertEquals(10.0, median.add(40.0), 1e-9)
+        assertEquals(10.0, median.add(10.0), 1e-9)
+    }
+
+    @Test
+    fun wayIgnoresStepsShorterThanThePlaceIsSure() {
+        val way = PathLength()
+        // Twenty metres each way between places good to 25 m: no way at all.
+        way.add(55.0, 37.0, 25f)
+        way.add(55.00018, 37.0, 25f)
+        way.add(55.0, 37.0, 25f)
+        assertEquals(0.0, way.metres, 1e-9)
+        // A hundred metres off, it has moved.
+        way.add(55.0009, 37.0, 25f)
+        assertEquals(100.0, way.metres, 0.2)
+    }
+
+    @Test
+    fun speedFromTheWayWalked() {
+        val walked = WalkedSpeed(Profile.MOVING)
+        // Places good to 20 m, a walk north at 2 m/s: 1.8e-5 of a degree a second.
+        assertNull(walked.add(55.0, 37.0, 20f, 0))
+        assertNull(walked.add(55.00009, 37.0, 20f, 5_000))
+        assertEquals(2.0f, walked.add(55.00018, 37.0, 20f, 10_000)!!, 0.05f)
+        // Then standing: zero once a move would have left the 20 m, and not before.
+        assertEquals(2.0f, walked.add(55.00018, 37.0, 20f, 20_000)!!, 0.05f)
+        assertEquals(0f, walked.add(55.00018, 37.0, 20f, 40_000)!!, 0f)
+        // Ten minutes on, a walk again is not thinned out by the wait.
+        assertEquals(0f, walked.add(55.00018, 37.0, 20f, 640_000)!!, 0f)
+        assertTrue(walked.add(55.00038, 37.0, 20f, 650_000)!! > 0.6f)
+        // A jump of a kilometre in a second is not a speed.
+        val before = walked.add(55.00038, 37.0, 20f, 651_000)
+        assertEquals(before, walked.add(55.01, 37.0, 20f, 652_000))
     }
 }

@@ -2,6 +2,7 @@ package dev.glowcow.altairgnss.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -22,20 +25,29 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
+import dev.glowcow.altairgnss.ui.theme.AppFont
 import kotlinx.coroutines.launch
 
 /** Rounded block of rows on the grouped background. */
@@ -120,6 +132,50 @@ fun GroupSheet(title: String, onDismiss: () -> Unit, content: @Composable Column
                     action()
                 }
             }
+        }
+    }
+}
+
+/**
+ * A row to type into: a small label above the text. A tap anywhere on it focuses the field; with
+ * [focused] it takes the cursor as soon as it appears.
+ */
+@Composable
+fun GroupField(
+    label: String,
+    value: String,
+    onChange: (String) -> Unit,
+    placeholder: String? = null,
+    keyboard: KeyboardType = KeyboardType.Text,
+    capitalize: Boolean = false,
+    focused: Boolean = false,
+) {
+    val c = AltairTheme.colors
+    val focus = remember { FocusRequester() }
+    if (focused) LaunchedEffect(Unit) { focus.requestFocus() }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { focus.requestFocus() }
+            .heightIn(min = 58.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
+    ) {
+        Text(label, color = c.muted, fontSize = 13.sp)
+        Box {
+            if (value.isEmpty() && placeholder != null) Text(placeholder, color = c.muted, fontSize = 15.sp)
+            BasicTextField(
+                value = value,
+                onValueChange = onChange,
+                singleLine = true,
+                textStyle = TextStyle(color = c.text, fontFamily = AppFont, fontSize = 15.sp),
+                cursorBrush = SolidColor(c.accent),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = keyboard,
+                    capitalization = if (capitalize) KeyboardCapitalization.Sentences else KeyboardCapitalization.None,
+                ),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
+            )
         }
     }
 }

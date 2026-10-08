@@ -56,6 +56,7 @@ import dev.glowcow.altairgnss.data.Palette
 import dev.glowcow.altairgnss.data.SettingsStore
 import dev.glowcow.altairgnss.data.SpeedUnit
 import dev.glowcow.altairgnss.data.ThemeMode
+import dev.glowcow.altairgnss.data.TrackZero
 import dev.glowcow.altairgnss.gnss.CoordinateFormat
 import dev.glowcow.altairgnss.gnss.GnssMonitor
 import dev.glowcow.altairgnss.maps.TileStore
@@ -98,6 +99,7 @@ class SettingsViewModel(
     fun setMapTiles(on: Boolean) = viewModelScope.launch { store.setMapTiles(on) }
     fun setMovingKmh(kmh: Int) = viewModelScope.launch { store.setMovingKmh(kmh) }
     fun setSteadyFix(seconds: Int) = viewModelScope.launch { store.setSteadyFixSeconds(seconds) }
+    fun setTrackZero(zero: TrackZero) = viewModelScope.launch { store.setTrackZero(zero) }
 
     fun clearMapCache() = viewModelScope.launch {
         tiles.clear()
@@ -138,6 +140,7 @@ class SettingsViewModel(
     fun setKeepScreenOn(on: Boolean) = viewModelScope.launch { store.setKeepScreenOn(on) }
     fun setStartTab(tab: TopTab) = viewModelScope.launch { store.setStartTab(tab.name) }
     fun setTrueNorth(on: Boolean) = viewModelScope.launch { store.setTrueNorth(on) }
+    fun setGainWatch(on: Boolean) = viewModelScope.launch { store.setGainWatch(on) }
     fun setAppUpdate(on: Boolean) = viewModelScope.launch { store.setAppUpdate(on) }
 }
 
@@ -267,6 +270,8 @@ fun SettingsScreen(
                     subtitle = stringResource(R.string.settings_assist_clear_hint),
                     onClick = { picker = Picker.CLEAR_ASSIST },
                 )
+                GroupDivider()
+                SwitchRow(stringResource(R.string.settings_gain), stringResource(R.string.settings_gain_hint), settings.gainWatch, vm::setGainWatch)
             }
             assisted?.let {
                 Text(
@@ -289,6 +294,13 @@ fun SettingsScreen(
                     subtitle = stringResource(R.string.settings_steady_fix_hint),
                     value = steadyText(settings.steadyFixSeconds),
                     onClick = { picker = Picker.STEADY_FIX },
+                )
+                GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_track_zero),
+                    subtitle = stringResource(R.string.settings_track_zero_hint),
+                    value = stringResource(TRACK_ZEROS.first { it.first == settings.trackZero }.second),
+                    onClick = { picker = Picker.TRACK_ZERO },
                 )
             }
             Group {
@@ -413,6 +425,13 @@ fun SettingsScreen(
             onSelect = vm::setSteadyFix,
             onDismiss = { picker = null },
         )
+        Picker.TRACK_ZERO -> ChoiceSheet(
+            title = stringResource(R.string.settings_track_zero),
+            options = TRACK_ZEROS.map { (zero, label) -> zero to stringResource(label) },
+            selected = settings.trackZero,
+            onSelect = vm::setTrackZero,
+            onDismiss = { picker = null },
+        )
         Picker.COORDINATES -> ChoiceSheet(
             title = stringResource(R.string.settings_coordinates),
             options = COORDINATES.map { (format, label) -> format to stringResource(label) },
@@ -489,7 +508,13 @@ private fun PasswordField(value: String, onChange: (String) -> Unit) {
     }
 }
 
-private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, LENGTH, SPEED, MOVING, STEADY_FIX, START_TAB, CLEAR_ASSIST }
+private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, LENGTH, SPEED, MOVING, STEADY_FIX, TRACK_ZERO, START_TAB, CLEAR_ASSIST }
+
+private val TRACK_ZEROS = listOf(
+    TrackZero.LOWEST to R.string.track_zero_lowest,
+    TrackZero.START to R.string.track_zero_start,
+    TrackZero.SEA to R.string.track_zero_sea,
+)
 
 private val THEMES = listOf(
     ThemeMode.SYSTEM to R.string.theme_system,

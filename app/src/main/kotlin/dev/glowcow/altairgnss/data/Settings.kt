@@ -15,11 +15,15 @@ import dev.glowcow.altairgnss.altimeter.CalibrationKind
 import dev.glowcow.altairgnss.gnss.CoordinateFormat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 enum class Palette { WARM, CLASSIC }
+
+/** Where the heights of a recording are counted from: its lowest point, its start or the zero set in it, or sea level. */
+enum class TrackZero { LOWEST, START, SEA }
 
 data class AppSettings(
     val theme: ThemeMode = ThemeMode.SYSTEM,
@@ -36,10 +40,15 @@ data class AppSettings(
     val appUpdate: Boolean = false,
     /** A recording keeps the position and the speed of its points; off, it is altitude alone and leaves the receiver be. */
     val recordPosition: Boolean = true,
+    /** A recording places its points by the phone's blend of satellites, Wi-Fi and cell towers. */
+    val networkPosition: Boolean = false,
     /** Slower than this many km/h a recording counts as standing. */
     val movingKmh: Int = 3,
     /** A recording with positions starts once the receiver has held a fix for this many seconds; 0 starts at once. */
     val steadyFixSeconds: Int = 15,
+    val trackZero: TrackZero = TrackZero.LOWEST,
+    /** Listen to the receiver's gain to tell interference sooner. */
+    val gainWatch: Boolean = false,
     /** Draw a recording's track on a map downloaded for it. */
     val mapTiles: Boolean = false,
 ) {
@@ -67,8 +76,12 @@ class SettingsStore(private val context: Context) {
     private val appUpdateKey = booleanPreferencesKey("app_update")
     private val mapTilesKey = booleanPreferencesKey("map_tiles")
     private val recordPositionKey = booleanPreferencesKey("record_position")
+    private val networkPositionKey = booleanPreferencesKey("network_position")
     private val movingKey = intPreferencesKey("moving_kmh")
     private val steadyFixKey = intPreferencesKey("steady_fix_seconds")
+    private val trackZeroKey = stringPreferencesKey("track_zero")
+    private val gainWatchKey = booleanPreferencesKey("gain_watch")
+    private val gainBaselineKey = stringPreferencesKey("gain_baseline")
 
     private val sourceKey = stringPreferencesKey("altitude_source")
     private val referenceKey = doublePreferencesKey("calibration_reference")
@@ -118,8 +131,11 @@ class SettingsStore(private val context: Context) {
             appUpdate = p[appUpdateKey] ?: false,
             mapTiles = p[mapTilesKey] ?: false,
             recordPosition = p[recordPositionKey] ?: true,
+            networkPosition = p[networkPositionKey] ?: false,
             movingKmh = p[movingKey] ?: 3,
             steadyFixSeconds = p[steadyFixKey] ?: 15,
+            trackZero = p[trackZeroKey]?.let { runCatching { TrackZero.valueOf(it) }.getOrNull() } ?: TrackZero.LOWEST,
+            gainWatch = p[gainWatchKey] ?: false,
         )
     }
 
@@ -136,8 +152,11 @@ class SettingsStore(private val context: Context) {
         it[appUpdateKey] = s.appUpdate
         it[mapTilesKey] = s.mapTiles
         it[recordPositionKey] = s.recordPosition
+        it[networkPositionKey] = s.networkPosition
         it[movingKey] = s.movingKmh
         it[steadyFixKey] = s.steadyFixSeconds
+        it[trackZeroKey] = s.trackZero.name
+        it[gainWatchKey] = s.gainWatch
     }
 
     suspend fun setTheme(mode: ThemeMode) = context.dataStore.edit { it[themeKey] = mode.name }
@@ -158,9 +177,23 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setRecordPosition(on: Boolean) = context.dataStore.edit { it[recordPositionKey] = on }
 
+    suspend fun setNetworkPosition(on: Boolean) = context.dataStore.edit { it[networkPositionKey] = on }
+
     suspend fun setMovingKmh(kmh: Int) = context.dataStore.edit { it[movingKey] = kmh }
 
     suspend fun setSteadyFixSeconds(seconds: Int) = context.dataStore.edit { it[steadyFixKey] = seconds }
+
+    suspend fun setTrackZero(zero: TrackZero) = context.dataStore.edit { it[trackZeroKey] = zero.name }
+
+    suspend fun setGainWatch(on: Boolean) = context.dataStore.edit { it[gainWatchKey] = on }
+
+    /** The receiver's gain under a quiet sky, by band, as [dev.glowcow.altairgnss.gnss.GainWatch] learnt it. */
+    suspend fun gainBaseline(): Map<String, Double> = context.dataStore.data.first()[gainBaselineKey].orEmpty()
+        .split(';').mapNotNull { pair -> pair.split('=').takeIf { it.size == 2 }?.let { (band, level) -> level.toDoubleOrNull()?.let { band to it } } }.toMap()
+
+    suspend fun setGainBaseline(levels: Map<String, Double>) = context.dataStore.edit {
+        it[gainBaselineKey] = levels.entries.joinToString(";") { (band, level) -> "$band=$level" }
+    }
 
     suspend fun setMapTiles(on: Boolean) = context.dataStore.edit { it[mapTilesKey] = on }
 

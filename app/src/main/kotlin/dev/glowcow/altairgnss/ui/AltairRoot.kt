@@ -21,10 +21,11 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.glowcow.altairgnss.data.AppSettings
 import dev.glowcow.altairgnss.ui.altimeter.AltimeterScreen
+import dev.glowcow.altairgnss.ui.components.TopTab
 import dev.glowcow.altairgnss.ui.instruments.CompassScreen
 import dev.glowcow.altairgnss.ui.instruments.InstrumentsScreen
 import dev.glowcow.altairgnss.ui.instruments.SpeedScreen
-import dev.glowcow.altairgnss.ui.components.TopTab
+import dev.glowcow.altairgnss.ui.recording.ChartScreen
 import dev.glowcow.altairgnss.ui.recording.RecordScreen
 import dev.glowcow.altairgnss.ui.recording.TrackScreen
 import dev.glowcow.altairgnss.ui.recording.TrackViewScreen
@@ -47,6 +48,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object SpeedRoute : NavKey
 @Serializable data class TrackRoute(val id: Long) : NavKey
 @Serializable data class TrackViewRoute(val id: Long) : NavKey
+@Serializable data class ChartRoute(val id: Long) : NavKey
 @Serializable data object NmeaRoute : NavKey
 @Serializable data object ScatterRoute : NavKey
 
@@ -118,9 +120,15 @@ fun AltairRoot(settings: AppSettings, openTab: Flow<TopTab>) {
             entry<CompassRoute> { CompassScreen(onBack = { backStack.removeLastOrNull() }) }
             entry<SpeedRoute> { SpeedScreen(onBack = { backStack.removeLastOrNull() }) }
             entry<TrackRoute> { route ->
-                TrackScreen(route.id, onBack = { backStack.removeLastOrNull() }, onExpand = { backStack.add(TrackViewRoute(route.id)) })
+                TrackScreen(
+                    route.id,
+                    onBack = { backStack.removeLastOrNull() },
+                    onExpand = { backStack.add(TrackViewRoute(route.id)) },
+                    onExpandChart = { backStack.add(ChartRoute(route.id)) },
+                )
             }
             entry<TrackViewRoute> { route -> TrackViewScreen(route.id, onBack = { backStack.removeLastOrNull() }) }
+            entry<ChartRoute> { route -> ChartScreen(route.id, onBack = { backStack.removeLastOrNull() }) }
             entry<NmeaRoute> { NmeaScreen(onBack = { backStack.removeLastOrNull() }) }
             entry<ScatterRoute> { ScatterScreen(onBack = { backStack.removeLastOrNull() }) }
             entry<SettingsRoute> { SettingsScreen(onTab = ::selectTab) }

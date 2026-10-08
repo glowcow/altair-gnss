@@ -51,6 +51,7 @@ import dev.glowcow.altairgnss.container
 import dev.glowcow.altairgnss.data.AppSettings
 import dev.glowcow.altairgnss.recording.Track
 import dev.glowcow.altairgnss.ui.components.ChoiceSheet
+import dev.glowcow.altairgnss.ui.components.FloatingButton
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
@@ -66,13 +67,43 @@ import dev.glowcow.altairgnss.ui.components.lengthText
 import dev.glowcow.altairgnss.ui.components.signedLengthText
 import dev.glowcow.altairgnss.ui.components.speedText
 import dev.glowcow.altairgnss.ui.components.verticalSpeedText
+import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import kotlinx.coroutines.launch
 
 /** The tab of recordings: what is measured now, the two buttons that start and stop a recording, and those made before. */
 @Composable
-fun RecordScreen(onTab: (TopTab) -> Unit, onOpen: (Long) -> Unit) = TabScreen(TopTab.RECORD, onTab) { top, bottom ->
-    LocationGate(top) { RecordContent(top, bottom, onOpen) }
+fun RecordScreen(onTab: (TopTab) -> Unit, onOpen: (Long) -> Unit) {
+    val container = LocalContext.current.container
+    val progress by container.recorder.live.collectAsStateWithLifecycle()
+    // The moment a checkpoint was asked for, while its sheet is open, and how far into the recording that was.
+    var marking by remember { mutableStateOf<Long?>(null) }
+    var markedAt by remember { mutableStateOf(0L) }
+    TabScreen(
+        TopTab.RECORD,
+        onTab,
+        floating = { bottom ->
+            // Only a recording that writes takes checkpoints: the moment is kept at the tap, the words come after.
+            val running = progress?.takeIf { it.waitingSeconds == null }
+            if (running != null) {
+                FloatingButton(AltairIcons.Plus, stringResource(R.string.mark_add), bottom) {
+                    markedAt = running.elapsedMs
+                    marking = System.currentTimeMillis()
+                }
+            }
+        },
+    ) { top, bottom ->
+        LocationGate(top) { RecordContent(top, bottom, onOpen) }
+    }
+    marking?.let { at ->
+        MarkSheet(
+            stringResource(R.string.mark_title, clock(markedAt)),
+            label = "",
+            action = stringResource(R.string.mark_add),
+            onSave = { text -> container.scope.launch { container.recorder.mark(at, text) } },
+            onDismiss = { marking = null },
+        )
+    }
 }
 
 @Composable
@@ -102,7 +133,8 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit) {
     val speed = @Composable { v: Float? -> v?.let { speedText(it) } ?: NO_VALUE }
 
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = top, bottom = bottom + 16.dp),
+        // While it records, the page ends clear of the button that floats over it.
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(top = top, bottom = bottom + if (live != null) 92.dp else 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         // What is measured now comes first; what a recording adds up fills in once it runs.
@@ -112,7 +144,7 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit) {
                     stringResource(R.string.label_elapsed) to (live?.let { clock(it.elapsedMs) } ?: NO_VALUE),
                     stringResource(R.string.label_moving_time) to (live?.movingMs?.let { clock(it) } ?: NO_VALUE),
                     stringResource(R.string.label_distance) to (live?.let { distanceText(it.distance) } ?: NO_VALUE),
-                    stringResource(R.string.label_speed) to speed(fix?.speed),
+                    stringResource(R.string.label_speed) to speed(live?.speed ?: fix?.speed),
                     stringResource(R.string.label_speed_average) to speed(live?.averageSpeed),
                     stringResource(R.string.label_speed_max) to speed(live?.maxSpeed),
                     stringResource(R.string.label_altitude) to metres(altimeter.altitude),
@@ -121,7 +153,6 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit) {
                     stringResource(R.string.label_descended) to metres(live?.loss),
                     stringResource(R.string.label_lowest) to from(live?.lowest),
                     stringResource(R.string.label_highest) to from(live?.highest),
-                    stringResource(R.string.label_from_zero) to from(live?.fromZero),
                 ),
             )
         }
@@ -162,6 +193,14 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit) {
                 stringResource(R.string.recording_position_hint),
                 settings.recordPosition,
             ) { on -> container.scope.launch { container.settings.setRecordPosition(on) } }
+            if (settings.recordPosition) {
+                GroupDivider()
+                SwitchRow(
+                    stringResource(R.string.recording_network),
+                    stringResource(R.string.recording_network_hint),
+                    settings.networkPosition,
+                ) { on -> container.scope.launch { container.settings.setNetworkPosition(on) } }
+            }
             if (live != null) {
                 GroupDivider()
                 GroupRow(stringResource(R.string.recording_zero), subtitle = stringResource(R.string.recording_zero_hint), onClick = recorder::zeroHere)
@@ -209,13 +248,14 @@ private enum class Mark { RECORD, WAITING, RUNNING, STOP }
 /**
  * One of the two buttons of the tab. Record is the dark pill with a red dot; while the recording
  * waits for the receiver the dot is amber and pulses, and once it runs it is red and pulses. Stop
- * is the quiet one with a square, dimmed while there is nothing to stop.
+ * is the quiet one with a square on the colour of a block, its label dimmed while there is nothing to stop.
  */
 @Composable
 private fun RecordButton(text: String, enabled: Boolean, mark: Mark, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val c = AltairTheme.colors
     val primary = mark != Mark.STOP
-    val content = if (primary) c.bg else c.text
+    // Stop with nothing to stop keeps its ground and only quiets what is written on it.
+    val content = if (primary) c.bg else if (enabled) c.text else c.muted.copy(alpha = 0.6f)
     val pulsing = mark == Mark.WAITING || mark == Mark.RUNNING
     val beat by rememberInfiniteTransition(label = "recording").animateFloat(
         initialValue = 1f,
@@ -226,9 +266,8 @@ private fun RecordButton(text: String, enabled: Boolean, mark: Mark, modifier: M
     Row(
         modifier
             .height(56.dp)
-            .alpha(if (enabled || primary) 1f else 0.35f)
             .clip(RoundedCornerShape(28.dp))
-            .background(if (primary) c.text else c.chip)
+            .background(if (primary) c.text else c.group)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
