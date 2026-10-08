@@ -154,7 +154,7 @@ class TrackPath(val points: List<PathPoint>, val centre: GeoPoint, val stops: Li
  * One point of a track on a plane round its middle: metres east and north, metres above the level
  * heights are counted from; with what it was like there — the altitude, the speed, the time and the way since the start.
  * [afterGap] says the recording had no place for a while before this point, so the way to it from
- * the point before is a straight guess.
+ * the point before is a straight guess; the points inside such a gap are set along it by their time.
  */
 data class PathPoint(
     val east: Double,
@@ -179,12 +179,32 @@ object Profile {
         val origin = GeoPoint(points[placed.first()].latitude!!, points[placed.first()].longitude!!)
         val offsets = placed.map { Scatter.offset(GeoPoint(points[it].latitude!!, points[it].longitude!!), origin) }
         val (centreEast, centreNorth) = enclosingCentre(offsets.map { it.east to it.north })
-        val lowest = base ?: placed.minOf { altitudes[it] }
+        val lowest = base ?: (placed.first()..placed.last()).minOf { altitudes[it] }
         val way = PathLength()
-        val laid = placed.mapIndexed { n, i ->
+        val laid = mutableListOf<PathPoint>()
+        placed.forEachIndexed { n, i ->
             val point = points[i]
+            val before = way.metres
             way.add(point.latitude!!, point.longitude!!, point.accuracy)
-            PathPoint(
+            val gap = n > 0 && point.timeMs - points[placed[n - 1]].timeMs > GAP_MS
+            if (gap) {
+                // The points with no place stand along the straight way across, each at its own altitude.
+                val from = placed[n - 1]
+                for (j in from + 1 until i) {
+                    val part = (points[j].timeMs - points[from].timeMs).toDouble() / (point.timeMs - points[from].timeMs)
+                    laid += PathPoint(
+                        offsets[n - 1].east + (offsets[n].east - offsets[n - 1].east) * part - centreEast,
+                        offsets[n - 1].north + (offsets[n].north - offsets[n - 1].north) * part - centreNorth,
+                        altitudes[j] - lowest,
+                        null,
+                        altitudes[j],
+                        points[j].timeMs - points.first().timeMs,
+                        before + (way.metres - before) * part,
+                        afterGap = true,
+                    )
+                }
+            }
+            laid += PathPoint(
                 offsets[n].east - centreEast,
                 offsets[n].north - centreNorth,
                 altitudes[i] - lowest,
@@ -192,7 +212,7 @@ object Profile {
                 altitudes[i],
                 point.timeMs - points.first().timeMs,
                 way.metres,
-                afterGap = n > 0 && point.timeMs - points[placed[n - 1]].timeMs > GAP_MS,
+                afterGap = gap,
             )
         }
         return TrackPath(laid, Scatter.shift(origin, centreEast, centreNorth), stops(laid, moving))

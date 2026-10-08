@@ -194,9 +194,15 @@ class ProfileTest {
     @Test
     fun pathMarksTheWayAcrossAGapInPositions() {
         fun placed(second: Int) = point(second, 100.0).copy(latitude = 55.0 + second * 1e-5, longitude = 37.0)
-        // Positions every second, none from the 4th to the 9th second, then again.
-        val points = (0..3).map(::placed) + (4..9).map { point(it, 100.0) } + (10..12).map(::placed)
+        // Positions every second, none from the 4th to the 9th second, then again; a hill inside the gap.
+        val points = (0..3).map(::placed) + (4..9).map { point(it, 100.0 + (it - 3) * 2) } + (10..12).map(::placed)
         val path = Profile.path(points, points.map { it.altitude })!!.points
-        assertEquals(listOf(false, false, false, false, true, false, false), path.map { it.afterGap })
+        assertEquals(13, path.size)
+        assertEquals((0..12).map { it in 4..10 }, path.map { it.afterGap })
+        // The points of the gap keep their altitudes and stand evenly on the straight way across.
+        assertEquals(12.0, path[9].up, 1e-9)
+        assertNull(path[9].speed)
+        assertEquals((path[3].north + path[10].north) / 2, (path[6].north + path[7].north) / 2, 1e-6)
+        assertTrue(path.zipWithNext().all { (a, b) -> b.distance >= a.distance && b.north > a.north })
     }
 }
