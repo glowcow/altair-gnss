@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,13 +22,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
+import dev.glowcow.altairgnss.ui.theme.AppFont
+import dev.glowcow.altairgnss.ui.theme.TitleFont
 
 enum class TopTab(val icon: ImageVector, val label: Int) {
     STATUS(AltairIcons.Status, R.string.tab_status),
@@ -60,7 +68,7 @@ fun BoxScope.FloatingButton(icon: ImageVector, description: String, bottom: Dp, 
 fun BottomBar(current: TopTab, onSelect: (TopTab) -> Unit) {
     val c = AltairTheme.colors
     Column(Modifier.navigationBarsPadding()) {
-        Box(Modifier.fillMaxWidth().height(1.dp).background(c.line))
+        GlassLine()
         Row(Modifier.fillMaxWidth().height(64.dp), verticalAlignment = Alignment.CenterVertically) {
             for (tab in TopTab.entries) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
@@ -70,6 +78,35 @@ fun BottomBar(current: TopTab, onSelect: (TopTab) -> Unit) {
         }
     }
 }
+
+/**
+ * The title of a page, on one line: Cormorant Garamond, [large] on a tab and the size a title was
+ * before in a row with buttons; the app's own bold face where the language is Hebrew, which that face lacks.
+ */
+@Composable
+fun PageTitle(text: String, modifier: Modifier = Modifier, large: Boolean = false) {
+    val own = LocalConfiguration.current.locales[0].language.let { it == "iw" || it == "he" }
+    Text(
+        text,
+        modifier,
+        color = AltairTheme.colors.text,
+        fontFamily = if (own) AppFont else TitleFont,
+        fontSize = when {
+            own -> 22.sp
+            large -> TAB_TITLE
+            else -> PAGE_TITLE
+        },
+        fontWeight = if (own) FontWeight.Bold else FontWeight.Normal,
+        style = TextStyle(fontFeatureSettings = "lnum"),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+private val TAB_TITLE = 36.sp
+
+// Cormorant's capitals are lower than Arimo's: at this size they stand as tall as a 22 sp title did.
+private val PAGE_TITLE = 25.sp
 
 @Composable
 fun IconButton48(

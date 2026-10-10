@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,7 +50,9 @@ import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
 import dev.glowcow.altairgnss.ui.components.GroupSheet
+import dev.glowcow.altairgnss.ui.components.HeaderGap
 import dev.glowcow.altairgnss.ui.components.IconButton48
+import dev.glowcow.altairgnss.ui.components.PageTitle
 import dev.glowcow.altairgnss.ui.components.StatGrid
 import dev.glowcow.altairgnss.ui.components.clock
 import dev.glowcow.altairgnss.ui.components.distanceText
@@ -313,9 +314,9 @@ fun ChartScreen(id: Long, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().background(c.groupBg).statusBarsPadding().navigationBarsPadding()) {
         Row(Modifier.heightIn(min = 56.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
-            Text(data.track?.let { startTime(context, it) }.orEmpty(), color = c.text, fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 4.dp))
+            PageTitle(data.track?.let { startTime(context, it) }.orEmpty(), Modifier.padding(start = 4.dp, end = 8.dp))
         }
-        Group(Modifier.weight(1f).padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+        Group(Modifier.weight(1f).padding(start = 16.dp, top = HeaderGap, end = 16.dp, bottom = 16.dp)) {
             ProfileChart(data.points.map { it.timeMs }, data.altitudes.map { it - data.base }, absolute = data.absolute, marks = data.chartMarks, full = true)
         }
     }

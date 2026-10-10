@@ -218,6 +218,7 @@
     <string name="settings_map_images">Слике карте</string>
     <string name="settings_version">Верзија</string>
     <string name="settings_font">Фонт</string>
+    <string name="settings_title_font">Фонт наслова</string>
     <string name="recording_channel">Снимање</string>
     <string name="recording_notification">Снима се стаза</string>
     <string name="recording_notification_text">Наставља се и када је екран искључен. Додирните да отворите</string>

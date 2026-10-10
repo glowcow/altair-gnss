@@ -163,7 +163,8 @@ Check a downloaded file with `apksigner verify --print-certs <file>.apk`.
 The look is shared with [stackd](https://github.com/glowcow/stackd). The
 default *classic* scheme is neutral grey — light `#FAFAFA` / dark `#161616`
 backgrounds, accent `#1F6FEB`; the *warm* scheme has `#FAF9F5` / `#1A1A18`
-and accent `#D97757`. UI font: Arimo. The launcher icon and the splash
+and accent `#D97757`. UI font: Arimo, with page titles in Cormorant Garamond. The launcher icon
+and the splash
 screen use the brand palette: navy `#0B1630`, gold `#FFD36B`, ice `#9FB7D9`.
 
 ## License
@@ -171,8 +172,9 @@ screen use the brand palette: navy `#0B1630`, gold `#FFD36B`, ice `#9FB7D9`.
 [GNU General Public License v3.0 or later](LICENSE) © Anton Sediuk. A
 modified version you distribute has to stay open under the same licence.
 
-Arimo is bundled under the SIL Open Font License 1.1 — see
-[`licenses/Arimo-OFL.txt`](licenses/Arimo-OFL.txt).
+Arimo and Cormorant Garamond are bundled under the SIL Open Font License
+1.1 — see [`licenses/Arimo-OFL.txt`](licenses/Arimo-OFL.txt) and
+[`licenses/CormorantGaramond-OFL.txt`](licenses/CormorantGaramond-OFL.txt).
 
 The world map uses NASA's Blue Marble and Black Marble images (NASA Earth
 Observatory), which are in the public domain. Airport reports come from

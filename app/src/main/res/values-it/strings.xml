@@ -218,6 +218,7 @@
     <string name="settings_map_images">Immagini della mappa</string>
     <string name="settings_version">Versione</string>
     <string name="settings_font">Carattere</string>
+    <string name="settings_title_font">Carattere dei titoli</string>
     <string name="recording_channel">Registrazione</string>
     <string name="recording_notification">Registrazione del percorso</string>
     <string name="recording_notification_text">Continua anche a schermo spento. Tocca per aprire</string>

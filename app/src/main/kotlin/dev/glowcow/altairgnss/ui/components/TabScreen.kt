@@ -9,11 +9,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -31,16 +30,13 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -99,7 +95,7 @@ fun TabScreen(
                 drawLayer(page)
             },
         ) {
-            content(with(density) { headerHeight.toDp() }, with(density) { barHeight.intValue.toDp() })
+            content(with(density) { headerHeight.toDp() } + HeaderGap, with(density) { barHeight.intValue.toDp() })
         }
         floating(with(density) { (barHeight.intValue - barShift.floatValue).coerceAtLeast(0f).toDp() })
         Column(
@@ -107,17 +103,17 @@ fun TabScreen(
                 .fillMaxWidth()
                 .onSizeChanged { headerHeight = it.height }
                 .frosted(page, c.groupBg) { Offset.Zero }
-                // What shows through the glass is not tappable through it.
-                .pointerInput(Unit) {}
+                .solid()
                 .statusBarsPadding(),
         ) {
             Row(
                 // The title is inset like a caption; what stands at the end lines up with the blocks below.
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+                // The row is as high as a 22 sp title with 14 dp above and below made it, whatever the title's face.
+                Modifier.fillMaxWidth().heightIn(min = 54.dp).padding(start = 20.dp, end = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(stringResource(tab.label), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = c.text, modifier = Modifier.weight(1f))
+                PageTitle(stringResource(tab.label), Modifier.weight(1f), large = true)
                 trailing?.invoke()
             }
             HeaderLine(shown = under > 0f)
@@ -128,7 +124,7 @@ fun TabScreen(
                 .onSizeChanged { barHeight.intValue = it.height }
                 .offset { IntOffset(0, barShift.floatValue.roundToInt()) }
                 .frosted(page, c.bg) { Offset(0f, pageHeight.intValue - barHeight.intValue + barShift.floatValue) }
-                .pointerInput(Unit) {},
+                .solid(),
         ) {
             BottomBar(tab, onTab)
         }

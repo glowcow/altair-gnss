@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launcher mark at the size the splash screen shows it: a smaller vector is drawn small and stretched. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:ignore="VectorRaster"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M32.95,67.85 L75.05,33.51"
+        android:strokeColor="@color/altair_steel"
+        android:strokeAlpha="1"
+        android:strokeWidth="1.1"
+        android:strokeLineCap="round" />
+    <path android:pathData="M35.69,63.42 a2.25,2.25 0 1,0 4.5,0 a2.25,2.25 0 1,0 -4.5,0 Z" android:fillColor="@color/altair_ice" />
+    <path android:pathData="M68.11,37.94 a1.95,1.95 0 1,0 3.9,0 a1.95,1.95 0 1,0 -3.9,0 Z" android:fillColor="@color/altair_ice" />
+    <path android:pathData="M54,40.71 L57.05,47.63 L63.97,50.68 L57.05,53.73 L54,60.65 L50.95,53.73 L44.03,50.68 L50.95,47.63 Z" android:fillColor="@color/altair_gold" />
+    <path
+        android:pathData="M30.74,75.6 L77.26,75.6"
+        android:strokeColor="@color/altair_gold"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M40.15,81.69 L67.85,81.69"
+        android:strokeColor="@color/altair_gold_dim"
+        android:strokeAlpha="1"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round" />
+</vector>

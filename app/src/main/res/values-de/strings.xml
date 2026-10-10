@@ -217,6 +217,7 @@
     <string name="settings_map_images">Kartenbilder</string>
     <string name="settings_version">Version</string>
     <string name="settings_font">Schrift</string>
+    <string name="settings_title_font">Schrift der Überschriften</string>
     <string name="recording_channel">Aufzeichnung</string>
     <string name="recording_notification">Die Strecke wird aufgezeichnet</string>
     <string name="recording_notification_text">Läuft auch bei ausgeschaltetem Bildschirm weiter. Zum Öffnen tippen</string>

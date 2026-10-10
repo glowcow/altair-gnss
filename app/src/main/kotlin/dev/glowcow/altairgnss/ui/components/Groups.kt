@@ -28,8 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,11 +42,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -142,7 +147,8 @@ fun GroupSheet(title: String, onDismiss: () -> Unit, content: @Composable Column
 
 /**
  * A row to type into: a small label above the text. A tap anywhere on it focuses the field; with
- * [focused] it takes the cursor as soon as it appears, and [secret] hides what is typed.
+ * [focused] it takes the cursor as soon as it appears, and [secret] hides what is typed. Text it
+ * appears with has the cursor at its end, or its first [selected] characters selected.
  */
 @Composable
 fun GroupField(
@@ -154,9 +160,13 @@ fun GroupField(
     capitalize: Boolean = false,
     focused: Boolean = false,
     secret: Boolean = false,
+    selected: Int = 0,
 ) {
     val c = AltairTheme.colors
     val focus = remember { FocusRequester() }
+    var field by remember { mutableStateOf(TextFieldValue(value, if (selected > 0) TextRange(0, selected) else TextRange(value.length))) }
+    // The text may be set from outside; the cursor then goes to its end.
+    if (field.text != value) field = TextFieldValue(value, TextRange(value.length))
     if (focused) LaunchedEffect(Unit) { focus.requestFocus() }
     Column(
         Modifier
@@ -170,8 +180,11 @@ fun GroupField(
         Box {
             if (value.isEmpty() && placeholder != null) Text(placeholder, color = c.muted, fontSize = 15.sp)
             BasicTextField(
-                value = value,
-                onValueChange = onChange,
+                value = field,
+                onValueChange = {
+                    field = it
+                    if (it.text != value) onChange(it.text)
+                },
                 singleLine = true,
                 textStyle = TextStyle(color = c.text, fontFamily = AppFont, fontSize = 15.sp),
                 cursorBrush = SolidColor(c.accent),

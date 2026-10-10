@@ -233,6 +233,7 @@
     <string name="settings_map_images">Снимки для карты</string>
     <string name="settings_version">Версия</string>
     <string name="settings_font">Шрифт</string>
+    <string name="settings_title_font">Шрифт заголовков</string>
     <string name="recording_channel">Запись</string>
     <string name="recording_notification">Идёт запись трека</string>
     <string name="recording_notification_text">Продолжается и при выключенном экране. Нажмите, чтобы открыть</string>

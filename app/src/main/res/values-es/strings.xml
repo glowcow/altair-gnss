@@ -218,6 +218,7 @@
     <string name="settings_map_images">Imágenes del mapa</string>
     <string name="settings_version">Versión</string>
     <string name="settings_font">Fuente</string>
+    <string name="settings_title_font">Fuente de los títulos</string>
     <string name="recording_channel">Grabación</string>
     <string name="recording_notification">Grabando el recorrido</string>
     <string name="recording_notification_text">Sigue con la pantalla apagada. Toca para abrir</string>

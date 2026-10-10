@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,14 +25,10 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
@@ -59,7 +54,7 @@ fun DetailScreen(title: String, onBack: () -> Unit, content: @Composable ColumnS
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(scroll)
-                    .padding(top = with(LocalDensity.current) { header.toDp() })
+                    .padding(top = with(LocalDensity.current) { header.toDp() } + HeaderGap)
                     .navigationBarsPadding()
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp),
@@ -72,21 +67,12 @@ fun DetailScreen(title: String, onBack: () -> Unit, content: @Composable ColumnS
                 .fillMaxWidth()
                 .onSizeChanged { header = it.height }
                 .frosted(page, c.groupBg) { Offset.Zero }
-                // What shows through the glass is not tappable through it.
-                .pointerInput(Unit) {}
+                .solid()
                 .statusBarsPadding(),
         ) {
             Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 IconButton48(AltairIcons.Back, stringResource(R.string.back), onClick = onBack)
-                Text(
-                    title,
-                    color = c.text,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).padding(start = 4.dp, end = 8.dp),
-                )
+                PageTitle(title, Modifier.weight(1f).padding(start = 4.dp, end = 8.dp))
             }
             HeaderLine(shown = scroll.value > 0)
         }

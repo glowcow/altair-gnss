@@ -218,6 +218,7 @@
     <string name="settings_map_images">Images de la carte</string>
     <string name="settings_version">Version</string>
     <string name="settings_font">Police</string>
+    <string name="settings_title_font">Police des titres</string>
     <string name="recording_channel">Enregistrement</string>
     <string name="recording_notification">Enregistrement du parcours</string>
     <string name="recording_notification_text">Il continue écran éteint. Touchez pour ouvrir</string>
