@@ -16,6 +16,7 @@ import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupField
 import dev.glowcow.altairgnss.ui.components.GroupRow
 import dev.glowcow.altairgnss.ui.components.GroupSheet
+import dev.glowcow.altairgnss.ui.theme.AltairTheme
 
 /**
  * What is written on a checkpoint. [action] names the row that takes the words: adding a new
@@ -32,7 +33,7 @@ fun MarkSheet(title: String, label: String, action: String, onSave: (String) -> 
             GroupRow(action, onClick = { pick { onSave(text) } })
             if (onDelete != null) {
                 GroupDivider()
-                GroupRow(stringResource(R.string.mark_delete), onClick = { pick(onDelete) })
+                GroupRow(stringResource(R.string.mark_delete), titleColor = AltairTheme.colors.danger, onClick = { pick(onDelete) })
             }
         }
     }

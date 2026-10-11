@@ -253,6 +253,8 @@
     <string name="settings_steady_fix">Устойчивая фиксация перед записью</string>
     <string name="settings_steady_fix_hint">Запись с GPS-треком начинается, когда положение держится столько времени</string>
     <string name="steady_fix_off">Сразу</string>
+    <string name="settings_record_interval">Интервал записи</string>
+    <string name="settings_record_interval_hint">Как часто запись сохраняет точку</string>
     <string name="settings_track_zero">Высота трека от</string>
     <string name="settings_track_zero_hint">Откуда вид трека, график и цифры записи отсчитывают высоту</string>
     <string name="track_zero_lowest">Нижней точки</string>

@@ -238,6 +238,8 @@
     <string name="settings_steady_fix">Стабилан положај пре снимања</string>
     <string name="settings_steady_fix_hint">Снимање са GPS стазом почиње када се положај одржи оволико</string>
     <string name="steady_fix_off">Одмах</string>
+    <string name="settings_record_interval">Интервал снимања</string>
+    <string name="settings_record_interval_hint">Колико често снимање уписује тачку</string>
     <string name="settings_track_zero">Висина стазе од</string>
     <string name="settings_track_zero_hint">Одакле приказ стазе, графикон и вредности снимка рачунају висину</string>
     <string name="track_zero_lowest">Најниже тачке</string>

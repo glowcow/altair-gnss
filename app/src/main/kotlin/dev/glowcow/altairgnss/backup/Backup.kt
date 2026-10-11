@@ -48,7 +48,7 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
                         },
                         settings = BackupSettings(
                             s.theme.name, s.palette.name, s.coordinates.name, s.length.name, s.speed.name,
-                            s.keepScreenOn, s.startTab, s.trueNorth, s.appUpdate, source.name, s.mapTiles, s.recordPosition, s.movingKmh, s.steadyFixSeconds, s.trackZero.name, s.gainWatch, s.networkPosition,
+                            s.keepScreenOn, s.startTab, s.trueNorth, s.appUpdate, source.name, s.mapTiles, s.recordPosition, s.movingKmh, s.steadyFixSeconds, s.trackZero.name, s.gainWatch, s.networkPosition, s.recordSeconds,
                         ),
                     ),
                 )
@@ -140,6 +140,7 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
                 trackZero = runCatching { TrackZero.valueOf(b.trackZero) }.getOrDefault(d.trackZero),
                 gainWatch = b.gainWatch,
                 networkPosition = b.networkPosition,
+                recordSeconds = b.recordSeconds.coerceIn(1, 60),
             ),
         )
         runCatching { AltitudeSource.valueOf(b.altitudeSource) }.getOrNull()?.let { settings.setAltitudeSource(it) }

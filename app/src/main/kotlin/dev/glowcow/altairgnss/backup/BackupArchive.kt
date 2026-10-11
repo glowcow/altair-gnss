@@ -31,6 +31,7 @@ data class BackupSettings(
     val trackZero: String = "LOWEST",
     val gainWatch: Boolean = false,
     val networkPosition: Boolean = false,
+    val recordSeconds: Int = 1,
 )
 
 /** A recording as the manifest lists it; its points are in `tracks/<startedAt>.csv`. */

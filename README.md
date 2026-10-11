@@ -39,7 +39,7 @@ The track on them is made up and lies in the Alps.
 - **Position scatter and NMEA** — how far the fixes wander round a point, and
   the receiver's own sentences, live and saved to a file.
 - **Activity record** — records altitude, position and speed with the screen
-  off, shows the figures as it runs and takes checkpoints with a note.
+  off as often as you set, with live figures and checkpoints with a note.
 - **Track in three dimensions** — a finished recording as a ribbon coloured
   by speed to turn, zoom and tap, its checkpoints as flags, on a map if wanted.
 - **Height chart** — height over time with round marks of time, the
@@ -163,9 +163,11 @@ Check a downloaded file with `apksigner verify --print-certs <file>.apk`.
 The look is shared with [stackd](https://github.com/glowcow/stackd). The
 default *classic* scheme is neutral grey — light `#FAFAFA` / dark `#161616`
 backgrounds, accent `#1F6FEB`; the *warm* scheme has `#FAF9F5` / `#1A1A18`
-and accent `#D97757`. UI font: Arimo, with page titles in Cormorant Garamond. The launcher icon
-and the splash
-screen use the brand palette: navy `#0B1630`, gold `#FFD36B`, ice `#9FB7D9`.
+and accent `#D97757`. UI font: Arimo, with page titles in Cormorant Garamond.
+Headers and the island of tabs at the bottom are frosted glass, and the bright
+colours are drawn in Display P3 where the screen shows it. The launcher icon
+and the splash screen use the brand palette: navy `#0B1630`, gold `#FFD36B`,
+ice `#9FB7D9`.
 
 ## License
 

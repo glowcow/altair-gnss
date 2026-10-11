@@ -51,7 +51,7 @@ class Climb {
 }
 
 /** The altitude as it comes in, with the sensor's jumps taken out: the median of the last [size] values. */
-class RunningMedian(private val size: Int = 15) {
+class RunningMedian(private val size: Int = 41) {
     private val last = ArrayDeque<Double>()
 
     fun add(value: Double): Double {
@@ -181,12 +181,13 @@ object Profile {
         val (centreEast, centreNorth) = enclosingCentre(offsets.map { it.east to it.north })
         val lowest = base ?: (placed.first()..placed.last()).minOf { altitudes[it] }
         val way = PathLength()
+        val gapMs = maxOf(GAP_MS, pace(points) * 5 / 2)
         val laid = mutableListOf<PathPoint>()
         placed.forEachIndexed { n, i ->
             val point = points[i]
             val before = way.metres
             way.add(point.latitude!!, point.longitude!!, point.accuracy)
-            val gap = n > 0 && point.timeMs - points[placed[n - 1]].timeMs > GAP_MS
+            val gap = n > 0 && point.timeMs - points[placed[n - 1]].timeMs > gapMs
             if (gap) {
                 // The points with no place stand along the straight way across, each at its own altitude.
                 val from = placed[n - 1]
@@ -227,13 +228,23 @@ object Profile {
         return around(points, steady) { it.average() }
     }
 
-    /** [fold] of the [values] within [SMOOTH_MS] of each point. */
+    /** The time between two points as the recording was set to write them: the median step, milliseconds. */
+    internal fun pace(points: List<Point>): Long {
+        if (points.size < 2) return 0
+        return (1 until points.size).map { points[it].timeMs - points[it - 1].timeMs }.sorted()[(points.size - 1) / 2]
+    }
+
+    /** [fold] of the [values] within [SMOOTH_MS] of each point, or within a step and a half of a recording written seldom. */
     private fun around(points: List<Point>, values: List<Double>, fold: (List<Double>) -> Double): List<Double> {
+        val reach = maxOf(SMOOTH_MS, pace(points) * 3 / 2)
         var from = 0
         var to = 0
         return points.indices.map { i ->
-            while (points[i].timeMs - points[from].timeMs > SMOOTH_MS) from++
-            while (to < points.lastIndex && points[to + 1].timeMs - points[i].timeMs <= SMOOTH_MS) to++
+            // Near an end the stretch is as short on the far side as on the near one, or a slope would be pulled along.
+            val within = minOf(reach, points[i].timeMs - points.first().timeMs, points.last().timeMs - points[i].timeMs)
+            while (points[i].timeMs - points[from].timeMs > within) from++
+            while (to < points.lastIndex && points[to + 1].timeMs - points[i].timeMs <= within) to++
+            while (points[to].timeMs - points[i].timeMs > within) to--
             fold(values.subList(from, to + 1))
         }
     }
@@ -308,9 +319,10 @@ object Profile {
         val inMotion = speeds.filter { it >= moving }
         // The time of every step that ended at a moving point; a gap in the recording is not a step.
         var movingMs = 0L
+        val longest = maxOf(MAX_STEP_MS, pace(points) * 2)
         for (i in 1 until points.size) {
             val step = points[i].timeMs - points[i - 1].timeMs
-            if ((points[i].speed ?: 0f) >= moving && step in 1..MAX_STEP_MS) movingMs += step
+            if ((points[i].speed ?: 0f) >= moving && step in 1..longest) movingMs += step
         }
         return ProfileStats(
             durationMs = points.last().timeMs - points.first().timeMs,
@@ -351,11 +363,11 @@ object Profile {
     private const val STOP_MS = 30_000L
     private const val MAX_STEP_MS = 10_000L
 
-    // Longer than this without a place is a gap in the track, not a late second.
+    // Longer than this without a place, or than two and a half steps of the recording, is a gap in the track.
     private const val GAP_MS = 3_000L
 
-    // How far to either side of a point its altitude is evened out.
-    private const val SMOOTH_MS = 7_000L
+    // How far to either side of a point its altitude is evened out: a walk shakes a barometer by a metre or two for half a minute at a time.
+    private const val SMOOTH_MS = 20_000L
 
     private const val SHRINK_STEPS = 60
 }

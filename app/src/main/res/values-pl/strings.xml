@@ -239,6 +239,8 @@
     <string name="settings_steady_fix">Stabilna pozycja przed nagraniem</string>
     <string name="settings_steady_fix_hint">Nagranie ze śladem GPS zaczyna się, gdy pozycja utrzyma się tak długo</string>
     <string name="steady_fix_off">Od razu</string>
+    <string name="settings_record_interval">Odstęp zapisu</string>
+    <string name="settings_record_interval_hint">Jak często nagranie zapisuje punkt</string>
     <string name="settings_track_zero">Wysokość trasy od</string>
     <string name="settings_track_zero_hint">Skąd widok trasy, wykres i wartości nagrania liczą wysokość</string>
     <string name="track_zero_lowest">Najniższego punktu</string>

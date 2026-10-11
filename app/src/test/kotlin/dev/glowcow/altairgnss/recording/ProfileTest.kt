@@ -205,4 +205,25 @@ class ProfileTest {
         assertEquals((path[3].north + path[10].north) / 2, (path[6].north + path[7].north) / 2, 1e-6)
         assertTrue(path.zipWithNext().all { (a, b) -> b.distance >= a.distance && b.north > a.north })
     }
+
+    @Test
+    fun smoothingEvensOutTheWobbleOfAWalk() {
+        // A level walk with the barometer swinging a metre and a half either way every 45 s.
+        val points = (0..600).map { point(it, 150.0 + 1.5 * kotlin.math.sin(it * 2 * Math.PI / 45)) }
+        val smooth = Profile.smooth(points)
+        assertTrue((60..540).all { kotlin.math.abs(smooth[it] - 150.0) < 0.25 })
+    }
+
+    @Test
+    fun aRecordingWrittenSeldomIsNotAllGaps() {
+        // A point every 15 s, each with a place and moving.
+        val points = (0..20).map { point(it * 15, 100.0).copy(latitude = 55.0 + it * 5e-4, longitude = 37.0, speed = 4f) }
+        assertEquals(15_000L, Profile.pace(points))
+        val altitudes = points.map { it.altitude }
+        assertTrue(Profile.path(points, altitudes)!!.points.none { it.afterGap })
+        assertEquals(300_000L, Profile.stats(points, altitudes)!!.movingMs)
+        // A minute with no place in it is still a gap.
+        val broken = points.filterIndexed { i, _ -> i !in 8..11 }
+        assertEquals(1, Profile.path(broken, broken.map { it.altitude })!!.points.count { it.afterGap })
+    }
 }

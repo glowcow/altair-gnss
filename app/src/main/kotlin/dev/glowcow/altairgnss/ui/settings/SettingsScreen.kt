@@ -86,6 +86,7 @@ class SettingsViewModel(
     fun setMapTiles(on: Boolean) = viewModelScope.launch { store.setMapTiles(on) }
     fun setMovingKmh(kmh: Int) = viewModelScope.launch { store.setMovingKmh(kmh) }
     fun setSteadyFix(seconds: Int) = viewModelScope.launch { store.setSteadyFixSeconds(seconds) }
+    fun setRecordSeconds(seconds: Int) = viewModelScope.launch { store.setRecordSeconds(seconds) }
     fun setTrackZero(zero: TrackZero) = viewModelScope.launch { store.setTrackZero(zero) }
 
     fun clearMapCache() = viewModelScope.launch {
@@ -284,6 +285,13 @@ fun SettingsScreen(
                 )
                 GroupDivider()
                 GroupRow(
+                    stringResource(R.string.settings_record_interval),
+                    subtitle = stringResource(R.string.settings_record_interval_hint),
+                    value = stringResource(R.string.unit_seconds, settings.recordSeconds.toString()),
+                    onClick = { picker = Picker.RECORD_INTERVAL },
+                )
+                GroupDivider()
+                GroupRow(
                     stringResource(R.string.settings_track_zero),
                     subtitle = stringResource(R.string.settings_track_zero_hint),
                     value = stringResource(TRACK_ZEROS.first { it.first == settings.trackZero }.second),
@@ -414,6 +422,13 @@ fun SettingsScreen(
             onSelect = vm::setSteadyFix,
             onDismiss = { picker = null },
         )
+        Picker.RECORD_INTERVAL -> ChoiceSheet(
+            title = stringResource(R.string.settings_record_interval),
+            options = RECORD_SECONDS.map { it to stringResource(R.string.unit_seconds, it.toString()) },
+            selected = settings.recordSeconds,
+            onSelect = vm::setRecordSeconds,
+            onDismiss = { picker = null },
+        )
         Picker.TRACK_ZERO -> ChoiceSheet(
             title = stringResource(R.string.settings_track_zero),
             options = TRACK_ZEROS.map { (zero, label) -> zero to stringResource(label) },
@@ -480,7 +495,7 @@ private fun backupName() = "altair-gnss-${LocalDate.now()}.altair"
 private fun PasswordField(value: String, onChange: (String) -> Unit) =
     Group { GroupField(stringResource(R.string.backup_password), value, onChange, secret = true) }
 
-private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, LENGTH, SPEED, MOVING, STEADY_FIX, TRACK_ZERO, START_TAB, CLEAR_ASSIST }
+private enum class Picker { THEME, PALETTE, LANGUAGE, COORDINATES, LENGTH, SPEED, MOVING, STEADY_FIX, RECORD_INTERVAL, TRACK_ZERO, START_TAB, CLEAR_ASSIST }
 
 private val TRACK_ZEROS = listOf(
     TrackZero.LOWEST to R.string.track_zero_lowest,
@@ -516,6 +531,8 @@ private fun steadyText(seconds: Int): String =
 private val MOVING_KMH = listOf(1, 2, 3, 5, 8)
 
 private val STEADY_SECONDS = listOf(0, 5, 10, 15, 30, 60)
+
+private val RECORD_SECONDS = listOf(1, 5, 15, 30)
 
 private val LENGTHS = listOf(
     LengthUnit.METRES to R.string.length_metres,

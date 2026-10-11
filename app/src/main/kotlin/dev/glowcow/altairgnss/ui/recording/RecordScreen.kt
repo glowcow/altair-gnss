@@ -288,9 +288,9 @@ private fun RecordButton(text: String, enabled: Boolean, mark: Mark, modifier: M
                 .alpha(beat)
                 .background(
                     when (mark) {
-                        Mark.WAITING -> WAITING_AMBER
+                        Mark.WAITING -> c.bright(WAITING_AMBER)
                         Mark.STOP -> content
-                        else -> RECORD_RED
+                        else -> c.bright(RECORD_RED)
                     },
                     if (primary) CircleShape else RoundedCornerShape(2.dp),
                 ),

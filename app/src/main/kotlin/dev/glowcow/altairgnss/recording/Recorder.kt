@@ -43,8 +43,8 @@ data class LiveProfile(
 )
 
 /**
- * Records the altimeter's altitude once a second into a [Track]. The points are written by
- * [RecordingService], which keeps the phone awake for it; this class starts and stops it.
+ * Records the altimeter's altitude into a [Track], a point as often as the settings say. The points are
+ * written by [RecordingService], which keeps the phone awake for it; this class starts and stops it.
  */
 class Recorder(
     private val context: Context,
@@ -167,6 +167,10 @@ class Recorder(
                 // With positions wanted, nothing is written until the receiver has held a fix for a while:
                 // its first fixes can lie far from the place.
                 val steadyMs = chosen.steadyFixSeconds * 1000L
+                // The figures follow every second; a point is written only as often as asked.
+                val everyMs = chosen.recordSeconds * 1000L
+                var writtenAt = 0L
+                var held: Fix? = null
                 var heldSince: Long? = null
                 while (placing && steadyMs > 0) {
                     val now = SystemClock.elapsedRealtime()
@@ -198,20 +202,27 @@ class Recorder(
                     carried = speed
                     // Without the altimeter's altitude the point takes the one that came with its place, else the last one written.
                     val altitude = state.altitude ?: fix?.mslAltitude ?: fix?.altitude ?: lastAltitude
+                    if (fix != null) held = fix
                     if (altitude != null) {
                         lastAltitude = altitude
-                        dao.insert(
-                            Point(
-                                trackId = track.id,
-                                timeMs = now,
-                                altitude = altitude,
-                                hpa = state.pressureHpa,
-                                latitude = fix?.latitude,
-                                longitude = fix?.longitude,
-                                speed = speed,
-                                accuracy = fix?.horizontalAccuracy,
-                            ),
-                        )
+                        if (now - writtenAt >= everyMs - INTERVAL_MS / 2) {
+                            // A place taken since the last point still places this one while it is fresh.
+                            val at = fix ?: held?.takeIf { SystemClock.elapsedRealtime() - it.elapsedRealtimeMs < minOf(everyMs, BLEND_FRESH_MS) }
+                            dao.insert(
+                                Point(
+                                    trackId = track.id,
+                                    timeMs = now,
+                                    altitude = altitude,
+                                    hpa = state.pressureHpa,
+                                    latitude = at?.latitude,
+                                    longitude = at?.longitude,
+                                    speed = speed,
+                                    accuracy = at?.horizontalAccuracy,
+                                ),
+                            )
+                            writtenAt = now
+                            held = null
+                        }
                         if (fix != null) way.add(fix.latitude, fix.longitude, fix.horizontalAccuracy)
                         speed?.let { speed ->
                             if (speed > (fastest ?: 0f)) fastest = speed

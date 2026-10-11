@@ -223,7 +223,7 @@ private fun SignalBars(signals: List<Signal>) {
                                 .width(14.dp)
                                 .fillMaxHeight((signal.cn0DbHz / CN0_FULL).coerceIn(0.02f, 1f))
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(signalColor(signal.cn0DbHz)),
+                                .background(c.bright(signalColor(signal.cn0DbHz))),
                         )
                     }
                 }

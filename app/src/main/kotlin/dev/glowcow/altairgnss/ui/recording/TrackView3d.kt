@@ -411,7 +411,7 @@ private fun TrackView3d(
             val (bx, by, bz) = points[i + 1]
             // Across a gap in the positions the line is a straight guess: grey, and with no wall under it.
             val guessed = shown[i + 1].afterGap
-            val colour = if (guessed) c.muted else speedColour(shown[i + 1].speed ?: shown[i].speed, top, c.muted)
+            val colour = if (guessed) c.muted else speedColour(shown[i + 1].speed ?: shown[i].speed, top)?.let(c::bright) ?: c.muted
             val a = camera.project(ax, ay, az)
             val b = camera.project(bx, by, bz)
             val wall = Path().apply {
@@ -470,7 +470,7 @@ private fun TrackView3d(
             val at = camera.project(x, y, z)
             drawLine(c.text, camera.project(x, y, 0.0), at, 1.5.dp.toPx())
             drawCircle(c.group, 8.dp.toPx(), at)
-            drawCircle(speedColour(shown[picked].speed, top, c.muted), 6.dp.toPx(), at)
+            drawCircle(speedColour(shown[picked].speed, top)?.let(c::bright) ?: c.muted, 6.dp.toPx(), at)
             drawCircle(c.text, 8.dp.toPx(), at, style = Stroke(2.dp.toPx()))
         }
     }
@@ -502,7 +502,7 @@ private fun DrawScope.mapLayer(layer: MapLayer, camera: Camera, half: Double, wh
 private fun SpeedLegend(top: Float, modifier: Modifier = Modifier) {
     val c = AltairTheme.colors
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).drawBehind { drawRect(Brush.horizontalGradient(SPEED_COLOURS)) })
+        Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).drawBehind { drawRect(Brush.horizontalGradient(SPEED_COLOURS.map(c::bright))) })
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text("0", color = c.muted, fontSize = 11.sp)
             Text(speedText(top), color = c.muted, fontSize = 11.sp)
@@ -510,9 +510,9 @@ private fun SpeedLegend(top: Float, modifier: Modifier = Modifier) {
     }
 }
 
-/** A point without a speed, where the receiver had no fix, takes [none]. */
-private fun speedColour(speed: Float?, top: Float, none: Color): Color {
-    if (speed == null) return none
+/** Null for a point without a speed, where the receiver had no fix. */
+private fun speedColour(speed: Float?, top: Float): Color? {
+    if (speed == null) return null
     val at = (speed / top).coerceIn(0f, 1f) * SPEED_COLOURS.lastIndex
     val from = at.toInt().coerceAtMost(SPEED_COLOURS.lastIndex - 1)
     return lerp(SPEED_COLOURS[from], SPEED_COLOURS[from + 1], at - from)

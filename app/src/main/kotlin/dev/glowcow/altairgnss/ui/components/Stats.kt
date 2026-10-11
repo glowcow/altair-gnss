@@ -79,7 +79,7 @@ fun Stat(label: String, value: String, modifier: Modifier = Modifier) {
 /** A word of warning in a pill, the orange of a weak signal in either theme; no taller than a page title. A tap explains it. */
 @Composable
 fun Alert(text: String, onClick: () -> Unit) {
-    Box(Modifier.clip(RoundedCornerShape(16.dp)).background(ALERT_ORANGE).clickable(role = Role.Button, onClick = onClick).padding(horizontal = 12.dp, vertical = 5.dp)) {
+    Box(Modifier.clip(RoundedCornerShape(16.dp)).background(AltairTheme.colors.bright(ALERT_ORANGE)).clickable(role = Role.Button, onClick = onClick).padding(horizontal = 12.dp, vertical = 5.dp)) {
         Text(text, color = ALERT_INK, fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1)
     }
 }

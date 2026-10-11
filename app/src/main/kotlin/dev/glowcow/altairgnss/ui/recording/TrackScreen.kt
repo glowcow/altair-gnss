@@ -263,7 +263,7 @@ fun TrackScreen(id: Long, onBack: () -> Unit, onExpand: () -> Unit, onExpandChar
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 14.dp),
             )
             Group {
-                GroupRow(stringResource(R.string.recording_delete_confirm), onClick = {
+                GroupRow(stringResource(R.string.recording_delete_confirm), titleColor = AltairTheme.colors.danger, onClick = {
                     pick {
                         onBack()
                         container.scope.launch { container.recorder.delete(id) }

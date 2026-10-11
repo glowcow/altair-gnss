@@ -46,6 +46,8 @@ data class AppSettings(
     val movingKmh: Int = 3,
     /** A recording with positions starts once the receiver has held a fix for this many seconds; 0 starts at once. */
     val steadyFixSeconds: Int = 15,
+    /** A recording writes a point this often, seconds. */
+    val recordSeconds: Int = 1,
     val trackZero: TrackZero = TrackZero.LOWEST,
     /** Listen to the receiver's gain to tell interference sooner. */
     val gainWatch: Boolean = false,
@@ -79,6 +81,7 @@ class SettingsStore(private val context: Context) {
     private val networkPositionKey = booleanPreferencesKey("network_position")
     private val movingKey = intPreferencesKey("moving_kmh")
     private val steadyFixKey = intPreferencesKey("steady_fix_seconds")
+    private val recordSecondsKey = intPreferencesKey("record_seconds")
     private val trackZeroKey = stringPreferencesKey("track_zero")
     private val gainWatchKey = booleanPreferencesKey("gain_watch")
     private val gainBaselineKey = stringPreferencesKey("gain_baseline")
@@ -134,6 +137,7 @@ class SettingsStore(private val context: Context) {
             networkPosition = p[networkPositionKey] ?: false,
             movingKmh = p[movingKey] ?: 3,
             steadyFixSeconds = p[steadyFixKey] ?: 15,
+            recordSeconds = p[recordSecondsKey] ?: 1,
             trackZero = p[trackZeroKey]?.let { runCatching { TrackZero.valueOf(it) }.getOrNull() } ?: TrackZero.LOWEST,
             gainWatch = p[gainWatchKey] ?: false,
         )
@@ -155,6 +159,7 @@ class SettingsStore(private val context: Context) {
         it[networkPositionKey] = s.networkPosition
         it[movingKey] = s.movingKmh
         it[steadyFixKey] = s.steadyFixSeconds
+        it[recordSecondsKey] = s.recordSeconds
         it[trackZeroKey] = s.trackZero.name
         it[gainWatchKey] = s.gainWatch
     }
@@ -182,6 +187,8 @@ class SettingsStore(private val context: Context) {
     suspend fun setMovingKmh(kmh: Int) = context.dataStore.edit { it[movingKey] = kmh }
 
     suspend fun setSteadyFixSeconds(seconds: Int) = context.dataStore.edit { it[steadyFixKey] = seconds }
+
+    suspend fun setRecordSeconds(seconds: Int) = context.dataStore.edit { it[recordSecondsKey] = seconds }
 
     suspend fun setTrackZero(zero: TrackZero) = context.dataStore.edit { it[trackZeroKey] = zero.name }
 

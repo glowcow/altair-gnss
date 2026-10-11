@@ -103,7 +103,7 @@ private fun SkyPlot(satellites: List<Signal>, turn: Float, modifier: Modifier = 
         val placed = satellites.filter { it.hasPosition }.map { it to at(it.elevation, it.azimuth) }
         for ((satellite, p) in placed) {
             // Expected but not heard: no level to colour it with.
-            val color = if (satellite.isHeard) signalColor(satellite.cn0DbHz) else c.muted
+            val color = if (satellite.isHeard) c.bright(signalColor(satellite.cn0DbHz)) else c.muted
             if (satellite.usedInFix) drawCircle(color, dot, p) else drawCircle(color, dot - 0.75.dp.toPx(), p, style = Stroke(1.5.dp.toPx()))
         }
         // A label goes under its dot, or over it or beside it where that is free, and is left out

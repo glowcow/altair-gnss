@@ -238,6 +238,8 @@
     <string name="settings_steady_fix">Position stable avant l’enregistrement</string>
     <string name="settings_steady_fix_hint">Un enregistrement avec trace GPS commence quand la position a tenu ce temps</string>
     <string name="steady_fix_off">Tout de suite</string>
+    <string name="settings_record_interval">Intervalle d’enregistrement</string>
+    <string name="settings_record_interval_hint">À quelle fréquence un enregistrement écrit un point</string>
     <string name="settings_track_zero">Hauteur du tracé depuis</string>
     <string name="settings_track_zero_hint">D’où la vue du tracé, le graphique et les chiffres d’un enregistrement comptent la hauteur</string>
     <string name="track_zero_lowest">Son point le plus bas</string>

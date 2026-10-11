@@ -1,5 +1,6 @@
 package dev.glowcow.altairgnss.ui.components
 
+import android.content.pm.ActivityInfo
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -29,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,11 +45,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -65,9 +69,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogWindowProvider
 import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import dev.glowcow.altairgnss.ui.theme.AppFont
+import dev.glowcow.altairgnss.ui.theme.inked
 import kotlinx.coroutines.launch
 
 /** Rounded block of rows on the grouped background. */
@@ -81,13 +87,14 @@ fun GroupDivider() {
     Box(Modifier.padding(horizontal = 16.dp).fillMaxWidth().height(1.dp).background(AltairTheme.colors.line))
 }
 
-/** A row of a [Group]. Clickable rows end with a chevron unless they bring their own [trailing]. */
+/** A row of a [Group]. Clickable rows end with a chevron unless they bring their own [trailing]; [titleColor] marks what cannot be taken back. */
 @Composable
 fun GroupRow(
     title: String,
     subtitle: String? = null,
     icon: ImageVector? = null,
     value: String? = null,
+    titleColor: Color = AltairTheme.colors.text,
     onClick: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
@@ -103,7 +110,7 @@ fun GroupRow(
     ) {
         if (icon != null) Icon(icon, null, tint = c.text, modifier = Modifier.size(22.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, color = c.text, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(title, Modifier.inked(titleColor), color = titleColor, fontSize = 16.sp, fontWeight = FontWeight.Medium)
             if (subtitle != null) Text(subtitle, color = c.muted, fontSize = 13.sp)
         }
         if (value != null) Text(value, color = c.muted, textAlign = TextAlign.End)
@@ -172,6 +179,9 @@ fun GroupSheet(title: String, onDismiss: () -> Unit, content: @Composable Column
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state, containerColor = c.groupBg) {
+        // A sheet is a window of its own, and a window shows Display P3 only when asked to.
+        val view = LocalView.current
+        SideEffect { (view.parent as? DialogWindowProvider)?.window?.colorMode = ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT }
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
             Text(title, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = c.text, modifier = Modifier.padding(start = 4.dp, bottom = 14.dp))
             content { action ->
@@ -252,7 +262,7 @@ fun <T> ChoiceSheet(
         options.forEachIndexed { i, (value, label) ->
             if (i > 0) GroupDivider()
             GroupRow(label, onClick = { pick { onSelect(value) } }, trailing = {
-                if (value == selected) Icon(AltairIcons.Check, null, tint = accent, modifier = Modifier.size(20.dp))
+                if (value == selected) Icon(AltairIcons.Check, null, tint = accent, modifier = Modifier.size(20.dp).inked(accent))
             })
         }
     }

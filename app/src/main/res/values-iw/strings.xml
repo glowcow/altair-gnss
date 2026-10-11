@@ -238,6 +238,8 @@
     <string name="settings_steady_fix">מיקום יציב לפני ההקלטה</string>
     <string name="settings_steady_fix_hint">הקלטה עם מסלול GPS מתחילה כשהמיקום מחזיק מעמד פרק זמן זה</string>
     <string name="steady_fix_off">מיד</string>
+    <string name="settings_record_interval">מרווח ההקלטה</string>
+    <string name="settings_record_interval_hint">באיזו תדירות הקלטה שומרת נקודה</string>
     <string name="settings_track_zero">גובה המסלול מ־</string>
     <string name="settings_track_zero_hint">מאיפה תצוגת המסלול, הגרף והנתונים של הקלטה סופרים גובה</string>
     <string name="track_zero_lowest">הנקודה הנמוכה ביותר</string>

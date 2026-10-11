@@ -239,6 +239,8 @@
     <string name="settings_steady_fix">Устойлівая фіксацыя перад запісам</string>
     <string name="settings_steady_fix_hint">Запіс з GPS-трэкам пачынаецца, калі становішча трымаецца столькі часу</string>
     <string name="steady_fix_off">Адразу</string>
+    <string name="settings_record_interval">Інтэрвал запісу</string>
+    <string name="settings_record_interval_hint">Як часта запіс захоўвае кропку</string>
     <string name="settings_track_zero">Вышыня трэка ад</string>
     <string name="settings_track_zero_hint">Адкуль выгляд трэка, графік і лічбы запісу адлічваюць вышыню</string>
     <string name="track_zero_lowest">Ніжняй кропкі</string>

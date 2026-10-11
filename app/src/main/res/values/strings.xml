@@ -269,6 +269,8 @@
     <string name="settings_steady_fix">Steady fix before recording</string>
     <string name="settings_steady_fix_hint">A recording with a GPS track starts once the position has held this long</string>
     <string name="steady_fix_off">At once</string>
+    <string name="settings_record_interval">Recording interval</string>
+    <string name="settings_record_interval_hint">How often a recording writes a point</string>
     <string name="settings_track_zero">Heights of a track from</string>
     <string name="settings_track_zero_hint">Where the track view, the chart and the figures of a recording count height from</string>
     <string name="track_zero_lowest">Its lowest point</string>

@@ -237,6 +237,8 @@
     <string name="settings_steady_fix">Stabile Position vor der Aufzeichnung</string>
     <string name="settings_steady_fix_hint">Eine Aufzeichnung mit GPS-Strecke beginnt, sobald die Position so lange gehalten hat</string>
     <string name="steady_fix_off">Sofort</string>
+    <string name="settings_record_interval">Aufzeichnungsintervall</string>
+    <string name="settings_record_interval_hint">Wie oft eine Aufzeichnung einen Punkt schreibt</string>
     <string name="settings_track_zero">Höhe der Strecke ab</string>
     <string name="settings_track_zero_hint">Wovon Streckenansicht, Diagramm und Werte einer Aufzeichnung die Höhe zählen</string>
     <string name="track_zero_lowest">Tiefster Punkt</string>

@@ -238,6 +238,8 @@
     <string name="settings_steady_fix">Posición estable antes de grabar</string>
     <string name="settings_steady_fix_hint">Una grabación con recorrido GPS empieza cuando la posición se ha mantenido este tiempo</string>
     <string name="steady_fix_off">Enseguida</string>
+    <string name="settings_record_interval">Intervalo de grabación</string>
+    <string name="settings_record_interval_hint">Cada cuánto una grabación guarda un punto</string>
     <string name="settings_track_zero">Altura del recorrido desde</string>
     <string name="settings_track_zero_hint">Desde dónde cuentan la altura la vista del recorrido, el gráfico y las cifras de una grabación</string>
     <string name="track_zero_lowest">Su punto más bajo</string>

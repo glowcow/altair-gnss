@@ -4,15 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +30,7 @@ import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import dev.glowcow.altairgnss.ui.theme.AppFont
 import dev.glowcow.altairgnss.ui.theme.TitleFont
+import dev.glowcow.altairgnss.ui.theme.inked
 
 enum class TopTab(val icon: ImageVector, val label: Int) {
     STATUS(AltairIcons.Status, R.string.tab_status),
@@ -45,7 +40,7 @@ enum class TopTab(val icon: ImageVector, val label: Int) {
     SETTINGS(AltairIcons.Settings, R.string.tab_settings),
 }
 
-/** The round button that floats over a tab's page, 20 dp above what the tab bar covers. */
+/** The round button that floats over a tab's page, 20 dp above what the island at the bottom takes. */
 @Composable
 fun BoxScope.FloatingButton(icon: ImageVector, description: String, bottom: Dp, onClick: () -> Unit) {
     val c = AltairTheme.colors
@@ -67,14 +62,9 @@ fun BoxScope.FloatingButton(icon: ImageVector, description: String, bottom: Dp, 
 @Composable
 fun BottomBar(current: TopTab, onSelect: (TopTab) -> Unit) {
     val c = AltairTheme.colors
-    Column(Modifier.navigationBarsPadding()) {
-        GlassLine()
-        Row(Modifier.fillMaxWidth().height(64.dp), verticalAlignment = Alignment.CenterVertically) {
-            for (tab in TopTab.entries) {
-                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    IconButton48(tab.icon, stringResource(tab.label), tint = if (tab == current) c.text else c.muted, size = 26.dp) { onSelect(tab) }
-                }
-            }
+    IslandIcons {
+        for (tab in TopTab.entries) {
+            IconButton48(tab.icon, stringResource(tab.label), tint = if (tab == current) c.text else c.muted, size = 24.dp) { onSelect(tab) }
         }
     }
 }
@@ -108,6 +98,7 @@ private val TAB_TITLE = 36.sp
 // Cormorant's capitals are lower than Arimo's: at this size they stand as tall as a 22 sp title did.
 private val PAGE_TITLE = 25.sp
 
+/** An icon to tap, 48 dp to touch. */
 @Composable
 fun IconButton48(
     icon: ImageVector,
@@ -117,9 +108,9 @@ fun IconButton48(
     onClick: () -> Unit,
 ) {
     Box(
-        Modifier.size(48.dp).clip(RoundedCornerShape(24.dp)).clickable(role = Role.Button, onClick = onClick),
+        Modifier.size(48.dp).clip(CircleShape).clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, description, tint = tint, modifier = Modifier.size(size))
+        Icon(icon, description, tint = tint, modifier = Modifier.size(size).inked(tint))
     }
 }
