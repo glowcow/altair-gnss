@@ -351,6 +351,8 @@ fun SettingsScreen(
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_map_data), value = "OpenStreetMap · ODbL")
                 GroupDivider()
+                GroupRow(stringResource(R.string.settings_icons), value = "Phosphor · MIT")
+                GroupDivider()
                 GroupRow(stringResource(R.string.settings_font), value = "Arimo · SIL OFL 1.1")
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_title_font), value = "Cormorant Garamond · SIL OFL 1.1")
