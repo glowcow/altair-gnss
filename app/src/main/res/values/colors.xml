@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg">#FAFAFA</color>
+    <color name="ground">#F1F1F1</color>
 
     <!-- Brand palette of the launcher icon and the splash screen. -->
     <color name="altair_navy">#0B1630</color>

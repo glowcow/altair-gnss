@@ -161,8 +161,8 @@ Check a downloaded file with `apksigner verify --print-certs <file>.apk`.
 ## Design
 
 The look is shared with [stackd](https://github.com/glowcow/stackd). The
-default *classic* scheme is neutral grey — light `#FAFAFA` / dark `#161616`
-backgrounds, accent `#1F6FEB`; the *warm* scheme has `#FAF9F5` / `#1A1A18`
+default *classic* scheme is neutral grey — light `#F1F1F1` / dark `#101010`
+backgrounds, accent `#1F6FEB`; the *warm* scheme has `#F0EEE6` / `#141413`
 and accent `#D97757`. UI font: Arimo, with page titles in Cormorant Garamond;
 icons are Phosphor.
 Headers and the island of tabs at the bottom are frosted glass, and the bright
