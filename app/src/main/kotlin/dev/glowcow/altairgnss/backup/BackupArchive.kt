@@ -36,7 +36,13 @@ data class BackupSettings(
 
 /** A recording as the manifest lists it; its points are in `tracks/<startedAt>.csv`. */
 @Serializable
-data class BackupTrack(val startedAt: Long, val endedAt: Long? = null, val zeroAltitude: Double? = null, val marks: List<BackupMark> = emptyList())
+data class BackupTrack(
+    val startedAt: Long,
+    val endedAt: Long? = null,
+    val zeroAltitude: Double? = null,
+    val marks: List<BackupMark> = emptyList(),
+    val activity: String? = null,
+)
 
 /** A marked moment of a recording. */
 @Serializable

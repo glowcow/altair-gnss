@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
@@ -54,6 +57,12 @@ fun compassPoints(): List<String> {
 /** A span of time as hours, minutes and seconds. */
 fun clock(ms: Long): String = (ms / 1000).let { String.format(Locale.ROOT, "%d:%02d:%02d", it / 3600, it / 60 % 60, it % 60) }
 
+/** The heading of a part of a page; it stands midway between the blocks round it. */
+@Composable
+fun SectionHeading(text: String) {
+    Text(text, Modifier.padding(start = 4.dp), color = AltairTheme.colors.text, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+}
+
 /** Labelled values in two columns inside a [Group]. */
 @Composable
 fun StatGrid(stats: List<Pair<String, String>>) {
@@ -87,17 +96,32 @@ fun Alert(text: String, onClick: () -> Unit) {
 private val ALERT_ORANGE = Color(0xFFF2913D)
 private val ALERT_INK = Color(0xFF1A1A18)
 
-/** A toggle in a row of filters; it lies on the ground of a grouped page, so it takes the colour of a block. */
+/**
+ * A toggle in a row of filters; it lies on the ground of a grouped page, so it takes the colour of a block.
+ * A chip of a kind with a [colour] is filled with it while on, and keeps a dot of it while off.
+ */
 @Composable
-fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
+fun Chip(text: String, selected: Boolean, colour: Color? = null, onClick: () -> Unit) {
     val c = AltairTheme.colors
-    Box(
+    Row(
         Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) c.accent else c.group)
+            .background(if (selected) colour ?: c.accent else c.group)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text, color = if (selected) c.onAccent else c.text, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        if (colour != null && !selected) Box(Modifier.size(8.dp).clip(CircleShape).background(colour))
+        Text(
+            text,
+            color = when {
+                !selected -> if (colour != null) c.muted else c.text
+                colour != null -> KindColors.ink(colour)
+                else -> c.onAccent
+            },
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+        )
     }
 }

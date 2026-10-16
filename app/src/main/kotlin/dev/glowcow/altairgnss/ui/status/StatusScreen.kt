@@ -1,6 +1,8 @@
 package dev.glowcow.altairgnss.ui.status
 
 import android.content.Intent
+import android.os.SystemClock
+import android.view.HapticFeedbackConstants
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +60,7 @@ import dev.glowcow.altairgnss.ui.components.StatGrid
 import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
 import dev.glowcow.altairgnss.ui.components.accuracyText
+import dev.glowcow.altairgnss.ui.components.colour
 import dev.glowcow.altairgnss.ui.components.decimals
 import dev.glowcow.altairgnss.ui.components.lengthText
 import dev.glowcow.altairgnss.ui.components.speedText
@@ -103,7 +107,25 @@ private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> 
     val c = AltairTheme.colors
     val context = LocalContext.current
     val state by context.container.gnss.state.collectAsStateWithLifecycle()
-    LaunchedEffect(state.disturbance) { onDisturbance(state.disturbance) }
+    val view = LocalView.current
+    var warned by remember { mutableStateOf(state.disturbance) }
+    LaunchedEffect(state.disturbance) {
+        onDisturbance(state.disturbance)
+        if (state.disturbance != Disturbance.NONE && warned == Disturbance.NONE) view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+        warned = state.disturbance
+    }
+    // The first fix since the tab was opened is felt, and one found again after a while without; a flickering one is not.
+    var lostAt by remember { mutableStateOf<Long?>(if (state.hasFix) null else 0L) }
+    LaunchedEffect(state.hasFix) {
+        val now = SystemClock.elapsedRealtime()
+        val since = lostAt
+        if (!state.hasFix) {
+            if (since == null) lostAt = now
+        } else if (since != null) {
+            if (since == 0L || now - since >= FIX_QUIET_MS) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+            lostAt = null
+        }
+    }
     val settings by context.container.settings.settings.collectAsStateWithLifecycle(AppSettings())
     var hidden by rememberSaveable { mutableStateOf(emptySet<Constellation>()) }
     var bySignal by rememberSaveable { mutableStateOf(true) }
@@ -162,12 +184,12 @@ private fun StatusContent(top: Dp, bottom: Dp, onSky: () -> Unit, onNmea: () -> 
         }
 
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Chip(stringResource(if (bySignal) R.string.sort_cn0 else R.string.sort_id), selected = false) { bySignal = !bySignal }
             for (constellation in present) {
-                Chip(constellation.title, selected = constellation !in hidden) {
+                Chip(constellation.title, selected = constellation !in hidden, colour = constellation.colour) {
                     hidden = if (constellation in hidden) hidden - constellation else hidden + constellation
                 }
             }
-            Chip(stringResource(if (bySignal) R.string.sort_cn0 else R.string.sort_id), selected = false) { bySignal = !bySignal }
         }
         Group {
             SignalBars(shown)
@@ -283,6 +305,9 @@ private fun SignalTable(signals: List<Signal>) {
         )
     }
 }
+
+/** A fix lost for less than this and found again is not felt again. */
+private const val FIX_QUIET_MS = 10_000L
 
 /** C/N0 that fills a bar; open-sky signals rarely exceed it. */
 private const val CN0_FULL = 50f

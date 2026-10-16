@@ -165,6 +165,18 @@
         <item>Letztes Viertel</item>
         <item>Abnehmende Sichel</item>
     </string-array>
+    <string name="settings_appearance">Darstellung</string>
+    <string name="settings_screen">Bildschirm</string>
+    <string name="settings_screen_hint">Anlassen, Tab beim Start</string>
+    <string name="settings_units">Einheiten</string>
+    <string name="settings_receiver">Empfänger</string>
+    <string name="settings_receiver_hint">Hilfsdaten und Verstärkung des Empfängers</string>
+    <string name="settings_recording">Aufzeichnung</string>
+    <string name="settings_recording_hint">Bewegung, stabiler Fix, Intervall, Höhen</string>
+    <string name="settings_map_page">Karte</string>
+    <string name="settings_map_page_hint">Unter der Strecke, und ihr Cache</string>
+    <string name="settings_backup">Sicherung</string>
+    <string name="settings_credits">Lizenz und Danksagungen</string>
     <string name="settings_theme">Design</string>
     <string name="theme_system">Systemstandard</string>
     <string name="theme_light">Hell</string>
@@ -230,7 +242,7 @@
     <string name="recording_position">GPS-Strecke</string>
     <string name="recording_position_hint">Unter Tage ausschalten: nur die Höhe wird geschrieben, der Empfänger bleibt nicht an</string>
     <string name="recording_network">Netzwerkortung</string>
-    <string name="recording_network_hint">WLAN und Mobilfunk helfen, die Punkte zu setzen, wo Satelliten gestört sind; der Standortdienst des Telefons erfährt dabei, wo Sie sind</string>
+    <string name="recording_network_hint">WLAN und Mobilfunk helfen, die Punkte zu setzen, wo Satelliten gestört sind; der Standortdienst des Telefons erfährt dabei, wo Sie sind, und nennt den Ort, an dem eine Aufzeichnung begann</string>
     <string name="recording_waiting">Warten auf eine stabile Position: %1$d s</string>
     <string name="recording_waiting_coarse">Die Position ist bisher nur auf %1$s genau; nötig sind %2$s oder besser</string>
     <string name="settings_moving">Bewegung ab</string>
@@ -253,6 +265,28 @@
     <string name="mark_default">Wegpunkt %1$d</string>
     <string name="marks">Wegpunkte</string>
     <string name="mark_delete">Wegpunkt löschen</string>
+    <string name="activity">Aktivität</string>
+    <string name="activity_walk">Spaziergang</string>
+    <string name="activity_run">Laufen</string>
+    <string name="activity_hike">Wandern</string>
+    <string name="activity_bike">Fahrrad</string>
+    <string name="activity_scooter">Tretroller</string>
+    <string name="activity_motorcycle">Motorrad</string>
+    <string name="activity_car">Auto</string>
+    <string name="activity_other">Andere</string>
+    <string name="activity_none">Keine Angabe</string>
+    <string name="place_none">Ort unbekannt</string>
+    <string name="year_open">Zahlen von %1$d</string>
+    <string name="year_counting">Wird addiert…</string>
+    <string name="year_days">Tage unterwegs</string>
+    <string name="year_change">Änderungen ggü. %1$d</string>
+    <string name="year_by_month">Nach Monat</string>
+    <string name="year_by_activity">Nach Aktivität</string>
+    <string name="year_dashes">Striche: derselbe Monat %1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d Aufzeichnung</item>
+        <item quantity="other">%d Aufzeichnungen</item>
+    </plurals>
     <string name="recordings">Aufzeichnungen</string>
     <string name="recordings_empty">Noch nichts aufgezeichnet</string>
     <string name="recording_now">Aufzeichnung läuft</string>

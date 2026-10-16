@@ -48,6 +48,7 @@ import dev.glowcow.altairgnss.gnss.CoordinateFormat
 import dev.glowcow.altairgnss.gnss.GnssMonitor
 import dev.glowcow.altairgnss.maps.TileStore
 import dev.glowcow.altairgnss.ui.components.ChoiceSheet
+import dev.glowcow.altairgnss.ui.components.DetailScreen
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupField
@@ -58,6 +59,7 @@ import dev.glowcow.altairgnss.ui.components.SwitchRow
 import dev.glowcow.altairgnss.ui.components.TabScreen
 import dev.glowcow.altairgnss.ui.components.TopTab
 import dev.glowcow.altairgnss.ui.components.speedText
+import dev.glowcow.altairgnss.ui.theme.AltairIcons
 import dev.glowcow.altairgnss.ui.theme.AltairTheme
 import dev.glowcow.altairgnss.update.AppRelease
 import dev.glowcow.altairgnss.update.AppUpdateState
@@ -132,66 +134,27 @@ class SettingsViewModel(
     fun setAppUpdate(on: Boolean) = viewModelScope.launch { store.setAppUpdate(on) }
 }
 
+/** The subjects of the settings, each on a page of its own. */
+enum class SettingsPage { APPEARANCE, SCREEN, UNITS, RECEIVER, RECORDING, MAP, BACKUP, CREDITS }
+
 @Composable
-fun SettingsScreen(
-    onTab: (TopTab) -> Unit,
-    vm: SettingsViewModel = viewModel { (this[APPLICATION_KEY] as AltairApp).container.let { SettingsViewModel(it.settings, it.appUpdater, it.gnss, it.backup, it.tiles) } },
-) {
+private fun settingsVm(): SettingsViewModel =
+    viewModel { (this[APPLICATION_KEY] as AltairApp).container.let { SettingsViewModel(it.settings, it.appUpdater, it.gnss, it.backup, it.tiles) } }
+
+@Composable
+fun SettingsScreen(onTab: (TopTab) -> Unit, onPage: (SettingsPage) -> Unit, vm: SettingsViewModel = settingsVm()) {
     val c = AltairTheme.colors
     val settings by vm.settings.collectAsStateWithLifecycle()
     val update by vm.updater.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    // The system keeps the per-app language, shared with Settings → Apps → App language.
     val locales = remember(context) { context.getSystemService(LocaleManager::class.java) }
-    var language by remember { mutableStateOf(locales.applicationLocales.takeUnless { it.isEmpty }?.get(0)?.language) }
-    var picker by rememberSaveable { mutableStateOf<Picker?>(null) }
+    val language = locales.applicationLocales.takeUnless { it.isEmpty }?.get(0)?.language
     var release by remember { mutableStateOf<AppRelease?>(null) }
-    // What the receiver answered to the last assistance request; null before any.
-    var assisted by remember { mutableStateOf<Boolean?>(null) }
     // The weekly check reports through a notification, so turning it on asks for the permission.
     val notifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     fun setAppUpdate(on: Boolean) {
         vm.setAppUpdate(on)
         if (on) notifications.launch(Manifest.permission.POST_NOTIFICATIONS)
-    }
-    fun setLanguage(tag: String?) {
-        language = tag
-        locales.applicationLocales = tag?.let { LocaleList.forLanguageTags(it) } ?: LocaleList.getEmptyLocaleList()
-    }
-    val startTab = TopTab.entries.firstOrNull { it.name == settings.startTab } ?: TopTab.STATUS
-    // Where a backup goes and where it comes from is the user's pick in the system file picker.
-    var sheet by rememberSaveable { mutableStateOf<BackupSheet?>(null) }
-    var password by remember { mutableStateOf("") }
-    var source by remember { mutableStateOf<Uri?>(null) }
-    var locked by remember { mutableStateOf(false) }
-    var overwrite by remember { mutableStateOf(false) }
-    val resources = LocalResources.current
-    fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
-    fun restored(outcome: RestoreOutcome) {
-        toast(
-            when (outcome) {
-                is RestoreOutcome.Restored -> resources.getString(R.string.backup_restored, outcome.recordings)
-                RestoreOutcome.WrongPassword -> resources.getString(R.string.backup_wrong_password)
-                RestoreOutcome.Invalid -> resources.getString(R.string.backup_invalid)
-            },
-        )
-        // A mistyped password is asked for again, for the same file.
-        if (outcome == RestoreOutcome.WrongPassword) sheet = BackupSheet.RESTORE
-    }
-    val saveTo = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
-        if (uri != null) vm.saveBackup(uri, password) { toast(resources.getString(if (it) R.string.backup_saved else R.string.backup_save_failed)) }
-        password = ""
-    }
-    val restoreFrom = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            vm.inspectBackup(uri) { encrypted ->
-                if (encrypted == null) return@inspectBackup restored(RestoreOutcome.Invalid)
-                source = uri
-                locked = encrypted
-                overwrite = false
-                sheet = BackupSheet.RESTORE
-            }
-        }
     }
 
     TabScreen(TopTab.SETTINGS, onTab) { top, bottom ->
@@ -200,6 +163,116 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Group {
+                GroupRow(
+                    stringResource(R.string.settings_appearance),
+                    subtitle = listOf(
+                        stringResource(THEMES.first { it.first == settings.theme }.second),
+                        stringResource(PALETTES.first { it.first == settings.palette }.second),
+                        LANGUAGES.firstOrNull { it.first == language }?.second ?: stringResource(R.string.language_system),
+                    ).distinct().joinToString(" · "),
+                    icon = AltairIcons.Palette,
+                    onClick = { onPage(SettingsPage.APPEARANCE) },
+                )
+                GroupDivider()
+                GroupRow(stringResource(R.string.settings_screen), subtitle = stringResource(R.string.settings_screen_hint), icon = AltairIcons.Phone, onClick = { onPage(SettingsPage.SCREEN) })
+                GroupDivider()
+                GroupRow(
+                    stringResource(R.string.settings_units),
+                    subtitle = listOf(
+                        stringResource(COORDINATES.first { it.first == settings.coordinates }.second),
+                        stringResource(LENGTHS.first { it.first == settings.length }.second),
+                        stringResource(SPEEDS.first { it.first == settings.speed }.second),
+                    ).joinToString(" · "),
+                    icon = AltairIcons.Ruler,
+                    onClick = { onPage(SettingsPage.UNITS) },
+                )
+                GroupDivider()
+                GroupRow(stringResource(R.string.settings_receiver), subtitle = stringResource(R.string.settings_receiver_hint), icon = AltairIcons.Receiver, onClick = { onPage(SettingsPage.RECEIVER) })
+                GroupDivider()
+                GroupRow(stringResource(R.string.settings_recording), subtitle = stringResource(R.string.settings_recording_hint), icon = AltairIcons.Path, onClick = { onPage(SettingsPage.RECORDING) })
+                GroupDivider()
+                GroupRow(stringResource(R.string.settings_map_page), subtitle = stringResource(R.string.settings_map_page_hint), icon = AltairIcons.Map, onClick = { onPage(SettingsPage.MAP) })
+                GroupDivider()
+                GroupRow(stringResource(R.string.settings_backup), subtitle = stringResource(R.string.settings_backup_save_hint), icon = AltairIcons.Floppy, onClick = { onPage(SettingsPage.BACKUP) })
+            }
+            Group {
+                GroupRow(
+                    stringResource(R.string.settings_version),
+                    subtitle = when (val s = update) {
+                        AppUpdateState.Idle -> if (vm.updater.supported) stringResource(R.string.app_update_check) else stringResource(R.string.app_update_dev)
+                        AppUpdateState.Checking -> stringResource(R.string.app_update_checking)
+                        AppUpdateState.UpToDate -> stringResource(R.string.app_update_latest)
+                        AppUpdateState.Failed -> stringResource(R.string.app_update_failed)
+                        is AppUpdateState.Available -> stringResource(R.string.app_update_available, s.release.version)
+                        is AppUpdateState.Downloading -> stringResource(R.string.app_update_downloading, (s.progress * 100).toInt())
+                    },
+                    value = vm.updater.current,
+                    onClick = when (val s = update) {
+                        AppUpdateState.Checking, is AppUpdateState.Downloading -> null
+                        is AppUpdateState.Available -> ({ release = s.release })
+                        else -> if (vm.updater.supported) vm.updater::checkNow else null
+                    },
+                )
+                if (vm.updater.supported) {
+                    GroupDivider()
+                    SwitchRow(stringResource(R.string.settings_app_update), stringResource(R.string.settings_app_update_hint), settings.appUpdate, ::setAppUpdate)
+                }
+            }
+            Group {
+                GroupRow(stringResource(R.string.settings_credits), icon = AltairIcons.Scroll, onClick = { onPage(SettingsPage.CREDITS) })
+            }
+        }
+    }
+
+    release?.let { r ->
+        GroupSheet(stringResource(R.string.app_update_available, r.version), onDismiss = { release = null }) { pick ->
+            if (r.notes.isNotEmpty()) {
+                Text(
+                    r.notes,
+                    color = c.muted,
+                    fontSize = 14.sp,
+                    modifier = Modifier.heightIn(max = 280.dp).verticalScroll(rememberScrollState()).padding(start = 4.dp, end = 4.dp, bottom = 14.dp),
+                )
+            }
+            Group { GroupRow(stringResource(R.string.app_update_install), onClick = { pick { vm.updater.install(r) } }) }
+        }
+    }
+}
+
+/** One subject of the settings on a page of its own. */
+@Composable
+fun SettingsPageScreen(page: SettingsPage, onBack: () -> Unit, vm: SettingsViewModel = settingsVm()) {
+    val c = AltairTheme.colors
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    // The system keeps the per-app language, shared with Settings → Apps → App language.
+    val locales = remember(context) { context.getSystemService(LocaleManager::class.java) }
+    var language by remember { mutableStateOf(locales.applicationLocales.takeUnless { it.isEmpty }?.get(0)?.language) }
+    var picker by rememberSaveable { mutableStateOf<Picker?>(null) }
+    // What the receiver answered to the last assistance request; null before any.
+    var assisted by remember { mutableStateOf<Boolean?>(null) }
+    fun setLanguage(tag: String?) {
+        language = tag
+        locales.applicationLocales = tag?.let { LocaleList.forLanguageTags(it) } ?: LocaleList.getEmptyLocaleList()
+    }
+    val startTab = TopTab.entries.firstOrNull { it.name == settings.startTab } ?: TopTab.STATUS
+    val title = stringResource(
+        when (page) {
+            SettingsPage.APPEARANCE -> R.string.settings_appearance
+            SettingsPage.SCREEN -> R.string.settings_screen
+            SettingsPage.UNITS -> R.string.settings_units
+            SettingsPage.RECEIVER -> R.string.settings_receiver
+            SettingsPage.RECORDING -> R.string.settings_recording
+            SettingsPage.MAP -> R.string.settings_map_page
+            SettingsPage.BACKUP -> R.string.settings_backup
+            SettingsPage.CREDITS -> R.string.settings_credits
+        },
+    )
+    if (page == SettingsPage.BACKUP) return BackupPage(title, vm, onBack)
+
+    DetailScreen(title, onBack) {
+        when (page) {
+            SettingsPage.APPEARANCE -> Group {
                 GroupRow(
                     stringResource(R.string.settings_theme),
                     value = stringResource(THEMES.first { it.first == settings.theme }.second),
@@ -218,12 +291,12 @@ fun SettingsScreen(
                     onClick = { picker = Picker.LANGUAGE },
                 )
             }
-            Group {
+            SettingsPage.SCREEN -> Group {
                 SwitchRow(stringResource(R.string.settings_keep_screen_on), stringResource(R.string.settings_keep_screen_on_hint), settings.keepScreenOn, vm::setKeepScreenOn)
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_start_tab), value = stringResource(startTab.label), onClick = { picker = Picker.START_TAB })
             }
-            Group {
+            SettingsPage.UNITS -> Group {
                 GroupRow(
                     stringResource(R.string.settings_coordinates),
                     value = stringResource(COORDINATES.first { it.first == settings.coordinates }.second),
@@ -244,32 +317,34 @@ fun SettingsScreen(
                 GroupDivider()
                 SwitchRow(stringResource(R.string.settings_true_north), stringResource(R.string.settings_true_north_hint), settings.trueNorth, vm::setTrueNorth)
             }
-            Group {
-                GroupRow(stringResource(R.string.settings_source), subtitle = stringResource(R.string.settings_source_hint))
-                GroupDivider()
-                GroupRow(
-                    stringResource(R.string.settings_assist_refresh),
-                    subtitle = stringResource(R.string.settings_assist_refresh_hint),
-                    onClick = { assisted = vm.gnss.assist(clear = false) },
-                )
-                GroupDivider()
-                GroupRow(
-                    stringResource(R.string.settings_assist_clear),
-                    subtitle = stringResource(R.string.settings_assist_clear_hint),
-                    onClick = { picker = Picker.CLEAR_ASSIST },
-                )
-                GroupDivider()
-                SwitchRow(stringResource(R.string.settings_gain), stringResource(R.string.settings_gain_hint), settings.gainWatch, vm::setGainWatch)
+            SettingsPage.RECEIVER -> {
+                Group {
+                    GroupRow(stringResource(R.string.settings_source), subtitle = stringResource(R.string.settings_source_hint))
+                    GroupDivider()
+                    GroupRow(
+                        stringResource(R.string.settings_assist_refresh),
+                        subtitle = stringResource(R.string.settings_assist_refresh_hint),
+                        onClick = { assisted = vm.gnss.assist(clear = false) },
+                    )
+                    GroupDivider()
+                    GroupRow(
+                        stringResource(R.string.settings_assist_clear),
+                        subtitle = stringResource(R.string.settings_assist_clear_hint),
+                        onClick = { picker = Picker.CLEAR_ASSIST },
+                    )
+                    GroupDivider()
+                    SwitchRow(stringResource(R.string.settings_gain), stringResource(R.string.settings_gain_hint), settings.gainWatch, vm::setGainWatch)
+                }
+                assisted?.let {
+                    Text(
+                        stringResource(if (it) R.string.assist_sent else R.string.assist_refused),
+                        color = c.muted,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
             }
-            assisted?.let {
-                Text(
-                    stringResource(if (it) R.string.assist_sent else R.string.assist_refused),
-                    color = c.muted,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                )
-            }
-            Group {
+            SettingsPage.RECORDING -> Group {
                 GroupRow(
                     stringResource(R.string.settings_moving),
                     subtitle = stringResource(R.string.settings_moving_hint),
@@ -298,7 +373,7 @@ fun SettingsScreen(
                     onClick = { picker = Picker.TRACK_ZERO },
                 )
             }
-            Group {
+            SettingsPage.MAP -> Group {
                 SwitchRow(stringResource(R.string.settings_map), stringResource(R.string.settings_map_hint), settings.mapTiles, vm::setMapTiles)
                 GroupDivider()
                 GroupRow(
@@ -308,43 +383,7 @@ fun SettingsScreen(
                     trailing = {},
                 )
             }
-            Group {
-                GroupRow(
-                    stringResource(R.string.settings_backup_save),
-                    subtitle = stringResource(R.string.settings_backup_save_hint),
-                    onClick = if (vm.busy) null else ({ sheet = BackupSheet.SAVE }),
-                )
-                GroupDivider()
-                GroupRow(
-                    stringResource(R.string.settings_backup_restore),
-                    subtitle = stringResource(R.string.settings_backup_restore_hint),
-                    onClick = if (vm.busy) null else ({ restoreFrom.launch(arrayOf("*/*")) }),
-                )
-            }
-            Group {
-                GroupRow(
-                    stringResource(R.string.settings_version),
-                    subtitle = when (val s = update) {
-                        AppUpdateState.Idle -> if (vm.updater.supported) stringResource(R.string.app_update_check) else stringResource(R.string.app_update_dev)
-                        AppUpdateState.Checking -> stringResource(R.string.app_update_checking)
-                        AppUpdateState.UpToDate -> stringResource(R.string.app_update_latest)
-                        AppUpdateState.Failed -> stringResource(R.string.app_update_failed)
-                        is AppUpdateState.Available -> stringResource(R.string.app_update_available, s.release.version)
-                        is AppUpdateState.Downloading -> stringResource(R.string.app_update_downloading, (s.progress * 100).toInt())
-                    },
-                    value = vm.updater.current,
-                    onClick = when (val s = update) {
-                        AppUpdateState.Checking, is AppUpdateState.Downloading -> null
-                        is AppUpdateState.Available -> ({ release = s.release })
-                        else -> if (vm.updater.supported) vm.updater::checkNow else null
-                    },
-                )
-                if (vm.updater.supported) {
-                    GroupDivider()
-                    SwitchRow(stringResource(R.string.settings_app_update), stringResource(R.string.settings_app_update_hint), settings.appUpdate, ::setAppUpdate)
-                }
-            }
-            Group {
+            SettingsPage.CREDITS -> Group {
                 GroupRow(stringResource(R.string.settings_licence), value = "GPL-3.0-or-later")
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_map_images), value = "NASA Blue Marble")
@@ -357,20 +396,7 @@ fun SettingsScreen(
                 GroupDivider()
                 GroupRow(stringResource(R.string.settings_title_font), value = "Cormorant Garamond · SIL OFL 1.1")
             }
-        }
-    }
-
-    release?.let { r ->
-        GroupSheet(stringResource(R.string.app_update_available, r.version), onDismiss = { release = null }) { pick ->
-            if (r.notes.isNotEmpty()) {
-                Text(
-                    r.notes,
-                    color = c.muted,
-                    fontSize = 14.sp,
-                    modifier = Modifier.heightIn(max = 280.dp).verticalScroll(rememberScrollState()).padding(start = 4.dp, end = 4.dp, bottom = 14.dp),
-                )
-            }
-            Group { GroupRow(stringResource(R.string.app_update_install), onClick = { pick { vm.updater.install(r) } }) }
+            SettingsPage.BACKUP -> Unit
         }
     }
 
@@ -458,6 +484,63 @@ fun SettingsScreen(
             Group { GroupRow(stringResource(R.string.assist_clear_confirm), onClick = { pick { assisted = vm.gnss.assist(clear = true) } }) }
         }
         null -> Unit
+    }
+}
+
+/** Saving recordings and settings to a file the user picks, and taking them back from one. */
+@Composable
+private fun BackupPage(title: String, vm: SettingsViewModel, onBack: () -> Unit) {
+    val c = AltairTheme.colors
+    val context = LocalContext.current
+    // Where a backup goes and where it comes from is the user's pick in the system file picker.
+    var sheet by rememberSaveable { mutableStateOf<BackupSheet?>(null) }
+    var password by remember { mutableStateOf("") }
+    var source by remember { mutableStateOf<Uri?>(null) }
+    var locked by remember { mutableStateOf(false) }
+    var overwrite by remember { mutableStateOf(false) }
+    val resources = LocalResources.current
+    fun toast(text: String) = Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+    fun restored(outcome: RestoreOutcome) {
+        toast(
+            when (outcome) {
+                is RestoreOutcome.Restored -> resources.getString(R.string.backup_restored, outcome.recordings)
+                RestoreOutcome.WrongPassword -> resources.getString(R.string.backup_wrong_password)
+                RestoreOutcome.Invalid -> resources.getString(R.string.backup_invalid)
+            },
+        )
+        // A mistyped password is asked for again, for the same file.
+        if (outcome == RestoreOutcome.WrongPassword) sheet = BackupSheet.RESTORE
+    }
+    val saveTo = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+        if (uri != null) vm.saveBackup(uri, password) { toast(resources.getString(if (it) R.string.backup_saved else R.string.backup_save_failed)) }
+        password = ""
+    }
+    val restoreFrom = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            vm.inspectBackup(uri) { encrypted ->
+                if (encrypted == null) return@inspectBackup restored(RestoreOutcome.Invalid)
+                source = uri
+                locked = encrypted
+                overwrite = false
+                sheet = BackupSheet.RESTORE
+            }
+        }
+    }
+
+    DetailScreen(title, onBack) {
+        Group {
+            GroupRow(
+                stringResource(R.string.settings_backup_save),
+                subtitle = stringResource(R.string.settings_backup_save_hint),
+                onClick = if (vm.busy) null else ({ sheet = BackupSheet.SAVE }),
+            )
+            GroupDivider()
+            GroupRow(
+                stringResource(R.string.settings_backup_restore),
+                subtitle = stringResource(R.string.settings_backup_restore_hint),
+                onClick = if (vm.busy) null else ({ restoreFrom.launch(arrayOf("*/*")) }),
+            )
+        }
     }
 
     when (sheet) {

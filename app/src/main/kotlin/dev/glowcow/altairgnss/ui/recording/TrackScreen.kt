@@ -39,6 +39,7 @@ import dev.glowcow.altairgnss.data.AppSettings
 import dev.glowcow.altairgnss.data.TrackZero
 import dev.glowcow.altairgnss.gnss.Scatter
 import dev.glowcow.altairgnss.maps.GroundMap
+import dev.glowcow.altairgnss.recording.Activity
 import dev.glowcow.altairgnss.recording.Mark
 import dev.glowcow.altairgnss.recording.Point
 import dev.glowcow.altairgnss.recording.Profile
@@ -46,6 +47,7 @@ import dev.glowcow.altairgnss.recording.ProfileStats
 import dev.glowcow.altairgnss.recording.Track
 import dev.glowcow.altairgnss.recording.TrackPath
 import dev.glowcow.altairgnss.ui.components.DetailScreen
+import dev.glowcow.altairgnss.ui.components.ChoiceSheet
 import dev.glowcow.altairgnss.ui.components.Group
 import dev.glowcow.altairgnss.ui.components.GroupDivider
 import dev.glowcow.altairgnss.ui.components.GroupRow
@@ -155,6 +157,7 @@ fun TrackScreen(id: Long, onBack: () -> Unit, onExpand: () -> Unit, onExpandChar
     val data = rememberTrackData(id)
     val map = rememberGroundMap(data.path)
     var deleting by rememberSaveable { mutableStateOf(false) }
+    var choosingActivity by rememberSaveable { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Mark?>(null) }
     val track = data.track
 
@@ -233,6 +236,12 @@ fun TrackScreen(id: Long, onBack: () -> Unit, onExpand: () -> Unit, onExpandChar
         }
         if (running) return@DetailScreen
         Group {
+            GroupRow(
+                stringResource(R.string.activity),
+                value = Activity.of(track.activity)?.let { stringResource(it.label) } ?: stringResource(R.string.activity_none),
+                onClick = { choosingActivity = true },
+            )
+            GroupDivider()
             if (stats != null) {
                 GroupRow(stringResource(R.string.export_csv), onClick = {
                     export.launch("track-" + FILE_TIME.format(Instant.ofEpochMilli(track.startedAt).atZone(ZoneId.systemDefault())) + ".csv")
@@ -251,6 +260,16 @@ fun TrackScreen(id: Long, onBack: () -> Unit, onExpand: () -> Unit, onExpandChar
             onSave = { text -> container.scope.launch { container.recorder.labelMark(mark.id, text) } },
             onDismiss = { editing = null },
             onDelete = { container.scope.launch { container.recorder.deleteMark(mark.id) } },
+        )
+    }
+
+    if (choosingActivity && track != null) {
+        ChoiceSheet(
+            title = stringResource(R.string.activity),
+            options = Activity.entries.map<Activity, Pair<Activity?, String>> { it to stringResource(it.label) },
+            selected = Activity.of(track.activity),
+            onSelect = { activity -> activity?.let { container.scope.launch { container.recorder.setActivity(track.id, it) } } },
+            onDismiss = { choosingActivity = false },
         )
     }
 

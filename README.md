@@ -38,8 +38,8 @@ The track on them is made up and lies in the Alps.
   warning when they look jammed or faked, and a sky plot that turns with you.
 - **Position scatter and NMEA** — how far the fixes wander round a point, and
   the receiver's own sentences, live and saved to a file.
-- **Activity record** — records altitude, position and speed with the screen
-  off as often as you set, with live figures and checkpoints with a note.
+- **Activity record** — a walk, a run, a ride or a drive, with the screen off
+  and checkpoints; recordings by year and place, a year's figures and trends.
 - **Track in three dimensions** — a finished recording as a ribbon coloured
   by speed to turn, zoom and tap, its checkpoints as flags, on a map if wanted.
 - **Height chart** — height over time with round marks of time, the
@@ -80,7 +80,8 @@ app/src/main/kotlin/dev/glowcow/altairgnss/
                 CompassMonitor (the rotation sensor)
   recording/    recordings of a track: the Room database, the recorder, the
                 foreground service that keeps it going, the figures of a
-                track, its layout for the 3D view, stops and CSV
+                track, its layout for the 3D view, stops and CSV, the
+                activities and the names of the places they began
   backup/       the backup archive, its password encryption, save and restore
   maps/         map tiles: their arithmetic, the cache on the phone, the two
                 layers of ground put together for a track
@@ -88,7 +89,7 @@ app/src/main/kotlin/dev/glowcow/altairgnss/
   update/       check for a new release, download, the weekly job
   data/         settings and what the altimeter remembers
   ui/recording/ the Activity record tab, a recording's page, the track in
-                three dimensions and the height chart
+                three dimensions, the height chart and a year's figures
   ui/tools/     position scatter and the NMEA page, opened from Status
   ui/           theme + icons, shared components (tab page with the frosted
                 bars, grouped rows and sheets, stats, the signal colour
@@ -166,7 +167,8 @@ backgrounds, accent `#1F6FEB`; the *warm* scheme has `#F0EEE6` / `#141413`
 and accent `#D97757`. UI font: Arimo, with page titles in Cormorant Garamond;
 icons are Phosphor.
 Headers and the island of tabs at the bottom are frosted glass, and the bright
-colours are drawn in Display P3 where the screen shows it. The launcher icon
+colours are drawn in Display P3 where the screen shows it. Satellite systems
+and activities wear colours of stackd's card palette. The launcher icon
 and the splash screen use the brand palette: navy `#0B1630`, gold `#FFD36B`,
 ice `#9FB7D9`.
 

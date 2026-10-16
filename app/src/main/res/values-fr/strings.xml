@@ -166,6 +166,18 @@
         <item>Dernier quartier</item>
         <item>Dernier croissant</item>
     </string-array>
+    <string name="settings_appearance">Apparence</string>
+    <string name="settings_screen">Écran</string>
+    <string name="settings_screen_hint">Le garder allumé, l’onglet d’ouverture</string>
+    <string name="settings_units">Unités</string>
+    <string name="settings_receiver">Récepteur</string>
+    <string name="settings_receiver_hint">Données d’assistance et gain du récepteur</string>
+    <string name="settings_recording">Enregistrement</string>
+    <string name="settings_recording_hint">Mouvement, position stable, intervalle, hauteurs</string>
+    <string name="settings_map_page">Carte</string>
+    <string name="settings_map_page_hint">Sous le parcours, et son cache</string>
+    <string name="settings_backup">Sauvegarde</string>
+    <string name="settings_credits">Licence et remerciements</string>
     <string name="settings_theme">Thème</string>
     <string name="theme_system">Par défaut du système</string>
     <string name="theme_light">Clair</string>
@@ -231,7 +243,7 @@
     <string name="recording_position">Trace GPS</string>
     <string name="recording_position_hint">À désactiver sous terre : seule l’altitude est écrite et le récepteur ne reste pas allumé</string>
     <string name="recording_network">Position par les réseaux</string>
-    <string name="recording_network_hint">Le Wi-Fi et les antennes aident à placer les points là où les satellites sont brouillés ; le service de localisation du téléphone apprend où vous êtes</string>
+    <string name="recording_network_hint">Le Wi-Fi et les antennes aident à placer les points là où les satellites sont brouillés ; le service de localisation du téléphone apprend où vous êtes et nomme le lieu où un enregistrement a commencé</string>
     <string name="recording_waiting">En attente d’une position stable : %1$d s</string>
     <string name="recording_waiting_coarse">La position n’est pour l’instant précise qu’à %1$s ; il faut %2$s ou mieux</string>
     <string name="settings_moving">En mouvement à partir de</string>
@@ -254,6 +266,29 @@
     <string name="mark_default">Point %1$d</string>
     <string name="marks">Points de passage</string>
     <string name="mark_delete">Supprimer le point de passage</string>
+    <string name="activity">Activité</string>
+    <string name="activity_walk">Marche</string>
+    <string name="activity_run">Course</string>
+    <string name="activity_hike">Randonnée</string>
+    <string name="activity_bike">Vélo</string>
+    <string name="activity_scooter">Trottinette</string>
+    <string name="activity_motorcycle">Moto</string>
+    <string name="activity_car">Voiture</string>
+    <string name="activity_other">Autre</string>
+    <string name="activity_none">Non indiquée</string>
+    <string name="place_none">Lieu inconnu</string>
+    <string name="year_open">Chiffres de %1$d</string>
+    <string name="year_counting">Calcul…</string>
+    <string name="year_days">Jours de sortie</string>
+    <string name="year_change">Évolution par rapport à %1$d</string>
+    <string name="year_by_month">Par mois</string>
+    <string name="year_by_activity">Par activité</string>
+    <string name="year_dashes">Tirets : le même mois en %1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d enregistrement</item>
+        <item quantity="many">%d enregistrements</item>
+        <item quantity="other">%d enregistrements</item>
+    </plurals>
     <string name="recordings">Enregistrements</string>
     <string name="recordings_empty">Rien d’enregistré pour l’instant</string>
     <string name="recording_now">Enregistrement en cours</string>

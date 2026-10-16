@@ -14,6 +14,10 @@ data class Track(
     val endedAt: Long? = null,
     /** The altitude counted as zero; null means the first point. */
     val zeroAltitude: Double? = null,
+    /** What it was made doing, an [Activity] key; null for a recording made before there was a choice. */
+    val activity: String? = null,
+    /** Where it began, named by the geocoder; null until looked up, empty where nothing could name it. */
+    val place: String? = null,
 )
 
 @Entity(

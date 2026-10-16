@@ -166,6 +166,18 @@
         <item>רבע אחרון</item>
         <item>סהר מתמעט</item>
     </string-array>
+    <string name="settings_appearance">מראה</string>
+    <string name="settings_screen">מסך</string>
+    <string name="settings_screen_hint">השארתו דלוק, הלשונית בפתיחה</string>
+    <string name="settings_units">יחידות</string>
+    <string name="settings_receiver">מקלט</string>
+    <string name="settings_receiver_hint">נתוני סיוע והגבר המקלט</string>
+    <string name="settings_recording">הקלטה</string>
+    <string name="settings_recording_hint">תנועה, קיבוע יציב, מרווח, גבהים</string>
+    <string name="settings_map_page">מפה</string>
+    <string name="settings_map_page_hint">מתחת למסלול והמטמון שלה</string>
+    <string name="settings_backup">גיבוי</string>
+    <string name="settings_credits">רישיון ותודות</string>
     <string name="settings_theme">ערכת נושא</string>
     <string name="theme_system">ברירת המחדל של המערכת</string>
     <string name="theme_light">בהירה</string>
@@ -231,7 +243,7 @@
     <string name="recording_position">מסלול GPS</string>
     <string name="recording_position_hint">לכבות מתחת לאדמה: נכתב רק הגובה והמקלט אינו נשאר דולק</string>
     <string name="recording_network">מיקום מרשתות</string>
-    <string name="recording_network_hint">Wi-Fi ואנטנות סלולריות עוזרות למקם את הנקודות היכן שהלוויינים משובשים; שירות המיקום של הטלפון ידע היכן אתם</string>
+    <string name="recording_network_hint">Wi-Fi ואנטנות סלולריות עוזרות למקם את הנקודות היכן שהלוויינים משובשים; שירות המיקום של הטלפון ידע היכן אתם ונותן שם למקום שבו התחילה הקלטה</string>
     <string name="recording_waiting">ממתין למיקום יציב: %1$d שנ׳</string>
     <string name="recording_waiting_coarse">בינתיים המיקום מדויק רק עד %1$s; נדרש %2$s או טוב יותר</string>
     <string name="settings_moving">תנועה החל מ־</string>
@@ -254,6 +266,29 @@
     <string name="mark_default">נקודת ציון %1$d</string>
     <string name="marks">נקודות ציון</string>
     <string name="mark_delete">מחיקת נקודת הציון</string>
+    <string name="activity">פעילות</string>
+    <string name="activity_walk">הליכה</string>
+    <string name="activity_run">ריצה</string>
+    <string name="activity_hike">טיול רגלי</string>
+    <string name="activity_bike">אופניים</string>
+    <string name="activity_scooter">קורקינט</string>
+    <string name="activity_motorcycle">אופנוע</string>
+    <string name="activity_car">מכונית</string>
+    <string name="activity_other">אחר</string>
+    <string name="activity_none">לא צוינה</string>
+    <string name="place_none">מיקום לא ידוע</string>
+    <string name="year_open">נתוני %1$d</string>
+    <string name="year_counting">מחשב…</string>
+    <string name="year_days">ימי יציאה</string>
+    <string name="year_change">שינויים לעומת %1$d</string>
+    <string name="year_by_month">לפי חודש</string>
+    <string name="year_by_activity">לפי פעילות</string>
+    <string name="year_dashes">קווים: אותו חודש ב־%1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d הקלטה</item>
+        <item quantity="two">%d הקלטות</item>
+        <item quantity="other">%d הקלטות</item>
+    </plurals>
     <string name="recordings">הקלטות</string>
     <string name="recordings_empty">עדיין אין הקלטות</string>
     <string name="recording_now">מקליט כעת</string>

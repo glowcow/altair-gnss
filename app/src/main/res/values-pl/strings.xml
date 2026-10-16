@@ -167,6 +167,18 @@
         <item>Ostatnia kwadra</item>
         <item>Ubywający sierp</item>
     </string-array>
+    <string name="settings_appearance">Wygląd</string>
+    <string name="settings_screen">Ekran</string>
+    <string name="settings_screen_hint">Nie wygaszać, karta na start</string>
+    <string name="settings_units">Jednostki</string>
+    <string name="settings_receiver">Odbiornik</string>
+    <string name="settings_receiver_hint">Dane wspomagania i wzmocnienie odbiornika</string>
+    <string name="settings_recording">Nagrywanie</string>
+    <string name="settings_recording_hint">Ruch, stabilny fix, interwał, wysokości</string>
+    <string name="settings_map_page">Mapa</string>
+    <string name="settings_map_page_hint">Pod trasą i jej pamięć podręczna</string>
+    <string name="settings_backup">Kopia zapasowa</string>
+    <string name="settings_credits">Licencja i podziękowania</string>
     <string name="settings_theme">Motyw</string>
     <string name="theme_system">Domyślny systemu</string>
     <string name="theme_light">Jasny</string>
@@ -232,7 +244,7 @@
     <string name="recording_position">Ślad GPS</string>
     <string name="recording_position_hint">Wyłącz pod ziemią: zapisywana jest tylko wysokość, a odbiornik nie pozostaje włączony</string>
     <string name="recording_network">Pozycja z sieci</string>
-    <string name="recording_network_hint">Wi-Fi i stacje komórkowe pomagają umieszczać punkty tam, gdzie satelity są zagłuszane; usługa lokalizacji telefonu dowiaduje się, gdzie jesteś</string>
+    <string name="recording_network_hint">Wi-Fi i stacje komórkowe pomagają umieszczać punkty tam, gdzie satelity są zagłuszane; usługa lokalizacji telefonu dowiaduje się, gdzie jesteś, i nazywa miejsce, w którym zaczęło się nagranie</string>
     <string name="recording_waiting">Oczekiwanie na stabilną pozycję: %1$d s</string>
     <string name="recording_waiting_coarse">Na razie pozycja ma dokładność tylko %1$s; potrzeba %2$s lub lepiej</string>
     <string name="settings_moving">Ruch od</string>
@@ -255,6 +267,30 @@
     <string name="mark_default">Punkt %1$d</string>
     <string name="marks">Punkty kontrolne</string>
     <string name="mark_delete">Usuń punkt kontrolny</string>
+    <string name="activity">Aktywność</string>
+    <string name="activity_walk">Spacer</string>
+    <string name="activity_run">Bieg</string>
+    <string name="activity_hike">Wędrówka</string>
+    <string name="activity_bike">Rower</string>
+    <string name="activity_scooter">Hulajnoga</string>
+    <string name="activity_motorcycle">Motocykl</string>
+    <string name="activity_car">Samochód</string>
+    <string name="activity_other">Inne</string>
+    <string name="activity_none">Nie podano</string>
+    <string name="place_none">Brak lokalizacji</string>
+    <string name="year_open">Liczby za %1$d</string>
+    <string name="year_counting">Liczenie…</string>
+    <string name="year_days">Dni z wyjściem</string>
+    <string name="year_change">Zmiany względem %1$d</string>
+    <string name="year_by_month">Według miesięcy</string>
+    <string name="year_by_activity">Według aktywności</string>
+    <string name="year_dashes">Kreski: ten sam miesiąc %1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d nagranie</item>
+        <item quantity="few">%d nagrania</item>
+        <item quantity="many">%d nagrań</item>
+        <item quantity="other">%d nagrania</item>
+    </plurals>
     <string name="recordings">Nagrania</string>
     <string name="recordings_empty">Nic jeszcze nie nagrano</string>
     <string name="recording_now">Trwa nagrywanie</string>

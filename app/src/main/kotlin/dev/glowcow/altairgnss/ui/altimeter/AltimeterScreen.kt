@@ -1,6 +1,7 @@
 package dev.glowcow.altairgnss.ui.altimeter
 
 import android.text.format.DateUtils
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +11,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -59,6 +63,16 @@ private fun AltimeterContent(top: Dp, bottom: Dp) {
     val altimeter = LocalContext.current.container.altimeter
     val state by altimeter.state.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf<Sheet?>(null) }
+    // Half a minute of averaging ends in something felt: done, or refused.
+    val view = LocalView.current
+    val calibrating = state.calibrating != null
+    var wasCalibrating by remember { mutableStateOf(calibrating) }
+    LaunchedEffect(calibrating) {
+        if (wasCalibrating && !calibrating) {
+            view.performHapticFeedback(if (state.calibrationFailed) HapticFeedbackConstants.REJECT else HapticFeedbackConstants.CONFIRM)
+        }
+        wasCalibrating = calibrating
+    }
 
     val plusMinus = @Composable { v: Float -> accuracyText(v) }
     val sourceName = stringResource(SOURCES.first { it.first == state.source }.second)

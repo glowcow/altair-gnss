@@ -166,6 +166,18 @@
         <item>Cuarto menguante</item>
         <item>Menguante</item>
     </string-array>
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_screen">Pantalla</string>
+    <string name="settings_screen_hint">Mantenerla encendida, pestaña al abrir</string>
+    <string name="settings_units">Unidades</string>
+    <string name="settings_receiver">Receptor</string>
+    <string name="settings_receiver_hint">Datos de asistencia y ganancia del receptor</string>
+    <string name="settings_recording">Grabación</string>
+    <string name="settings_recording_hint">Movimiento, posición estable, intervalo, alturas</string>
+    <string name="settings_map_page">Mapa</string>
+    <string name="settings_map_page_hint">Bajo el recorrido y su caché</string>
+    <string name="settings_backup">Copia de seguridad</string>
+    <string name="settings_credits">Licencia y créditos</string>
     <string name="settings_theme">Tema</string>
     <string name="theme_system">Predeterminado del sistema</string>
     <string name="theme_light">Claro</string>
@@ -231,7 +243,7 @@
     <string name="recording_position">Recorrido GPS</string>
     <string name="recording_position_hint">Desactívalo bajo tierra: solo se escribe la altitud y el receptor no se mantiene encendido</string>
     <string name="recording_network">Posición por redes</string>
-    <string name="recording_network_hint">El Wi-Fi y las antenas ayudan a situar los puntos donde los satélites están interferidos; el servicio de ubicación del teléfono sabrá dónde está</string>
+    <string name="recording_network_hint">El Wi-Fi y las antenas ayudan a situar los puntos donde los satélites están interferidos; el servicio de ubicación del teléfono sabrá dónde está y nombra el lugar donde empezó una grabación</string>
     <string name="recording_waiting">Esperando una posición estable: %1$d s</string>
     <string name="recording_waiting_coarse">Por ahora la posición solo tiene una precisión de %1$s; hace falta %2$s o mejor</string>
     <string name="settings_moving">En movimiento desde</string>
@@ -254,6 +266,29 @@
     <string name="mark_default">Punto %1$d</string>
     <string name="marks">Puntos de control</string>
     <string name="mark_delete">Eliminar el punto de control</string>
+    <string name="activity">Actividad</string>
+    <string name="activity_walk">Paseo</string>
+    <string name="activity_run">Carrera</string>
+    <string name="activity_hike">Senderismo</string>
+    <string name="activity_bike">Bicicleta</string>
+    <string name="activity_scooter">Patinete</string>
+    <string name="activity_motorcycle">Moto</string>
+    <string name="activity_car">Coche</string>
+    <string name="activity_other">Otra</string>
+    <string name="activity_none">Sin indicar</string>
+    <string name="place_none">Sin ubicación</string>
+    <string name="year_open">Cifras de %1$d</string>
+    <string name="year_counting">Sumando…</string>
+    <string name="year_days">Días de salida</string>
+    <string name="year_change">Cambios frente a %1$d</string>
+    <string name="year_by_month">Por mes</string>
+    <string name="year_by_activity">Por actividad</string>
+    <string name="year_dashes">Guiones: el mismo mes de %1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d grabación</item>
+        <item quantity="many">%d grabaciones</item>
+        <item quantity="other">%d grabaciones</item>
+    </plurals>
     <string name="recordings">Grabaciones</string>
     <string name="recordings_empty">Aún no hay grabaciones</string>
     <string name="recording_now">Grabando ahora</string>

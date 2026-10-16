@@ -181,6 +181,18 @@
         <item>Убывающий серп</item>
     </string-array>
 
+    <string name="settings_appearance">Оформление</string>
+    <string name="settings_screen">Экран</string>
+    <string name="settings_screen_hint">Не гасить, вкладка при запуске</string>
+    <string name="settings_units">Единицы</string>
+    <string name="settings_receiver">Приёмник</string>
+    <string name="settings_receiver_hint">Данные помощи и усиление приёмника</string>
+    <string name="settings_recording">Запись</string>
+    <string name="settings_recording_hint">Движение, устойчивый фикс, интервал, высоты</string>
+    <string name="settings_map_page">Карта</string>
+    <string name="settings_map_page_hint">Под треком и её кеш</string>
+    <string name="settings_backup">Резервная копия</string>
+    <string name="settings_credits">Лицензия и благодарности</string>
     <string name="settings_theme">Тема</string>
     <string name="theme_system">Как в системе</string>
     <string name="theme_light">Светлая</string>
@@ -246,7 +258,7 @@
     <string name="recording_position">GPS-трек</string>
     <string name="recording_position_hint">Выключите под землёй: пишется только высота, приёмник не держится включённым</string>
     <string name="recording_network">Помощь сетей</string>
-    <string name="recording_network_hint">Wi-Fi и сотовые вышки помогают ставить точки там, где спутники глушат; служба геолокации телефона при этом узнаёт, где вы</string>
+    <string name="recording_network_hint">Wi-Fi и сотовые вышки помогают ставить точки там, где спутники глушат; служба геолокации телефона при этом узнаёт, где вы, и называет место, где началась запись</string>
     <string name="recording_waiting">Ждём устойчивую фиксацию: %1$d с</string>
     <string name="recording_waiting_coarse">Пока положение известно с точностью %1$s; нужно %2$s или лучше</string>
     <string name="settings_moving">Движение от</string>
@@ -269,6 +281,30 @@
     <string name="mark_default">Точка %1$d</string>
     <string name="marks">Контрольные точки</string>
     <string name="mark_delete">Удалить контрольную точку</string>
+    <string name="activity">Активность</string>
+    <string name="activity_walk">Прогулка</string>
+    <string name="activity_run">Бег</string>
+    <string name="activity_hike">Хайкинг</string>
+    <string name="activity_bike">Велосипед</string>
+    <string name="activity_scooter">Самокат</string>
+    <string name="activity_motorcycle">Мотоцикл</string>
+    <string name="activity_car">Автомобиль</string>
+    <string name="activity_other">Другое</string>
+    <string name="activity_none">Не указана</string>
+    <string name="place_none">Место неизвестно</string>
+    <string name="year_open">Итоги %1$d года</string>
+    <string name="year_counting">Подсчёт…</string>
+    <string name="year_days">Дней с записями</string>
+    <string name="year_change">Изменения к %1$d году</string>
+    <string name="year_by_month">По месяцам</string>
+    <string name="year_by_activity">По активностям</string>
+    <string name="year_dashes">Чёрточки — тот же месяц %1$d года</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d запись</item>
+        <item quantity="few">%d записи</item>
+        <item quantity="many">%d записей</item>
+        <item quantity="other">%d записи</item>
+    </plurals>
     <string name="recordings">Записи</string>
     <string name="recordings_empty">Записей пока нет</string>
     <string name="recording_now">Идёт запись</string>

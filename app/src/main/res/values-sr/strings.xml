@@ -166,6 +166,18 @@
         <item>Последња четврт</item>
         <item>Опадајући срп</item>
     </string-array>
+    <string name="settings_appearance">Изглед</string>
+    <string name="settings_screen">Екран</string>
+    <string name="settings_screen_hint">Да остане упаљен, картица на почетку</string>
+    <string name="settings_units">Јединице</string>
+    <string name="settings_receiver">Пријемник</string>
+    <string name="settings_receiver_hint">Подаци помоћи и појачање пријемника</string>
+    <string name="settings_recording">Снимање</string>
+    <string name="settings_recording_hint">Кретање, стабилна позиција, интервал, висине</string>
+    <string name="settings_map_page">Карта</string>
+    <string name="settings_map_page_hint">Испод стазе и њен кеш</string>
+    <string name="settings_backup">Резервна копија</string>
+    <string name="settings_credits">Лиценца и захвалнице</string>
     <string name="settings_theme">Тема</string>
     <string name="theme_system">Подразумевано у систему</string>
     <string name="theme_light">Светла</string>
@@ -231,7 +243,7 @@
     <string name="recording_position">GPS стаза</string>
     <string name="recording_position_hint">Искључите под земљом: уписује се само висина, а пријемник не остаје укључен</string>
     <string name="recording_network">Положај из мрежа</string>
-    <string name="recording_network_hint">Wi-Fi и базне станице помажу да се тачке поставе тамо где су сателити ометани; услуга локације телефона сазнаје где сте</string>
+    <string name="recording_network_hint">Wi-Fi и базне станице помажу да се тачке поставе тамо где су сателити ометани; услуга локације телефона сазнаје где сте, и даје име месту где је снимак почео</string>
     <string name="recording_waiting">Чека се стабилан положај: %1$d с</string>
     <string name="recording_waiting_coarse">За сада је положај тачан само до %1$s; потребно је %2$s или боље</string>
     <string name="settings_moving">Кретање од</string>
@@ -254,6 +266,29 @@
     <string name="mark_default">Тачка %1$d</string>
     <string name="marks">Контролне тачке</string>
     <string name="mark_delete">Обриши контролну тачку</string>
+    <string name="activity">Активност</string>
+    <string name="activity_walk">Шетња</string>
+    <string name="activity_run">Трчање</string>
+    <string name="activity_hike">Планинарење</string>
+    <string name="activity_bike">Бицикл</string>
+    <string name="activity_scooter">Тротинет</string>
+    <string name="activity_motorcycle">Мотоцикл</string>
+    <string name="activity_car">Аутомобил</string>
+    <string name="activity_other">Друго</string>
+    <string name="activity_none">Није наведено</string>
+    <string name="place_none">Место непознато</string>
+    <string name="year_open">Бројке за %1$d</string>
+    <string name="year_counting">Сабирање…</string>
+    <string name="year_days">Дана напољу</string>
+    <string name="year_change">Промене у односу на %1$d</string>
+    <string name="year_by_month">По месецима</string>
+    <string name="year_by_activity">По активностима</string>
+    <string name="year_dashes">Цртице: исти месец %1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d снимак</item>
+        <item quantity="few">%d снимка</item>
+        <item quantity="other">%d снимака</item>
+    </plurals>
     <string name="recordings">Снимци</string>
     <string name="recordings_empty">Још нема снимака</string>
     <string name="recording_now">Снимање у току</string>

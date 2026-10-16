@@ -44,7 +44,7 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
                         createdAt = System.currentTimeMillis(),
                         app = context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty(),
                         tracks = finished.map { t ->
-                            BackupTrack(t.startedAt, t.endedAt, t.zeroAltitude, tracks.marks(t.id).map { m -> BackupMark(m.timeMs, m.label) })
+                            BackupTrack(t.startedAt, t.endedAt, t.zeroAltitude, tracks.marks(t.id).map { m -> BackupMark(m.timeMs, m.label) }, t.activity)
                         },
                         settings = BackupSettings(
                             s.theme.name, s.palette.name, s.coordinates.name, s.length.name, s.speed.name,
@@ -109,7 +109,7 @@ class Backup(private val context: Context, private val tracks: TrackDao, private
             if (!overwrite || known.endedAt == null) return false
             tracks.delete(known.id)
         }
-        val id = tracks.insert(Track(startedAt = track.startedAt, endedAt = ended, zeroAltitude = track.zeroAltitude))
+        val id = tracks.insert(Track(startedAt = track.startedAt, endedAt = ended, zeroAltitude = track.zeroAltitude, activity = track.activity))
         val points = BackupArchive.points(file, id)
         if (points.isEmpty()) {
             tracks.delete(id)

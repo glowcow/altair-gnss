@@ -3,6 +3,7 @@ package dev.glowcow.altairgnss.recording
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import dev.glowcow.altairgnss.Haptics
 import dev.glowcow.altairgnss.altimeter.Altimeter
 import dev.glowcow.altairgnss.data.SettingsStore
 import dev.glowcow.altairgnss.gnss.Fix
@@ -54,6 +55,7 @@ class Recorder(
     private val gnss: GnssMonitor,
     private val fused: FusedPosition,
     private val settings: SettingsStore,
+    private val places: Places,
 ) {
     /** The recording that runs now. */
     val active: StateFlow<Track?> = dao.observeActive().stateIn(scope, SharingStarted.Eagerly, null)
@@ -72,21 +74,28 @@ class Recorder(
         if (last == null) dao.delete(track.id) else dao.close(track.id, at ?: last)
     }
 
-    fun start() {
+    fun start(activity: Activity) {
         scope.launch {
             if (dao.active() != null) return@launch
-            dao.insert(Track(startedAt = System.currentTimeMillis()))
+            dao.insert(Track(startedAt = System.currentTimeMillis(), activity = activity.key))
             context.startForegroundService(Intent(context, RecordingService::class.java))
         }
     }
 
     fun stop() {
         scope.launch {
-            dao.active()?.let { end(it, System.currentTimeMillis()) }
+            val track = dao.active()
+            track?.let { end(it, System.currentTimeMillis()) }
             context.stopService(Intent(context, RecordingService::class.java))
             liveState.value = null
+            if (track != null) {
+                Haptics.stopped(context)
+                places.fill()
+            }
         }
     }
+
+    suspend fun setActivity(id: Long, activity: Activity) = dao.setActivity(id, activity.key)
 
     /** Counts heights of the running recording from where the phone is now. */
     fun zeroHere() {
@@ -187,6 +196,8 @@ class Recorder(
                     startedAt = System.currentTimeMillis()
                     dao.setStartedAt(track.id, startedAt)
                 }
+                // Felt in a pocket too: the fix has held and points are being written.
+                Haptics.started(context)
                 while (true) {
                     val state = altimeter.state.value
                     val now = System.currentTimeMillis()

@@ -13,7 +13,9 @@ import dev.glowcow.altairgnss.instruments.CompassMonitor
 import dev.glowcow.altairgnss.maps.MapLoader
 import dev.glowcow.altairgnss.maps.TileStore
 import dev.glowcow.altairgnss.recording.AltairDatabase
+import dev.glowcow.altairgnss.recording.Places
 import dev.glowcow.altairgnss.recording.Recorder
+import dev.glowcow.altairgnss.recording.Summaries
 import dev.glowcow.altairgnss.update.AppUpdateScheduler
 import dev.glowcow.altairgnss.update.AppUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +33,9 @@ class AppContainer(context: Context) {
     val compass = CompassMonitor(context)
     val altimeter = Altimeter(scope, gnss, PressureMonitor(context), settings)
     val tracks = AltairDatabase.create(context).tracks()
-    val recorder = Recorder(context, scope, tracks, altimeter, gnss, FusedPosition(context), settings)
+    val places = Places(context, scope, tracks, settings)
+    val summaries = Summaries(tracks)
+    val recorder = Recorder(context, scope, tracks, altimeter, gnss, FusedPosition(context), settings, places)
     val backup = Backup(context, tracks, settings)
     val appUpdater = AppUpdater(context, scope)
     val airports = AirportService("altair-gnss/${appUpdater.current}")

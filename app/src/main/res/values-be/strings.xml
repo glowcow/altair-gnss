@@ -167,6 +167,18 @@
         <item>Апошняя квадра</item>
         <item>Стары серп</item>
     </string-array>
+    <string name="settings_appearance">Афармленне</string>
+    <string name="settings_screen">Экран</string>
+    <string name="settings_screen_hint">Не гасіць, укладка пры запуску</string>
+    <string name="settings_units">Адзінкі</string>
+    <string name="settings_receiver">Прымач</string>
+    <string name="settings_receiver_hint">Даныя дапамогі і ўзмацненне прымача</string>
+    <string name="settings_recording">Запіс</string>
+    <string name="settings_recording_hint">Рух, устойлівы фікс, інтэрвал, вышыні</string>
+    <string name="settings_map_page">Карта</string>
+    <string name="settings_map_page_hint">Пад трэкам і яе кэш</string>
+    <string name="settings_backup">Рэзервовая копія</string>
+    <string name="settings_credits">Ліцэнзія і падзякі</string>
     <string name="settings_theme">Тэма</string>
     <string name="theme_system">Як у сістэме</string>
     <string name="theme_light">Светлая</string>
@@ -232,7 +244,7 @@
     <string name="recording_position">GPS-трэк</string>
     <string name="recording_position_hint">Выключыце пад зямлёй: пішацца толькі вышыня, прыёмнік не трымаецца ўключаным</string>
     <string name="recording_network">Дапамога сетак</string>
-    <string name="recording_network_hint">Wi-Fi і сотавыя вышкі дапамагаюць ставіць кропкі там, дзе спадарожнікі глушаць; служба геалакацыі тэлефона пры гэтым даведваецца, дзе вы</string>
+    <string name="recording_network_hint">Wi-Fi і сотавыя вышкі дапамагаюць ставіць кропкі там, дзе спадарожнікі глушаць; служба геалакацыі тэлефона пры гэтым даведваецца, дзе вы, і называе месца, дзе пачаўся запіс</string>
     <string name="recording_waiting">Чакаем устойлівай фіксацыі: %1$d с</string>
     <string name="recording_waiting_coarse">Пакуль становішча вядома з дакладнасцю %1$s; трэба %2$s або лепш</string>
     <string name="settings_moving">Рух ад</string>
@@ -255,6 +267,30 @@
     <string name="mark_default">Кропка %1$d</string>
     <string name="marks">Кантрольныя кропкі</string>
     <string name="mark_delete">Выдаліць кантрольную кропку</string>
+    <string name="activity">Актыўнасць</string>
+    <string name="activity_walk">Прагулка</string>
+    <string name="activity_run">Бег</string>
+    <string name="activity_hike">Хайкінг</string>
+    <string name="activity_bike">Ровар</string>
+    <string name="activity_scooter">Самакат</string>
+    <string name="activity_motorcycle">Матацыкл</string>
+    <string name="activity_car">Аўтамабіль</string>
+    <string name="activity_other">Іншае</string>
+    <string name="activity_none">Не пазначана</string>
+    <string name="place_none">Месца невядомае</string>
+    <string name="year_open">Вынікі %1$d года</string>
+    <string name="year_counting">Падлік…</string>
+    <string name="year_days">Дзён з запісамі</string>
+    <string name="year_change">Змены да %1$d года</string>
+    <string name="year_by_month">Па месяцах</string>
+    <string name="year_by_activity">Па актыўнасцях</string>
+    <string name="year_dashes">Рыскі — той жа месяц %1$d года</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d запіс</item>
+        <item quantity="few">%d запісы</item>
+        <item quantity="many">%d запісаў</item>
+        <item quantity="other">%d запісу</item>
+    </plurals>
     <string name="recordings">Запісы</string>
     <string name="recordings_empty">Запісаў пакуль няма</string>
     <string name="recording_now">Ідзе запіс</string>

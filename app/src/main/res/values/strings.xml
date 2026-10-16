@@ -197,6 +197,18 @@
         <item>Waning crescent</item>
     </string-array>
 
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_screen">Screen</string>
+    <string name="settings_screen_hint">Keeping it on, the tab to open on</string>
+    <string name="settings_units">Units</string>
+    <string name="settings_receiver">Receiver</string>
+    <string name="settings_receiver_hint">Assistance data and the receiver’s gain</string>
+    <string name="settings_recording">Recording</string>
+    <string name="settings_recording_hint">Moving, the steady fix, the interval, heights</string>
+    <string name="settings_map_page">Map</string>
+    <string name="settings_map_page_hint">Under a track, and its cache</string>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_credits">Licence and credits</string>
     <string name="settings_theme">Theme</string>
     <string name="theme_system">System default</string>
     <string name="theme_light">Light</string>
@@ -262,7 +274,7 @@
     <string name="recording_position">GPS track</string>
     <string name="recording_position_hint">Off for underground: only the altitude is written and the receiver is not kept on</string>
     <string name="recording_network">Network positioning</string>
-    <string name="recording_network_hint">Wi-Fi and cell towers help place the points where satellites are jammed; the phone’s location service learns where you are</string>
+    <string name="recording_network_hint">Wi-Fi and cell towers help place the points where satellites are jammed; the phone’s location service learns where you are and names the place a recording began</string>
     <string name="recording_waiting">Waiting for a steady fix: %1$d s</string>
     <string name="recording_waiting_coarse">The position is only good to %1$s so far; %2$s or better is needed</string>
     <string name="settings_moving">Moving from</string>
@@ -285,6 +297,28 @@
     <string name="mark_default">Checkpoint %1$d</string>
     <string name="marks">Checkpoints</string>
     <string name="mark_delete">Delete the checkpoint</string>
+    <string name="activity">Activity</string>
+    <string name="activity_walk">Walk</string>
+    <string name="activity_run">Run</string>
+    <string name="activity_hike">Hike</string>
+    <string name="activity_bike">Bike</string>
+    <string name="activity_scooter">Scooter</string>
+    <string name="activity_motorcycle">Motorcycle</string>
+    <string name="activity_car">Car</string>
+    <string name="activity_other">Other</string>
+    <string name="activity_none">Not set</string>
+    <string name="place_none">No location</string>
+    <string name="year_open">Figures of %1$d</string>
+    <string name="year_counting">Adding up…</string>
+    <string name="year_days">Days out</string>
+    <string name="year_change">Changes against %1$d</string>
+    <string name="year_by_month">By month</string>
+    <string name="year_by_activity">By activity</string>
+    <string name="year_dashes">Dashes: the same month of %1$d</string>
+    <plurals name="recordings_count">
+        <item quantity="one">%d recording</item>
+        <item quantity="other">%d recordings</item>
+    </plurals>
     <string name="recordings">Recordings</string>
     <string name="recordings_empty">Nothing recorded yet</string>
     <string name="recording_now">Recording now</string>

@@ -37,6 +37,15 @@ interface TrackDao {
     @Query("UPDATE tracks SET zeroAltitude = :altitude WHERE id = :id")
     suspend fun setZero(id: Long, altitude: Double?)
 
+    @Query("UPDATE tracks SET activity = :activity WHERE id = :id")
+    suspend fun setActivity(id: Long, activity: String)
+
+    @Query("SELECT * FROM tracks WHERE place IS NULL AND endedAt IS NOT NULL")
+    suspend fun unplaced(): List<Track>
+
+    @Query("UPDATE tracks SET place = :place WHERE id = :id")
+    suspend fun setPlace(id: Long, place: String)
+
     @Query("DELETE FROM tracks WHERE id = :id")
     suspend fun delete(id: Long)
 
@@ -51,6 +60,9 @@ interface TrackDao {
 
     @Query("SELECT * FROM points WHERE trackId = :trackId ORDER BY timeMs")
     suspend fun points(trackId: Long): List<Point>
+
+    @Query("SELECT * FROM points WHERE trackId = :trackId AND latitude IS NOT NULL ORDER BY timeMs LIMIT 1")
+    suspend fun firstPlaced(trackId: Long): Point?
 
     @Query("SELECT MAX(timeMs) FROM points WHERE trackId = :trackId")
     suspend fun lastPointTime(trackId: Long): Long?

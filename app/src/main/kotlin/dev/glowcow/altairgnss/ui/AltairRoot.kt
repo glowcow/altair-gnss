@@ -29,6 +29,9 @@ import dev.glowcow.altairgnss.ui.recording.ChartScreen
 import dev.glowcow.altairgnss.ui.recording.RecordScreen
 import dev.glowcow.altairgnss.ui.recording.TrackScreen
 import dev.glowcow.altairgnss.ui.recording.TrackViewScreen
+import dev.glowcow.altairgnss.ui.recording.YearScreen
+import dev.glowcow.altairgnss.ui.settings.SettingsPage
+import dev.glowcow.altairgnss.ui.settings.SettingsPageScreen
 import dev.glowcow.altairgnss.ui.settings.SettingsScreen
 import dev.glowcow.altairgnss.ui.sky.SkyScreen
 import dev.glowcow.altairgnss.ui.status.StatusScreen
@@ -49,6 +52,8 @@ import kotlinx.serialization.Serializable
 @Serializable data class TrackRoute(val id: Long) : NavKey
 @Serializable data class TrackViewRoute(val id: Long) : NavKey
 @Serializable data class ChartRoute(val id: Long) : NavKey
+@Serializable data class YearRoute(val year: Int) : NavKey
+@Serializable data class SettingsPageRoute(val page: SettingsPage) : NavKey
 @Serializable data object NmeaRoute : NavKey
 @Serializable data object ScatterRoute : NavKey
 
@@ -112,7 +117,7 @@ fun AltairRoot(settings: AppSettings, openTab: Flow<TopTab>) {
                 )
             }
             entry<SkyRoute> { SkyScreen(onBack = { backStack.removeLastOrNull() }) }
-            entry<RecordRoute> { RecordScreen(onTab = ::selectTab, onOpen = { backStack.add(TrackRoute(it)) }) }
+            entry<RecordRoute> { RecordScreen(onTab = ::selectTab, onOpen = { backStack.add(TrackRoute(it)) }, onYear = { backStack.add(YearRoute(it)) }) }
             entry<AltimeterRoute> { AltimeterScreen(onTab = ::selectTab) }
             entry<InstrumentsRoute> {
                 InstrumentsScreen(onTab = ::selectTab, onCompass = { backStack.add(CompassRoute) }, onSpeed = { backStack.add(SpeedRoute) })
@@ -129,9 +134,11 @@ fun AltairRoot(settings: AppSettings, openTab: Flow<TopTab>) {
             }
             entry<TrackViewRoute> { route -> TrackViewScreen(route.id, onBack = { backStack.removeLastOrNull() }) }
             entry<ChartRoute> { route -> ChartScreen(route.id, onBack = { backStack.removeLastOrNull() }) }
+            entry<YearRoute> { route -> YearScreen(route.year, onBack = { backStack.removeLastOrNull() }) }
             entry<NmeaRoute> { NmeaScreen(onBack = { backStack.removeLastOrNull() }) }
             entry<ScatterRoute> { ScatterScreen(onBack = { backStack.removeLastOrNull() }) }
-            entry<SettingsRoute> { SettingsScreen(onTab = ::selectTab) }
+            entry<SettingsRoute> { SettingsScreen(onTab = ::selectTab, onPage = { backStack.add(SettingsPageRoute(it)) }) }
+            entry<SettingsPageRoute> { route -> SettingsPageScreen(route.page, onBack = { backStack.removeLastOrNull() }) }
         },
     )
 }
