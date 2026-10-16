@@ -166,7 +166,7 @@ fun YearScreen(year: Int, onBack: () -> Unit) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         KindPill(stringResource(activity?.label ?: R.string.activity_none), activity?.colour ?: c.muted)
                         Text(
-                            pluralStringResource(R.plurals.recordings_count, list.size, list.size) + " | " + clock(list.sumOf { it.movingMs }),
+                            pluralStringResource(R.plurals.recordings_count, list.size, list.size) + " · " + clock(list.sumOf { it.movingMs }),
                             color = c.muted,
                             fontSize = 13.sp,
                         )

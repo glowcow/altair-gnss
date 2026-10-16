@@ -417,7 +417,7 @@ private fun TrackRow(track: Track, onClick: () -> Unit) {
             Text(
                 if (ended == null) stringResource(R.string.recording_now)
                 // The length first, so a long place is what gets cut; with no place looked up, the length alone.
-                else listOfNotNull(clock(ended - track.startedAt), track.place?.let { it.ifEmpty { stringResource(R.string.place_none) } }).joinToString(" | "),
+                else listOfNotNull(clock(ended - track.startedAt), track.place?.let { it.ifEmpty { stringResource(R.string.place_none) } }).joinToString(" · "),
                 color = c.muted,
                 fontSize = 13.sp,
                 maxLines = 1,
