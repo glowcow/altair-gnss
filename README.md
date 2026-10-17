@@ -38,8 +38,8 @@ The track on them is made up and lies in the Alps.
   warning when they look jammed or faked, and a sky plot that turns with you.
 - **Position scatter and NMEA** — how far the fixes wander round a point, and
   the receiver's own sentences, live and saved to a file.
-- **Activity record** — a walk, a run, a ride or a drive, with the screen off
-  and checkpoints; recordings by year and place, a year's figures and trends.
+- **Activity record** — a walk, a run, a ride or a drive with the screen off,
+  felt in the hand as it starts; by year and place, with a year's trends.
 - **Track in three dimensions** — a finished recording as a ribbon coloured
   by speed to turn, zoom and tap, its checkpoints as flags, on a map if wanted.
 - **Height chart** — height over time with round marks of time, the

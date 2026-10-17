@@ -170,12 +170,12 @@ fun TrackScene(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Stat(stringResource(R.string.label_elapsed), clock(point.elapsedMs), Modifier.width(96.dp))
-                    Stat(stringResource(R.string.label_distance), distanceText(point.distance), Modifier.width(96.dp))
+                    Stat(stringResource(R.string.label_elapsed), clock(point.elapsedMs), Modifier.width(96.dp), onGlass = true)
+                    Stat(stringResource(R.string.label_distance), distanceText(point.distance), Modifier.width(96.dp), onGlass = true)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Stat(stringResource(R.string.label_altitude), lengthText(point.altitude), Modifier.width(96.dp))
-                    Stat(stringResource(R.string.label_speed), point.speed?.let { speedText(it) } ?: NO_VALUE, Modifier.width(96.dp))
+                    Stat(stringResource(R.string.label_altitude), lengthText(point.altitude), Modifier.width(96.dp), onGlass = true)
+                    Stat(stringResource(R.string.label_speed), point.speed?.let { speedText(it) } ?: NO_VALUE, Modifier.width(96.dp), onGlass = true)
                 }
             }
         }
@@ -504,8 +504,8 @@ private fun SpeedLegend(top: Float, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).drawBehind { drawRect(Brush.horizontalGradient(SPEED_COLOURS.map(c::bright))) })
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("0", color = c.muted, fontSize = 11.sp)
-            Text(speedText(top), color = c.muted, fontSize = 11.sp)
+            Text("0", color = c.text, fontSize = 11.sp)
+            Text(speedText(top), color = c.text, fontSize = 11.sp)
         }
     }
 }

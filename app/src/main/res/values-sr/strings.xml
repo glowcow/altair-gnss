@@ -348,6 +348,8 @@
     <string name="settings_backup_save">Сачувај копију</string>
     <string name="settings_backup_restore">Врати из копије</string>
     <string name="backup_password">Лозинка</string>
+    <string name="password_show">Прикажи лозинку</string>
+    <string name="password_hide">Сакриј лозинку</string>
     <string name="backup_save_pick">Изабери где да се сачува</string>
     <string name="backup_saved">Копија је сачувана</string>
     <string name="backup_save_failed">Чување копије није успело</string>

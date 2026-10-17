@@ -76,11 +76,12 @@ fun StatGrid(stats: List<Pair<String, String>>) {
     }
 }
 
+/** A figure under its caption; [onGlass] the caption takes the text colour, as all text on glass does. */
 @Composable
-fun Stat(label: String, value: String, modifier: Modifier = Modifier) {
+fun Stat(label: String, value: String, modifier: Modifier = Modifier, onGlass: Boolean = false) {
     val c = AltairTheme.colors
     Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label, color = c.muted, fontSize = 12.sp, maxLines = 1)
+        Text(label, color = if (onGlass) c.text else c.muted, fontSize = 12.sp, maxLines = 1)
         Text(value, color = c.text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, style = tabular(), maxLines = 1)
     }
 }

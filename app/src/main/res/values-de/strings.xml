@@ -345,6 +345,8 @@
     <string name="settings_backup_save">Sicherung speichern</string>
     <string name="settings_backup_restore">Aus Sicherung wiederherstellen</string>
     <string name="backup_password">Passwort</string>
+    <string name="password_show">Passwort anzeigen</string>
+    <string name="password_hide">Passwort verbergen</string>
     <string name="backup_save_pick">Speicherort wählen</string>
     <string name="backup_saved">Sicherung gespeichert</string>
     <string name="backup_save_failed">Die Sicherung konnte nicht gespeichert werden</string>

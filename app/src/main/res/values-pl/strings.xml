@@ -351,6 +351,8 @@
     <string name="settings_backup_save">Zapisz kopię</string>
     <string name="settings_backup_restore">Przywróć z kopii</string>
     <string name="backup_password">Hasło</string>
+    <string name="password_show">Pokaż hasło</string>
+    <string name="password_hide">Ukryj hasło</string>
     <string name="backup_save_pick">Wybierz, gdzie zapisać</string>
     <string name="backup_saved">Kopia zapisana</string>
     <string name="backup_save_failed">Nie udało się zapisać kopii</string>

@@ -348,6 +348,8 @@
     <string name="settings_backup_save">שמירת גיבוי</string>
     <string name="settings_backup_restore">שחזור מגיבוי</string>
     <string name="backup_password">סיסמה</string>
+    <string name="password_show">הצגת הסיסמה</string>
+    <string name="password_hide">הסתרת הסיסמה</string>
     <string name="backup_save_pick">בחירת מקום לשמירה</string>
     <string name="backup_saved">הגיבוי נשמר</string>
     <string name="backup_save_failed">לא ניתן היה לשמור את הגיבוי</string>

@@ -348,6 +348,8 @@
     <string name="settings_backup_save">Guardar una copia</string>
     <string name="settings_backup_restore">Restaurar desde una copia</string>
     <string name="backup_password">Contraseña</string>
+    <string name="password_show">Mostrar la contraseña</string>
+    <string name="password_hide">Ocultar la contraseña</string>
     <string name="backup_save_pick">Elegir dónde guardar</string>
     <string name="backup_saved">Copia guardada</string>
     <string name="backup_save_failed">No se ha podido guardar la copia</string>
