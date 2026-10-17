@@ -242,8 +242,10 @@
     <string name="recording_stop">Detener la grabación</string>
     <string name="recording_position">Recorrido GPS</string>
     <string name="recording_position_hint">Desactívalo bajo tierra: solo se escribe la altitud y el receptor no se mantiene encendido</string>
+    <string name="recording_position_locked">Siempre activado sin barómetro: la altitud la dan los satélites</string>
+    <string name="recording_empty">No se grabó nada: no llegó ninguna altitud</string>
     <string name="recording_network">Posición por redes</string>
-    <string name="recording_network_hint">El Wi-Fi y las antenas ayudan a situar los puntos donde los satélites están interferidos; el servicio de ubicación del teléfono sabrá dónde está y nombra el lugar donde empezó una grabación</string>
+    <string name="recording_network_hint">El Wi-Fi y las antenas ayudan a situar los puntos donde los satélites están interferidos; el servicio de ubicación del teléfono sabrá dónde está y nombra el lugar de cada grabación empezada con esto activado</string>
     <string name="recording_waiting">Esperando una posición estable: %1$d s</string>
     <string name="recording_waiting_coarse">Por ahora la posición solo tiene una precisión de %1$s; hace falta %2$s o mejor</string>
     <string name="settings_moving">En movimiento desde</string>

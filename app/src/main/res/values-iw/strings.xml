@@ -242,8 +242,10 @@
     <string name="recording_stop">עצירת ההקלטה</string>
     <string name="recording_position">מסלול GPS</string>
     <string name="recording_position_hint">לכבות מתחת לאדמה: נכתב רק הגובה והמקלט אינו נשאר דולק</string>
+    <string name="recording_position_locked">תמיד פועל בלי ברומטר: הגובה מגיע מהלוויינים</string>
+    <string name="recording_empty">לא הוקלט דבר: לא התקבל גובה</string>
     <string name="recording_network">מיקום מרשתות</string>
-    <string name="recording_network_hint">Wi-Fi ואנטנות סלולריות עוזרות למקם את הנקודות היכן שהלוויינים משובשים; שירות המיקום של הטלפון ידע היכן אתם ונותן שם למקום שבו התחילה הקלטה</string>
+    <string name="recording_network_hint">Wi-Fi ואנטנות סלולריות עוזרות למקם את הנקודות היכן שהלוויינים משובשים; שירות המיקום של הטלפון ידע היכן אתם ונותן שם למקום של כל הקלטה שהתחילה כשזה מופעל</string>
     <string name="recording_waiting">ממתין למיקום יציב: %1$d שנ׳</string>
     <string name="recording_waiting_coarse">בינתיים המיקום מדויק רק עד %1$s; נדרש %2$s או טוב יותר</string>
     <string name="settings_moving">תנועה החל מ־</string>

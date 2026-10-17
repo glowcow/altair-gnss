@@ -242,8 +242,10 @@
     <string name="recording_stop">Заустави снимање</string>
     <string name="recording_position">GPS стаза</string>
     <string name="recording_position_hint">Искључите под земљом: уписује се само висина, а пријемник не остаје укључен</string>
+    <string name="recording_position_locked">Без барометра увек укључен: висину дају сателити</string>
+    <string name="recording_empty">Ништа није снимљено: висина није стигла</string>
     <string name="recording_network">Положај из мрежа</string>
-    <string name="recording_network_hint">Wi-Fi и базне станице помажу да се тачке поставе тамо где су сателити ометани; услуга локације телефона сазнаје где сте, и даје име месту где је снимак почео</string>
+    <string name="recording_network_hint">Wi-Fi и базне станице помажу да се тачке поставе тамо где су сателити ометани; услуга локације телефона сазнаје где сте, и даје име месту сваког снимка започетог док је ово укључено</string>
     <string name="recording_waiting">Чека се стабилан положај: %1$d с</string>
     <string name="recording_waiting_coarse">За сада је положај тачан само до %1$s; потребно је %2$s или боље</string>
     <string name="settings_moving">Кретање од</string>

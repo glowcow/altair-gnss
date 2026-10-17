@@ -40,7 +40,7 @@ interface TrackDao {
     @Query("UPDATE tracks SET activity = :activity WHERE id = :id")
     suspend fun setActivity(id: Long, activity: String)
 
-    @Query("SELECT * FROM tracks WHERE place IS NULL AND endedAt IS NOT NULL")
+    @Query("SELECT * FROM tracks WHERE place IS NULL AND geotag AND endedAt IS NOT NULL")
     suspend fun unplaced(): List<Track>
 
     @Query("UPDATE tracks SET place = :place WHERE id = :id")

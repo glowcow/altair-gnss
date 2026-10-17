@@ -13,8 +13,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.resume
 
 /**
- * Names where each finished recording began, once, through the platform's geocoder — only while
- * network positioning is on: the geocoder sends the place to the phone's location service.
+ * Names where each finished recording begun with network positioning on began, once, through the platform's
+ * geocoder — only while the switch is on: the geocoder sends the place to the phone's location service.
  */
 class Places(private val context: Context, private val scope: CoroutineScope, private val dao: TrackDao, private val settings: SettingsStore) {
     private val lock = Mutex()

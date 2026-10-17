@@ -42,6 +42,8 @@ data class BackupTrack(
     val zeroAltitude: Double? = null,
     val marks: List<BackupMark> = emptyList(),
     val activity: String? = null,
+    val place: String? = null,
+    val geotag: Boolean = false,
 )
 
 /** A marked moment of a recording. */

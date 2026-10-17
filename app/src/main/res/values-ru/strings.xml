@@ -257,8 +257,10 @@
     <string name="recording_stop">Остановить запись</string>
     <string name="recording_position">GPS-трек</string>
     <string name="recording_position_hint">Выключите под землёй: пишется только высота, приёмник не держится включённым</string>
+    <string name="recording_position_locked">Без барометра всегда включён: высоту дают спутники</string>
+    <string name="recording_empty">Ничего не записано: высота так и не пришла</string>
     <string name="recording_network">Помощь сетей</string>
-    <string name="recording_network_hint">Wi-Fi и сотовые вышки помогают ставить точки там, где спутники глушат; служба геолокации телефона при этом узнаёт, где вы, и называет место, где началась запись</string>
+    <string name="recording_network_hint">Wi-Fi и сотовые вышки помогают ставить точки там, где спутники глушат; служба геолокации телефона при этом узнаёт, где вы, и называет место записей, начатых при включённом переключателе</string>
     <string name="recording_waiting">Ждём устойчивую фиксацию: %1$d с</string>
     <string name="recording_waiting_coarse">Пока положение известно с точностью %1$s; нужно %2$s или лучше</string>
     <string name="settings_moving">Движение от</string>

@@ -3,13 +3,17 @@ package dev.glowcow.altairgnss.recording
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import android.widget.Toast
 import dev.glowcow.altairgnss.Haptics
+import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.altimeter.Altimeter
 import dev.glowcow.altairgnss.data.SettingsStore
+import dev.glowcow.altairgnss.data.tracked
 import dev.glowcow.altairgnss.gnss.Fix
 import dev.glowcow.altairgnss.gnss.FusedPosition
 import dev.glowcow.altairgnss.gnss.GnssMonitor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** The running recording as it stands; heights are metres from its zero. */
 data class LiveProfile(
@@ -60,6 +65,8 @@ class Recorder(
     /** The recording that runs now. */
     val active: StateFlow<Track?> = dao.observeActive().stateIn(scope, SharingStarted.Eagerly, null)
 
+    private val barometer = altimeter.state.value.hasBarometer
+
     private val liveState = MutableStateFlow<LiveProfile?>(null)
     val live: StateFlow<LiveProfile?> = liveState
 
@@ -68,16 +75,17 @@ class Recorder(
         scope.launch { dao.active()?.let { end(it, null) } }
     }
 
-    // A recording that never got an altitude holds nothing worth keeping.
-    private suspend fun end(track: Track, at: Long?) {
+    // A recording that never got an altitude holds nothing worth keeping; false when it was dropped.
+    private suspend fun end(track: Track, at: Long?): Boolean {
         val last = dao.lastPointTime(track.id)
         if (last == null) dao.delete(track.id) else dao.close(track.id, at ?: last)
+        return last != null
     }
 
     fun start(activity: Activity) {
         scope.launch {
             if (dao.active() != null) return@launch
-            dao.insert(Track(startedAt = System.currentTimeMillis(), activity = activity.key))
+            dao.insert(Track(startedAt = System.currentTimeMillis(), activity = activity.key, geotag = settings.settings.first().networkPosition))
             context.startForegroundService(Intent(context, RecordingService::class.java))
         }
     }
@@ -85,13 +93,15 @@ class Recorder(
     fun stop() {
         scope.launch {
             val track = dao.active()
-            track?.let { end(it, System.currentTimeMillis()) }
+            val kept = track?.let { end(it, System.currentTimeMillis()) }
             context.stopService(Intent(context, RecordingService::class.java))
             liveState.value = null
             if (track != null) {
                 Haptics.stopped(context)
                 places.fill()
             }
+            // A recording that vanished from the list says why.
+            if (kept == false) withContext(Dispatchers.Main) { Toast.makeText(context, R.string.recording_empty, Toast.LENGTH_LONG).show() }
         }
     }
 
@@ -138,7 +148,7 @@ class Recorder(
             val sensors = launch { altimeter.state.collect {} }
             var placing = true
             val receiver = launch {
-                settings.settings.map { it.recordPosition }.distinctUntilChanged().collectLatest { wanted ->
+                settings.settings.map { it.tracked(barometer) }.distinctUntilChanged().collectLatest { wanted ->
                     placing = wanted
                     if (wanted) gnss.state.collect {}
                 }
@@ -147,7 +157,7 @@ class Recorder(
             // sure enough; the receiver alone does otherwise, and wherever the blend has nothing.
             var blended: Fix? = null
             val network = launch {
-                settings.settings.map { it.recordPosition && it.networkPosition }.distinctUntilChanged().collectLatest { wanted ->
+                settings.settings.map { it.tracked(barometer) && it.networkPosition }.distinctUntilChanged().collectLatest { wanted ->
                     blended = null
                     if (wanted) fused.fixes.collect { blended = it }
                 }

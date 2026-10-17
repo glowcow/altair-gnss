@@ -62,6 +62,7 @@ import dev.glowcow.altairgnss.R
 import dev.glowcow.altairgnss.altimeter.AltitudeSource
 import dev.glowcow.altairgnss.container
 import dev.glowcow.altairgnss.data.AppSettings
+import dev.glowcow.altairgnss.data.tracked
 import dev.glowcow.altairgnss.recording.Activity
 import dev.glowcow.altairgnss.recording.Recorder
 import dev.glowcow.altairgnss.recording.Track
@@ -157,7 +158,7 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit, onYear: (
     var picked by rememberSaveable { mutableStateOf(emptySet<Activity>()) }
     val recording = active != null
     val settings by remember { container.settings.settings }.collectAsStateWithLifecycle(AppSettings())
-    // Places are named only while network positioning is on, and as soon as it is turned on.
+    // A recording begun with network positioning on is named while the switch is on; one the geocoder missed is tried again.
     LaunchedEffect(settings.networkPosition) { container.places.fill() }
     var choosingSource by rememberSaveable { mutableStateOf(false) }
     val sourceName = stringResource(SOURCES.first { it.first == altimeter.source }.second)
@@ -229,12 +230,17 @@ private fun RecordContent(top: Dp, bottom: Dp, onOpen: (Long) -> Unit, onYear: (
                 onClick = if (altimeter.hasBarometer) ({ choosingSource = true }) else null,
             )
             GroupDivider()
-            SwitchRow(
-                stringResource(R.string.recording_position),
-                stringResource(R.string.recording_position_hint),
-                settings.recordPosition,
-            ) { on -> container.scope.launch { container.settings.setRecordPosition(on) } }
-            if (settings.recordPosition) {
+            // Without a barometer the altitude is the receiver's, so the track cannot be left out.
+            if (altimeter.hasBarometer) {
+                SwitchRow(
+                    stringResource(R.string.recording_position),
+                    stringResource(R.string.recording_position_hint),
+                    settings.recordPosition,
+                ) { on -> container.scope.launch { container.settings.setRecordPosition(on) } }
+            } else {
+                GroupRow(stringResource(R.string.recording_position), subtitle = stringResource(R.string.recording_position_locked))
+            }
+            if (settings.tracked(altimeter.hasBarometer)) {
                 GroupDivider()
                 SwitchRow(
                     stringResource(R.string.recording_network),
@@ -417,7 +423,7 @@ private fun TrackRow(track: Track, onClick: () -> Unit) {
             Text(
                 if (ended == null) stringResource(R.string.recording_now)
                 // The length first, so a long place is what gets cut; with no place looked up, the length alone.
-                else listOfNotNull(clock(ended - track.startedAt), track.place?.let { it.ifEmpty { stringResource(R.string.place_none) } }).joinToString(" · "),
+                else listOfNotNull(clock(ended - track.startedAt), track.place?.takeIf { track.geotag }?.let { it.ifEmpty { stringResource(R.string.place_none) } }).joinToString(" · "),
                 color = c.muted,
                 fontSize = 13.sp,
                 maxLines = 1,

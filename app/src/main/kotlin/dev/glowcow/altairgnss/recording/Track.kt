@@ -1,5 +1,6 @@
 package dev.glowcow.altairgnss.recording
 
+import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
@@ -18,6 +19,8 @@ data class Track(
     val activity: String? = null,
     /** Where it began, named by the geocoder; null until looked up, empty where nothing could name it. */
     val place: String? = null,
+    /** Network positioning was on when it began, so its place is named and shown. */
+    @ColumnInfo(defaultValue = "0") val geotag: Boolean = false,
 )
 
 @Entity(

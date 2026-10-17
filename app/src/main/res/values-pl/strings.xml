@@ -243,8 +243,10 @@
     <string name="recording_stop">Zatrzymaj nagrywanie</string>
     <string name="recording_position">Ślad GPS</string>
     <string name="recording_position_hint">Wyłącz pod ziemią: zapisywana jest tylko wysokość, a odbiornik nie pozostaje włączony</string>
+    <string name="recording_position_locked">Bez barometru zawsze włączony: wysokość podają satelity</string>
+    <string name="recording_empty">Nic nie nagrano: nie przyszła żadna wysokość</string>
     <string name="recording_network">Pozycja z sieci</string>
-    <string name="recording_network_hint">Wi-Fi i stacje komórkowe pomagają umieszczać punkty tam, gdzie satelity są zagłuszane; usługa lokalizacji telefonu dowiaduje się, gdzie jesteś, i nazywa miejsce, w którym zaczęło się nagranie</string>
+    <string name="recording_network_hint">Wi-Fi i stacje komórkowe pomagają umieszczać punkty tam, gdzie satelity są zagłuszane; usługa lokalizacji telefonu dowiaduje się, gdzie jesteś, i nazywa miejsce każdego nagrania rozpoczętego przy włączonej opcji</string>
     <string name="recording_waiting">Oczekiwanie na stabilną pozycję: %1$d s</string>
     <string name="recording_waiting_coarse">Na razie pozycja ma dokładność tylko %1$s; potrzeba %2$s lub lepiej</string>
     <string name="settings_moving">Ruch od</string>

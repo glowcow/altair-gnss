@@ -64,6 +64,9 @@ data class AltimeterPrefs(
     val calibration: Calibration? = null,
 )
 
+/** A recording keeps its track while asked to, and always without a barometer: the altitude then comes from the receiver. */
+fun AppSettings.tracked(barometer: Boolean) = recordPosition || !barometer
+
 private val Context.dataStore by preferencesDataStore("settings")
 
 class SettingsStore(private val context: Context) {

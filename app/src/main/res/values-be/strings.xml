@@ -243,8 +243,10 @@
     <string name="recording_stop">Спыніць запіс</string>
     <string name="recording_position">GPS-трэк</string>
     <string name="recording_position_hint">Выключыце пад зямлёй: пішацца толькі вышыня, прыёмнік не трымаецца ўключаным</string>
+    <string name="recording_position_locked">Без барометра заўсёды ўключаны: вышыню даюць спадарожнікі</string>
+    <string name="recording_empty">Нічога не запісана: вышыня так і не прыйшла</string>
     <string name="recording_network">Дапамога сетак</string>
-    <string name="recording_network_hint">Wi-Fi і сотавыя вышкі дапамагаюць ставіць кропкі там, дзе спадарожнікі глушаць; служба геалакацыі тэлефона пры гэтым даведваецца, дзе вы, і называе месца, дзе пачаўся запіс</string>
+    <string name="recording_network_hint">Wi-Fi і сотавыя вышкі дапамагаюць ставіць кропкі там, дзе спадарожнікі глушаць; служба геалакацыі тэлефона пры гэтым даведваецца, дзе вы, і называе месца запісаў, пачатых пры ўключаным перамыкачы</string>
     <string name="recording_waiting">Чакаем устойлівай фіксацыі: %1$d с</string>
     <string name="recording_waiting_coarse">Пакуль становішча вядома з дакладнасцю %1$s; трэба %2$s або лепш</string>
     <string name="settings_moving">Рух ад</string>

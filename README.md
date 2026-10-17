@@ -184,5 +184,7 @@ Arimo and Cormorant Garamond are bundled under the SIL Open Font License
 [`licenses/Phosphor-MIT.txt`](licenses/Phosphor-MIT.txt).
 
 The world map uses NASA's Blue Marble and Black Marble images (NASA Earth
-Observatory), which are in the public domain. Airport reports come from
+Observatory), which are in the public domain. The map under a track is
+OpenStreetMap — © OpenStreetMap contributors, data under the Open Database
+License. Airport reports come from
 the Aviation Weather Center's public data API.

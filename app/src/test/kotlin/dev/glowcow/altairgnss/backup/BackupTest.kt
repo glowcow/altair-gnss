@@ -33,7 +33,7 @@ class BackupTest {
     private fun archive(): ByteArray {
         val out = ByteArrayOutputStream()
         BackupArchive.Writer(out).apply {
-            manifest(BackupManifest(createdAt = 99, app = "0.2.1", tracks = listOf(BackupTrack(1000, 5000, 412.5), BackupTrack(9000, 9500)), settings = settings))
+            manifest(BackupManifest(createdAt = 99, app = "0.2.1", tracks = listOf(BackupTrack(1000, 5000, 412.5, place = "Fieschertal", geotag = true), BackupTrack(9000, 9500)), settings = settings))
             track(
                 1000,
                 listOf(
@@ -54,6 +54,7 @@ class BackupTest {
 
         assertEquals(listOf(1000L, 9000L), manifest.tracks.map { it.startedAt })
         assertEquals(412.5, manifest.tracks[0].zeroAltitude!!, 0.0)
+        assertEquals(listOf("Fieschertal" to true, null to false), manifest.tracks.map { it.place to it.geotag })
         assertEquals(settings, manifest.settings)
         assertEquals("0.2.1", manifest.app)
 

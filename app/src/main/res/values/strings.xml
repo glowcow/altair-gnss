@@ -273,8 +273,10 @@
     <string name="recording_stop">Stop recording</string>
     <string name="recording_position">GPS track</string>
     <string name="recording_position_hint">Off for underground: only the altitude is written and the receiver is not kept on</string>
+    <string name="recording_position_locked">Always on without a barometer: the altitude comes from the satellites</string>
+    <string name="recording_empty">Nothing was recorded: no altitude came in</string>
     <string name="recording_network">Network positioning</string>
-    <string name="recording_network_hint">Wi-Fi and cell towers help place the points where satellites are jammed; the phone’s location service learns where you are and names the place a recording began</string>
+    <string name="recording_network_hint">Wi-Fi and cell towers help place the points where satellites are jammed; the phone’s location service learns where you are and names the place of each recording begun while this is on</string>
     <string name="recording_waiting">Waiting for a steady fix: %1$d s</string>
     <string name="recording_waiting_coarse">The position is only good to %1$s so far; %2$s or better is needed</string>
     <string name="settings_moving">Moving from</string>

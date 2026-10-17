@@ -241,8 +241,10 @@
     <string name="recording_stop">Aufzeichnung beenden</string>
     <string name="recording_position">GPS-Strecke</string>
     <string name="recording_position_hint">Unter Tage ausschalten: nur die Höhe wird geschrieben, der Empfänger bleibt nicht an</string>
+    <string name="recording_position_locked">Ohne Barometer immer an: die Höhe kommt von den Satelliten</string>
+    <string name="recording_empty">Nichts aufgezeichnet: es kam keine Höhe</string>
     <string name="recording_network">Netzwerkortung</string>
-    <string name="recording_network_hint">WLAN und Mobilfunk helfen, die Punkte zu setzen, wo Satelliten gestört sind; der Standortdienst des Telefons erfährt dabei, wo Sie sind, und nennt den Ort, an dem eine Aufzeichnung begann</string>
+    <string name="recording_network_hint">WLAN und Mobilfunk helfen, die Punkte zu setzen, wo Satelliten gestört sind; der Standortdienst des Telefons erfährt dabei, wo Sie sind, und nennt den Ort jeder Aufzeichnung, die bei eingeschaltetem Schalter begann</string>
     <string name="recording_waiting">Warten auf eine stabile Position: %1$d s</string>
     <string name="recording_waiting_coarse">Die Position ist bisher nur auf %1$s genau; nötig sind %2$s oder besser</string>
     <string name="settings_moving">Bewegung ab</string>

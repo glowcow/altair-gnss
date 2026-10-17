@@ -242,8 +242,10 @@
     <string name="recording_stop">Ferma la registrazione</string>
     <string name="recording_position">Traccia GPS</string>
     <string name="recording_position_hint">Da spegnere sottoterra: si scrive solo l’altitudine e il ricevitore non resta acceso</string>
+    <string name="recording_position_locked">Sempre attivo senza barometro: l’altitudine arriva dai satelliti</string>
+    <string name="recording_empty">Non è stato registrato nulla: non è arrivata nessuna altitudine</string>
     <string name="recording_network">Posizione dalle reti</string>
-    <string name="recording_network_hint">Wi-Fi e celle aiutano a collocare i punti dove i satelliti sono disturbati; il servizio di localizzazione del telefono viene a sapere dove sei e dà il nome al luogo in cui è iniziata una registrazione</string>
+    <string name="recording_network_hint">Wi-Fi e celle aiutano a collocare i punti dove i satelliti sono disturbati; il servizio di localizzazione del telefono viene a sapere dove sei e dà il nome al luogo di ogni registrazione iniziata con questa opzione attiva</string>
     <string name="recording_waiting">In attesa di una posizione stabile: %1$d s</string>
     <string name="recording_waiting_coarse">Per ora la posizione è precisa solo a %1$s; servono %2$s o meglio</string>
     <string name="settings_moving">In movimento da</string>
